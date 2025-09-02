@@ -23,5 +23,3 @@ O projeto está sendo desenvolvido como parte de um **trabalho de faculdade em S
 - **n8n** – automação de fluxos  
 - **APIs externas** de nutrição e exercícios  
 - **Banco de dados relacional** (PostgreSQL)  
-
----
