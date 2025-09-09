@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "App-Fitness",
-    "slug": "App-Fitness",
+    "name": "AuxFit",
+    "slug": "auxfit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

@@ -1,5 +1,5 @@
 {
-  "name": "app-fitness",
+  "name": "auxfit",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
