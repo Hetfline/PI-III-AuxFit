@@ -1,9 +1,9 @@
 import { Text, View } from 'react-native';
 
-export default function TrainingScreen() {
+export default function WorkoutScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Training Screen</Text>
+      <Text>Workout Screen</Text>
     </View>
   );
 }
