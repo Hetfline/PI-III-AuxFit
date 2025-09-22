@@ -1,38 +1,37 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
-import { ExternalLink } from './ExternalLink';
-import { MonoText } from './StyledText';
-import { Text, View } from './Themed';
-import Texts from '@/constants/Texts';
-import Colors from '@/constants/Colors';
+import { ExternalLink } from "./ExternalLink";
+import { MonoText } from "./StyledText";
+import { Text} from "./Themed";
+import {Colors, Spacing, Texts} from "@/constants/Styles";
 
 export default function EditScreenInfo({ path }: { path: string }) {
   return (
     <View>
       <View style={styles.getStartedContainer}>
-        <Text
-          style={Texts.body}>
-          Open up the code for this screen:
-        </Text>
+        <Text style={Texts.body}>Open up the code for this screen:</Text>
 
         <View
-          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
+          style={[styles.codeHighlightContainer, styles.homeScreenFilename]}
+        >
           <MonoText>{path}</MonoText>
         </View>
 
-        <Text
-          style={Texts.body}>
-          Change any of the text, save the file, and your app will automatically update.
+        <Text style={Texts.body}>
+          Change any of the text, save the file, and your app will automatically
+          update.
         </Text>
       </View>
 
       <View style={styles.helpContainer}>
         <ExternalLink
           style={styles.helpLink}
-          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet">
+          href="https://docs.expo.io/get-started/create-a-new-app/#opening-the-app-on-your-phonetablet"
+        >
           <Text style={styles.helpLinkText}>
-            Tap here if your app doesn't automatically update after making changes
+            Tap here if your app doesn't automatically update after making
+            changes
           </Text>
         </ExternalLink>
       </View>
@@ -42,7 +41,7 @@ export default function EditScreenInfo({ path }: { path: string }) {
 
 const styles = StyleSheet.create({
   getStartedContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 50,
   },
   homeScreenFilename: {
@@ -55,17 +54,17 @@ const styles = StyleSheet.create({
   getStartedText: {
     fontSize: 17,
     lineHeight: 24,
-    textAlign: 'center',
+    textAlign: "center",
   },
   helpContainer: {
     marginTop: 15,
     marginHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   helpLink: {
     paddingVertical: 15,
   },
   helpLinkText: {
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

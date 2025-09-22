@@ -2,9 +2,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ImageBackground } from "react-native";
-import Colors from '@/constants/Colors';
+import {Colors, Spacing, Texts} from "@/constants/Styles";
 import "react-native-reanimated";
 
 export {
@@ -29,6 +29,9 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
+   // Estado de autenticação fictício. Em produção, use um Context ou Redux.
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -44,24 +47,23 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return <RootLayoutNav isAuthenticated={isAuthenticated} />;
 }
 
-function RootLayoutNav() {
+// Função com os props de autentificação EM PRODUÇÃO
+function RootLayoutNav({ isAuthenticated }: { isAuthenticated: boolean }) {
   return (
-    <ImageBackground
-      source={require("@/assets/images/backgroundLines.png")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
-      <Stack
-      screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Colors.primary }, // <- cor de fundo padrão
-        }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
-    </ImageBackground>
+    <Stack>
+      {/* Se não está autenticado, redirecione para a tela de login */}
+      {!isAuthenticated ? (
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      ) : (
+        <>
+          {/* Se está autenticado, renderize as tabs */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* o valor original entre os parênteses é (app)*/}
+          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        </>
+      )}
+    </Stack>
   );
 }
