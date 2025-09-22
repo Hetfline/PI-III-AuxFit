@@ -1,48 +1,32 @@
 {
-	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
-	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
-	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
-	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
-	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
-	// Placeholders with the same ids are connected.
-	// Example:
-	// "Print to console": {
-	// 	"scope": "javascript,typescript",
-	// 	"prefix": "log",
-	// 	"body": [
-	// 		"console.log('$1');",
-	// 		"$2"
-	// 	],
-	// 	"description": "Log output to console"
-	// }
-
-	"React Native Complete Screen Structure": {
+  "React Native Complete Screen Structure": {
     "prefix": "rnScreen",
     "body": [
       "import React from 'react';",
       "import {",
       "  View,",
       "  Text,",
-      "  StyleSheet,",
       "  ScrollView,",
       "  KeyboardAvoidingView,",
       "  Platform,",
+      "  StyleSheet,",
       "} from 'react-native';",
       "import { SafeAreaView } from 'react-native-safe-area-context';",
+      "import { Colors, Spacing, Texts } from '@/constants/Styles';",
       "",
       "const ${1:ScreenName} = () => {",
       "  return (",
-      "    <SafeAreaView style={styles.container}>",
+      "    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>",
       "      <KeyboardAvoidingView",
       "        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}",
-      "        style={styles.keyboardView}",
+      "        style={{ flex: 1 }}",
       "      >",
       "        <ScrollView",
-      "          contentContainerStyle={styles.scrollContent}",
+      "          contentContainerStyle={{ flexGrow: 1 }}",
       "          keyboardShouldPersistTaps=\"handled\"",
       "        >",
-      "          <View style={styles.content}>",
-      "            <Text style={styles.title}>${2:Screen Title}</Text>",
+      "          <View style={{ flex: 1, padding: 20 }}>",
+      "            <Text style={Texts.title}>${2:Screen Title}</Text>",
       "            $0",
       "          </View>",
       "        </ScrollView>",
@@ -51,30 +35,8 @@
       "  );",
       "};",
       "",
-      "const styles = StyleSheet.create({",
-      "  container: {",
-      "    flex: 1,",
-      "    backgroundColor: '#fff',",
-      "  },",
-      "  keyboardView: {",
-      "    flex: 1,",
-      "  },",
-      "  scrollContent: {",
-      "    flexGrow: 1,",
-      "  },",
-      "  content: {",
-      "    flex: 1,",
-      "    padding: 20,",
-      "  },",
-      "  title: {",
-      "    fontSize: 24,",
-      "    fontWeight: 'bold',",
-      "    marginBottom: 20,",
-      "  },",
-      "});",
-      "",
       "export default ${1:ScreenName};"
     ],
-    "description": "Complete screen structure with SafeAreaView, KeyboardAvoidingView, and ScrollView"
+    "description": "Complete screen structure with SafeAreaView, KeyboardAvoidingView, and ScrollView using global Colors and Texts"
   }
 }

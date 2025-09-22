@@ -56,6 +56,7 @@ Também foram adicionados tratamentos de erro para falha de autenticação.
 
 ## 🎨 Estilo e Padrões
 
+* Sempre utilziar o  **snippet de rnScreen** para telas. **EM COMPONENTES NÃO É NECESSÁRIO**.
 * Utilizar **arquivos de estilos universais** sempre que possível.
 * **Tipar variáveis e funções** quando possível (TypeScript recomendado).
 * **Usar imports absolutos** em vez de caminhos longos (`../../../`).
