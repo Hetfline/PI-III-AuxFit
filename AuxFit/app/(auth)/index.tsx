@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import { Text } from "@/components/Themed";
 import InputField from "@/components/universal/InputField";
+import Button from "@/components/universal/Button";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
-import EditScreenInfo from "@/components/EditScreenInfo";
 
 export default function Login() {
   return (
@@ -27,12 +27,7 @@ export default function Login() {
         >
           <View style={styles.container}>
             <Text style={Texts.title}>Index dentro de (auth)</Text>
-            <View style={styles.inputs}>
-              <InputField icon="person" placeholder="Nome" password={false} />
-              <View style={{ margin: Spacing.md }}></View>
-              <InputField icon="lock" placeholder="Senha" password={true} />
-            </View>
-            {/* <EditScreenInfo path="app/(tabs)/index.tsx" /> */}
+            <View style={styles.inputs}></View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
