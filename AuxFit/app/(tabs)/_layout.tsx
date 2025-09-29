@@ -1,78 +1,54 @@
-import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
-import {Colors, Spacing, Texts} from "@/constants/Styles";
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import React from 'react';
+import { Tabs } from 'expo-router';
+import BottomTabBar from '../../components/BottomTabBar';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.secondary,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        // headerShown: useClientOnlyValue(false, true),
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.bgMedium,
-          borderTopWidth: 0,
-          paddingBottom: 5,
-          height: 60,
-        },
       }}
+      tabBar={(props) => (
+        <BottomTabBar
+          activeTab={props.state.routeNames[props.state.index]}
+          onTabPress={(tabId) => {
+            const index = props.state.routeNames.indexOf(tabId);
+            if (index !== -1) {
+              props.navigation.navigate(props.state.routeNames[index]);
+            }
+          }}
+        />
+      )}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Index Raiz",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors.primary}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
-        }}
+      <Tabs.Screen 
+        name="home" 
+        options={{ 
+          title: 'Home',
+        }} 
       />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: "Tab Two"
-        }}
+      <Tabs.Screen 
+        name="workout" 
+        options={{ 
+          title: 'Workout',
+        }} 
       />
-      <Tabs.Screen
-        name="Home"
-        options={{
-          title: "Início"
-        }}
+      <Tabs.Screen 
+        name="chat" 
+        options={{ 
+          title: 'Chat',
+        }} 
       />
-      <Tabs.Screen
-        name="Diet"
-        options={{
-          title: "Dieta"
-        }}
+      <Tabs.Screen 
+        name="diet" 
+        options={{ 
+          title: 'Diet',
+        }} 
       />
-      <Tabs.Screen
-        name="Workout"
-        options={{
-          title: "Treino"
-        }}
+      <Tabs.Screen 
+        name="profile" 
+        options={{ 
+          title: 'Profile',
+        }} 
       />
     </Tabs>
   );
