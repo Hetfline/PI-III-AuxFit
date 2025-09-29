@@ -2,27 +2,51 @@
 // ? precisa adicionar prop para mudar o tamanho do input?
 
 import React, { useState } from "react";
-import { View, TextInput, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Pressable,
+  TextInputProps,
+} from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const InputField = (props: any) => {
+interface InputFieldProps extends TextInputProps {
+  // esse extends faz com que o componente InputFieldProps receba também os props que o componente padrão TextInput
+  icon?: React.ComponentProps<typeof MaterialIcons>["name"];
+  iconColor?: string;
+  password?: boolean;
+  onIconPress?: () => void;
+}
+
+export default function InputField({
+  icon,
+  iconColor,
+  placeholder,
+  password,
+  onIconPress,
+  ...rest
+}: InputFieldProps) {
   const [seePassword, setSeePassword] = useState(false); // variável para alternar a visibilidade do input de senha
 
-  if (props.password) {
+  if (password) {
     return (
       <View style={styles.passwordContainer}>
-        <MaterialIcons
-          name={props.icon}
-          size={24}
-          color={Colors.subtext}
-          style={{ marginRight: Spacing.sm }}
-        />
+        {icon && (
+          <MaterialIcons
+            name={icon}
+            size={24}
+            color={Colors.subtext}
+            style={{ marginRight: Spacing.sm }}
+          />
+        )}
         <TextInput
           secureTextEntry={!seePassword}
-          style={[Texts.body, { flex: 1 }]}
-          placeholder={props.placeholder}
+          style={[Texts.body, { flex: 1, color: Colors.text }]}
+          placeholder={placeholder}
           placeholderTextColor={Colors.subtext}
+          {...rest}
         />
 
         <Pressable onPress={() => setSeePassword((prev) => !prev)}>
@@ -37,25 +61,26 @@ const InputField = (props: any) => {
   } else {
     return (
       <View style={styles.container}>
-        {props.icon && (
-          <Pressable onPress={() => props.onPress}>
+        {icon && (
+          <Pressable onPress={onIconPress}>
             <MaterialIcons
-              name={props.icon}
+              name={icon}
               size={24}
-              color={props.iconColor ? props.color : Colors.subtext}
+              color={iconColor || Colors.subtext}
               style={{ marginRight: Spacing.sm }}
             />
           </Pressable>
         )}
         <TextInput
-          style={[Texts.body, { flex: 1 }]}
-          placeholder={props.placeholder}
+          style={[Texts.body, { flex: 1, color: Colors.text }]}
+          placeholder={placeholder}
           placeholderTextColor={Colors.subtext}
+          {...rest}
         />
       </View>
     );
   }
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -79,5 +104,3 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
 });
-
-export default InputField;

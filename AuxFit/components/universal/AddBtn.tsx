@@ -1,14 +1,18 @@
 // * Componente de botão de adicionar. O único prop passado pra ele é a sua função onPress
-// TODO adicionar função futuramente para mudar o estado no banco também
+// TODO adicionar função para fazer requisições no banco também
 
-import { useState } from "react";
+import React from "react";
 import { StyleSheet, Pressable } from "react-native";
-import { Colors, Spacing, Texts } from "@/constants/Styles";
+import { Colors, Spacing} from "@/constants/Styles";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export default function AddBtn(props: any) {
+interface AddBtnProps {
+  onPress: () => void;
+}
+
+export default function AddBtn({ onPress }: AddBtnProps) {
   return (
-    <Pressable style={styles.container} onPress={() => props.onPress}>
+    <Pressable style={styles.container} onPress={onPress}>
       <MaterialIcons name="add" size={24} color={Colors.primary} />
     </Pressable>
   );

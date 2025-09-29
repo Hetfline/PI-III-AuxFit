@@ -7,21 +7,21 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 export default function Favorite() {
-  const [favorite, setFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   return (
     <Pressable
-      onPress={() => setFavorite((prev) => !prev)}
+      onPress={() => setIsFavorite((prev) => !prev)}
       style={styles.container}
     >
-      {favorite ? (
+      {isFavorite ? (
+        <MaterialIcons name="favorite" size={32} color={Colors.incorrect} />
+      ) : (
         <MaterialIcons
           name="favorite-border"
           size={32}
           color={Colors.subtext}
         />
-      ) : (
-        <MaterialIcons name="favorite" size={32} color={Colors.incorrect} />
       )}
     </Pressable>
   );
