@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ProfileScreen() {
+export default function ChatScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>👤 Profile Screen</Text>
-      <Text style={styles.subtitle}>Seu perfil e configurações</Text>
+      <Text style={styles.title}>🤖 Chat IA</Text>
+      <Text style={styles.subtitle}>Seu assistente fitness inteligente</Text>
     </View>
   );
 }
