@@ -14,7 +14,7 @@
       "import { SafeAreaView } from 'react-native-safe-area-context';",
       "import { Colors, Spacing, Texts } from '@/constants/Styles';",
       "",
-      "const ${1:ScreenName} = () => {",
+      "export default function ${1:ScreenName}() {",
       "  return (",
       "    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>",
       "      <KeyboardAvoidingView",
@@ -33,9 +33,7 @@
       "      </KeyboardAvoidingView>",
       "    </SafeAreaView>",
       "  );",
-      "};",
-      "",
-      "export default ${1:ScreenName};"
+      "}"
     ],
     "description": "Complete screen structure with SafeAreaView, KeyboardAvoidingView, and ScrollView using global Colors and Texts"
   }

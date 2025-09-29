@@ -40,6 +40,11 @@ export const Texts = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
   },
+  bodyBold: {
+    fontFamily: "MontserratBold",
+    fontSize: 16,
+    color: Colors.text,
+  },
   subtext: {
     fontFamily: "MontserratRegular",
     fontSize: 14,

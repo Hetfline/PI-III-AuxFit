@@ -1,4 +1,5 @@
-// Componente de campo de input. Permite que sejam passados vários props que definem o ícone, placeholder e tipo do input (senha, texto normal, etc.)
+// * Componente de campo de input. Permite que sejam passados vários props que definem o ícone, placeholder e tipo do input (senha, texto normal, etc.)
+// ? precisa adicionar prop para mudar o tamanho do input?
 
 import React, { useState } from "react";
 import { View, TextInput, StyleSheet, Pressable } from "react-native";
@@ -59,6 +60,7 @@ const InputField = (props: any) => {
 const styles = StyleSheet.create({
   container: {
     height: 48,
+    minWidth: 200,
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
   },
   passwordContainer: {
     height: 48,
+    minWidth: 200,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
