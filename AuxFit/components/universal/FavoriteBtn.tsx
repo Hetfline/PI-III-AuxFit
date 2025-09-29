@@ -15,13 +15,13 @@ export default function Favorite() {
       style={styles.container}
     >
       {isFavorite ? (
+        <MaterialIcons name="favorite" size={32} color={Colors.incorrect} />
+      ) : (
         <MaterialIcons
           name="favorite-border"
           size={32}
           color={Colors.subtext}
         />
-      ) : (
-        <MaterialIcons name="favorite" size={32} color={Colors.incorrect} />
       )}
     </Pressable>
   );

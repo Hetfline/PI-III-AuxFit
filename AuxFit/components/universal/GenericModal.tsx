@@ -6,17 +6,17 @@ import Modal from "react-native-modal";
 import { ReactNode } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 
-interface GenericModallProps {
+interface GenericModalProps {
   isVisible: boolean;
   onClose: () => void;
   children: ReactNode;
 }
 
-export default function GenericModall({
+export default function GenericModal({
   isVisible,
   onClose,
   children,
-}: GenericModallProps) {
+}: GenericModalProps) {
   return (
     <Modal
       isVisible={isVisible}

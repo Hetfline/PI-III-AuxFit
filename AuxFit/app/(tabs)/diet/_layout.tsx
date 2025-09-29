@@ -2,8 +2,13 @@ import { Stack } from 'expo-router';
 
 export default function DietLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ title: 'Diet', headerShown: false }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen 
+        name="index" 
+        options={{ 
+          headerShown: false 
+        }} 
+      />
     </Stack>
   );
 }
