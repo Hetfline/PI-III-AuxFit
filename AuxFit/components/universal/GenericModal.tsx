@@ -1,7 +1,7 @@
 // * Componente de modal genérico. Além dos props padrão de modal (booleano que define a visualização do modal e função para fechar), o componente espera um conteúdo para envolver
 // TODO diminuir o tamanho do container do modal
 
-import { StyleSheet, Pressable } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Modal from "react-native-modal";
 import { ReactNode } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
@@ -20,24 +20,25 @@ export default function GenericModal({
   return (
     <Modal
       isVisible={isVisible}
-      onBackdropPress={onClose} // Fecha ao tocar no fundo
-      style={styles.container}
+      onBackdropPress={onClose}
+      style={styles.modal}
     >
-      <Pressable>
+      <View style={styles.container}>
         {children}
-        </Pressable>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  modal: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     backgroundColor: Colors.bgLight,
     borderRadius: 20,
+    padding: Spacing.lg,
+    width: '90%',
   },
-  modalContent: {
-    flex: 3,
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
 });
