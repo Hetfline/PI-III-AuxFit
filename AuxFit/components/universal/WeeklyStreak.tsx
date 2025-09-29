@@ -1,5 +1,6 @@
+// * Componente de streak semanal. Ele contém uma função do próprio Javascript que faz com que ele seja atualizado conforme o dia atual (função getDay() do objeto Date())
+
 import { StyleSheet, Text, View } from "react-native";
-import { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 

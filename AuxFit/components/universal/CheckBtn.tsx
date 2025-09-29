@@ -7,17 +7,17 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function CheckBtn() {
-  const [checked, setChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
   return (
     <Pressable
       style={[
         styles.container,
-        checked ? styles.containerChecked : styles.containerUnchecked,
+        isChecked ? styles.containerChecked : styles.containerUnchecked,
       ]}
-      onPress={() => setChecked((prev) => !prev)}
+      onPress={() => setIsChecked((prev) => !prev)}
     >
-      {checked && <MaterialIcons name="check" size={24} color={Colors.bg} />}
+      {isChecked && <MaterialIcons name="check" size={24} color={Colors.bg} />}
     </Pressable>
   );
 }
