@@ -3,13 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Button from '../../components/universal/Button';
+import Background from '../../components/universal/Background';
 
-/**
- * Tela de introdução do onboarding
- * 
- * Localização: app/onboarding/index.tsx
- * Primeira tela que introduz o questionário inicial
- */
 export default function OnboardingIntro() {
   const router = useRouter();
 
@@ -21,22 +16,15 @@ export default function OnboardingIntro() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         
-        {/* Ícone/Logo central */}
-        <View style={styles.iconContainer}>
-          <View style={styles.iconCircle}>
-            <Text style={styles.iconText}>🏋️</Text>
-          </View>
-        </View>
+        {/* Background com linhas decorativas */}
+        <Background />
 
-        {/* Texto principal */}
-        <View style={styles.textContainer}>
+        {/* Conteúdo principal */}
+        <View style={styles.content}>
           <Text style={styles.title}>
             Precisamos saber algumas{'\n'}coisas sobre você
           </Text>
-        </View>
 
-        {/* Botão de avançar */}
-        <View style={styles.buttonContainer}>
           <Button
             title="Prosseguir"
             onPress={handleStart}
@@ -52,45 +40,27 @@ export default function OnboardingIntro() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1A1D23',
+    backgroundColor: '#0A0E14',
   },
   container: {
     flex: 1,
+    position: 'relative',
+  },
+  content: {
+    flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  iconContainer: {
-    flex: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#2A2F38',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  iconText: {
-    fontSize: 60,
-  },
-  textContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 60,
+    paddingBottom: 40,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
     color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 28,
-  },
-  buttonContainer: {
-    width: '100%',
-    paddingBottom: 20,
+    lineHeight: 32,
+    marginTop: 'auto',
+    marginBottom: 'auto',
   },
 });

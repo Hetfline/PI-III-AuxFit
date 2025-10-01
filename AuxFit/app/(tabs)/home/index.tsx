@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Background from '../../../components/universal/Background';
 import Button from '../../../components/universal/Button';
 import AddBtn from '../../../components/universal/AddBtn';
 import CheckBtn from '../../../components/universal/CheckBtn';
@@ -53,70 +54,76 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         
-        <Header 
-          title="Home"
-          subtitle="Bem-vindo ao seu treino"
-          icon="more-vert"
-          onIconPress={handleHeaderIcon}
-        />
+        {/* Background com linhas decorativas */}
+        <Background />
         
-        <ScrollView 
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Botão de teste do Onboarding - REMOVER depois */}
-          <Button 
-            title="🧪 Testar Onboarding"
-            onPress={handleTestOnboarding}
-            bgColor="#FF6B35"
-          />
-
-          <View style={{ height: 40 }}>
-            <ProgressBar />
-          </View>
-
-          <WeeklyStreak />
-
-          <WeightIn />
-
-          <InputField
-            icon="person"
-            placeholder="Digite seu nome"
-            value={nameValue}
-            onChangeText={setNameValue}
-          />
-
-          <InputField
-            icon="lock"
-            placeholder="Digite sua senha"
-            password={true}
-            value={passwordValue}
-            onChangeText={setPasswordValue}
-          />
-
-          <InputField
-            placeholder="Email"
-            keyboardType="email-address"
-          />
-
-          <Button 
-            title="Iniciar Treino"
-            onPress={handleStartWorkout}
+        {/* Conteúdo principal */}
+        <View style={styles.contentWrapper}>
+          <Header 
+            title="Home"
+            subtitle="Bem-vindo ao seu treino"
+            icon="more-vert"
+            onIconPress={handleHeaderIcon}
           />
           
-          <View style={styles.smallButtonsRow}>
-            <AddBtn onPress={handleAddNew} />
-            <CheckBtn />
-            <Favorite />
-            <FilterBtn onPress={handleFilter} />
-          </View>
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Botão de teste do Onboarding - REMOVER depois */}
+            <Button 
+              title="🧪 Testar Onboarding"
+              onPress={handleTestOnboarding}
+              bgColor="#FF6B35"
+            />
 
-          <Button 
-            title="Abrir Modal Genérico"
-            onPress={handleOpenModal}
-          />
-        </ScrollView>
+            <View style={{ height: 40 }}>
+              <ProgressBar />
+            </View>
+
+            <WeeklyStreak />
+
+            <WeightIn />
+
+            <InputField
+              icon="person"
+              placeholder="Digite seu nome"
+              value={nameValue}
+              onChangeText={setNameValue}
+            />
+
+            <InputField
+              icon="lock"
+              placeholder="Digite sua senha"
+              password={true}
+              value={passwordValue}
+              onChangeText={setPasswordValue}
+            />
+
+            <InputField
+              placeholder="Email"
+              keyboardType="email-address"
+            />
+
+            <Button 
+              title="Iniciar Treino"
+              onPress={handleStartWorkout}
+            />
+            
+            <View style={styles.smallButtonsRow}>
+              <AddBtn onPress={handleAddNew} />
+              <CheckBtn />
+              <Favorite />
+              <FilterBtn onPress={handleFilter} />
+            </View>
+
+            <Button 
+              title="Abrir Modal Genérico"
+              onPress={handleOpenModal}
+            />
+          </ScrollView>
+        </View>
 
         <GenericModal
           isVisible={isModalVisible}
@@ -138,9 +145,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#0A0E14',
   },
   container: {
+    flex: 1,
+  },
+  contentWrapper: {
     flex: 1,
     paddingHorizontal: 16,
   },
