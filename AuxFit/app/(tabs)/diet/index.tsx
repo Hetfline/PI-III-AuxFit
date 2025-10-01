@@ -22,7 +22,7 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import GenericModal from "@/components/universal/GenericModal";
 import WeightIn from "@/components/universal/WeightIn";
 import ProgressBar from "@/components/questions/ProgressBar";
-import HeightSelect from "@/components/questions/HeightSelect";
+import HeightQuestion from "@/components/onboarding/HeightQuestion";
 
 export default function DietScreen() {
   // * Os useStates que controlam estados de componentes devem estar presentes na TELA DE IMPORTAÇÃO!
@@ -30,6 +30,7 @@ export default function DietScreen() {
   const [isVisible, setIsVisible] = useState(false); // muda o estado do componente de modal FilterModal
   const openModal = () => setIsVisible(true); // função para abrir o modal
   const closeModal = () => setIsVisible(false); // função para fechar o modal
+  const onChange = () => null
 
   return (
     <SafeAreaView
@@ -56,7 +57,7 @@ export default function DietScreen() {
             <View style={styles.progressContainer}>
               <ProgressBar />
             </View>
-            <HeightSelect/>
+            <HeightQuestion height="180" onChange={onChange}/>
           </View>
         {/* </ScrollView> */}
       </KeyboardAvoidingView>

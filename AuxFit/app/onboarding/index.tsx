@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Button from '../../components/universal/Button';
 import Background from '../../components/universal/Background';
+import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 export default function OnboardingIntro() {
   const router = useRouter();
@@ -21,14 +22,14 @@ export default function OnboardingIntro() {
 
         {/* Conteúdo principal */}
         <View style={styles.content}>
-          <Text style={styles.title}>
-            Precisamos saber algumas{'\n'}coisas sobre você
+          <Text style={[Texts.title, {textAlign: 'center', fontSize: 22}]}>
+            Precisamos saber algumas coisas sobre você
           </Text>
 
           <Button
             title="Prosseguir"
             onPress={handleStart}
-            bgColor="#00D68F"
+            bgColor={Colors.primary}
           />
         </View>
 
@@ -44,23 +45,16 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    position: 'relative',
+    backgroundColor: Colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   content: {
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 60,
+    paddingHorizontal: Spacing.sm,
+    paddingTop: "80%",
     paddingBottom: 40,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    lineHeight: 32,
-    marginTop: 'auto',
-    marginBottom: 'auto',
-  },
+  }
 });

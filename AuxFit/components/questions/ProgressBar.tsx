@@ -21,7 +21,7 @@ let questionQuantity = 6;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    backgroundColor: Colors.primary,
     flexDirection: "row",
     justifyContent: 'space-between',
     gap: Spacing.sm,
@@ -33,12 +33,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: Colors.bgLight,
-    height: "100%",
+    height: 12,
     borderRadius: 100,
     overflow: "hidden", // pra barra de progresso não atravessar essa barra de container
   },
   progress: {
     backgroundColor: Colors.secondary,
     borderRadius: 100,
+    height: 12,
   },
 });
