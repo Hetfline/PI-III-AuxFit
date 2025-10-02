@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-
+import { Colors, Texts, Spacing } from "@/constants/Styles";
 import BackgroundLines from '../../assets/icons/backgroundLines/background-lines.svg';
 
 const { width, height } = Dimensions.get('window');
@@ -22,6 +22,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
-    backgroundColor: '#000',
+    backgroundColor: Colors.bg,
   },
 });

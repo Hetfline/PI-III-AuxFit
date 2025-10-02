@@ -21,7 +21,6 @@ let questionQuantity = 6;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.primary,
     flexDirection: "row",
     justifyContent: 'space-between',
     gap: Spacing.sm,

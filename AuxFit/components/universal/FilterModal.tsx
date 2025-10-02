@@ -8,14 +8,14 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 interface FilterModalProps {
-  isVisible: boolean;
+  isFilterVisible: boolean;
   onClose: () => void;
   filterTitle: string;
   children: ReactNode; // "ReactNode" é o tipo para qualquer coisa que o React pode renderizar. Definimos o prop "children" com esse tipo pois o modal vai envolver outros elementos React Native
 }
 
 export default function FilterModal({
-  isVisible,
+  isFilterVisible,
   onClose,
   filterTitle,
   children,
@@ -23,7 +23,7 @@ export default function FilterModal({
   return (
     <Modal
       animationIn="slideInUp"
-      isVisible={isVisible}
+      isVisible={isFilterVisible}
       onBackdropPress={onClose} // Fecha ao tocar no fundo
       style={styles.container}
     >

@@ -1,48 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Background from '../../../components/universal/Background';
+import { Stack } from 'expo-router';
 
 export default function ChatLayout() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        
-        {/* Background com linhas decorativas */}
-        <Background />
-        
-        {/* Conteúdo principal */}
-        <View style={styles.content}>
-          <Text style={styles.title}>🤖 Chat IA</Text>
-          <Text style={styles.subtitle}>Seu assistente fitness inteligente</Text>
-        </View>
-        
-      </View>
-    </SafeAreaView>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" options={{ title: 'Chat' }} />
+    </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#0A0E14',
-  },
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    color: '#B0B0B0',
-    fontSize: 16,
-  },
-});
