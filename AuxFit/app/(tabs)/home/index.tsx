@@ -24,6 +24,9 @@ import WeeklyStreak from "@/components/universal/WeeklyStreak";
 import WeightIn from "@/components/universal/WeightIn";
 import ProgressBar from "@/components/questions/ProgressBar";
 import FilterModal from "@/components/universal/FilterModal";
+import MacrosTable from "@/components/diet/MacrosTable";
+import MacroDonutChart from "@/components/diet/MacroDonutChart";
+import MacroLegend from "@/components/diet/MacroLegend";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -56,6 +59,16 @@ export default function HomeScreen() {
     router.push("/onboarding");
   };
 
+  // Dados de mock para teste
+  const macros: { protein: number; carbs: number; fats: number } = {
+    protein: 150,
+    carbs: 225,
+    fats: 56,
+  };
+
+  let calories: number =
+    macros.protein * 4 + macros.carbs * 4 + macros.fats * 9;
+
   return (
     <SafeAreaView
       style={{
@@ -85,7 +98,6 @@ export default function HomeScreen() {
               onIconPress={handleHeaderIcon}
             />
 
-            {/* Botão de teste do Onboarding - REMOVER depois */}
             <Button
               title="Testar Onboarding"
               onPress={handleTestOnboarding}
@@ -135,6 +147,13 @@ export default function HomeScreen() {
             </View>
 
             <Button title="Abrir Modal Genérico" onPress={handleGenericModal} />
+           
+
+            <MacrosTable calories={calories} protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
+            <View style={styles.macrosContainer}>
+              <MacroLegend protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
+              <MacroDonutChart protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -162,5 +181,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingVertical: 8,
+  },
+  macrosContainer: {
+    // backgroundColor: Colors.bgLight,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
