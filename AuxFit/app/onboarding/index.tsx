@@ -1,9 +1,11 @@
+// app/onboarding/index.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Button from '../../components/universal/Button';
 import Background from '../../components/universal/Background';
+import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function OnboardingIntro() {
   const router = useRouter();
@@ -21,15 +23,23 @@ export default function OnboardingIntro() {
 
         {/* Conteúdo principal */}
         <View style={styles.content}>
-          <Text style={styles.title}>
-            Precisamos saber algumas{'\n'}coisas sobre você
-          </Text>
 
-          <Button
-            title="Prosseguir"
-            onPress={handleStart}
-            bgColor="#00D68F"
-          />
+          {/* Texto central grande */}
+          <View style={styles.centerContent}>
+            <Text style={styles.mainTitle}>
+              Precisamos saber algumas{'\n'}coisas sobre você
+            </Text>
+          </View>
+
+          {/* Botão na parte inferior */}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Prosseguir"
+              onPress={handleStart}
+              bgColor={Colors.primary}
+            />
+          </View>
+
         </View>
 
       </View>
@@ -40,7 +50,7 @@ export default function OnboardingIntro() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0A0E14',
+    backgroundColor: Colors.bg,
   },
   container: {
     flex: 1,
@@ -48,19 +58,33 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 60,
-    paddingBottom: 40,
+    position: 'relative',
   },
-  title: {
+  topTitle: {
+    ...Texts.subtext,
+    fontSize: 13,
+    textAlign: 'left',
+    marginTop: Spacing.md,
+  },
+  centerContent: {
+    position: 'absolute',
+    top: 395,
+    left: 12.5,
+    right: 12.5,
+    alignItems: 'center',
+  },
+  mainTitle: {
+    ...Texts.title,
     fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 32,
-    marginTop: 'auto',
-    marginBottom: 'auto',
+    lineHeight: 34,
+    fontFamily: 'MontserratBold',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    top: 657,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
 });
