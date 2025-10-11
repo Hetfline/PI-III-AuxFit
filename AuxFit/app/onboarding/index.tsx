@@ -1,11 +1,15 @@
 // app/onboarding/index.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Button from '../../components/universal/Button';
 import Background from '../../components/universal/Background';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const DESIGN_WIDTH = 412;
+const DESIGN_HEIGHT = 917;
 
 export default function OnboardingIntro() {
   const router = useRouter();
@@ -69,8 +73,8 @@ const styles = StyleSheet.create({
   centerContent: {
     position: 'absolute',
     top: 395,
-    left: 12.5,
-    right: 12.5,
+    left: 22.5,
+    right: 22.5,
     alignItems: 'center',
   },
   mainTitle: {
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: 'absolute',
-    top: 657,
+    top: 660,
     left: 0,
     right: 0,
     alignItems: 'center',
