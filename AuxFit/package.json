@@ -16,7 +16,7 @@
     "@expo/vector-icons": "^15.0.2",
     "@react-navigation/native": "^7.1.6",
     "@shopify/react-native-skia": "^2.2.21",
-    "expo": "^54.0.10",
+    "expo": "^54.0.13",
     "expo-font": "~14.0.8",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.6",
