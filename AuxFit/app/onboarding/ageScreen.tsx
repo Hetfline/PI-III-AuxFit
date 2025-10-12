@@ -4,30 +4,34 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import GenderQuestion from '../../components/onboarding/GenderQuestion';
+import AgePicker from '../../components/onboarding/AgePicker';
 import Button from '../../components/universal/Button';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
-export default function OnboardingQuestions() {
+export default function AgeQuestion() {
   const router = useRouter();
-  const [currentQuestion, setCurrentQuestion] = useState(1);
-  const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState(2);
   const totalQuestions = 6;
+
+  // Estados para data de nascimento
+  const [selectedDay, setSelectedDay] = useState(7);
+  const [selectedMonth, setSelectedMonth] = useState(7); // Julho
+  const [selectedYear, setSelectedYear] = useState(2004);
 
   const handleBack = () => {
     if (currentQuestion === 1) {
       router.back();
     } else {
       setCurrentQuestion(prev => prev - 1);
+      router.back();
     }
   };
 
   const handleNext = () => {
-    if (!selectedGender) return;
-    
     if (currentQuestion < totalQuestions) {
       setCurrentQuestion(prev => prev + 1);
-      setSelectedGender(null);
+      // Navegar para próxima pergunta
+      router.push('/onboarding/nextQuestion');
     } else {
       router.push('/home');
     }
@@ -55,14 +59,18 @@ export default function OnboardingQuestions() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.question}>Qual o seu gênero?</Text>
+            <Text style={styles.question}>Qual a sua idade?</Text>
           </View>
 
-          {/* Cards de gênero */}
-          <View style={styles.cardsSection}>
-            <GenderQuestion
-              selectedGender={selectedGender}
-              onSelect={setSelectedGender}
+          {/* Picker de data */}
+          <View style={styles.pickerSection}>
+            <AgePicker
+              selectedDay={selectedDay}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+              onDayChange={setSelectedDay}
+              onMonthChange={setSelectedMonth}
+              onYearChange={setSelectedYear}
             />
           </View>
 
@@ -71,10 +79,10 @@ export default function OnboardingQuestions() {
         {/* Botões de navegação */}
         <View style={styles.navigationButtons}>
           
-          {/* Voltar */}
+          {/* Anterior */}
           <View style={styles.backButtonWrapper}>
             <Button
-              title="Voltar"
+              title="Anterior"
               onPress={handleBack}
               bgColor="#E8E8E8"
             />
@@ -126,9 +134,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
   },
-  cardsSection: {
+  pickerSection: {
     position: 'absolute',
-    top: 317,
+    top: 316,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.lg,

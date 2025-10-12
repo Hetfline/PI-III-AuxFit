@@ -15,7 +15,7 @@ export default function OnboardingIntro() {
   const router = useRouter();
 
   const handleStart = () => {
-    router.push('/onboarding/questions');
+    router.push('/onboarding/genderScreen');
   };
 
   return (
