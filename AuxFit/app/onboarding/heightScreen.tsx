@@ -4,19 +4,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import AgePicker from '../../components/onboarding/AgePicker';
+import HeightPicker from '../../components/onboarding/HeightPicker';
 import Button from '../../components/universal/Button';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
-export default function AgeQuestion() {
+export default function HeightScreen() {
   const router = useRouter();
-  const [currentQuestion, setCurrentQuestion] = useState(2);
+  const [currentQuestion, setCurrentQuestion] = useState(3);
   const totalQuestions = 6;
 
-  // Estados para data de nascimento
-  const [selectedDay, setSelectedDay] = useState(7);
-  const [selectedMonth, setSelectedMonth] = useState(7); // Julho
-  const [selectedYear, setSelectedYear] = useState(2004);
+  // Estados para altura
+  const [selectedHeight, setSelectedHeight] = useState(183);
+  const [selectedDecimal, setSelectedDecimal] = useState(0);
 
   const handleBack = () => {
     if (currentQuestion === 1) {
@@ -31,7 +30,7 @@ export default function AgeQuestion() {
     if (currentQuestion < totalQuestions) {
       setCurrentQuestion(prev => prev + 1);
       // Navegar para próxima pergunta
-      router.push('/onboarding/heightScreen');
+      router.push('/onboarding/nextQuestion');
     } else {
       router.push('/home');
     }
@@ -59,18 +58,16 @@ export default function AgeQuestion() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.question}>Qual a sua idade?</Text>
+            <Text style={styles.question}>Qual a sua altura?</Text>
           </View>
 
-          {/* Picker de data */}
+          {/* Picker de altura */}
           <View style={styles.pickerSection}>
-            <AgePicker
-              selectedDay={selectedDay}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              onDayChange={setSelectedDay}
-              onMonthChange={setSelectedMonth}
-              onYearChange={setSelectedYear}
+            <HeightPicker
+              selectedHeight={selectedHeight}
+              selectedDecimal={selectedDecimal}
+              onHeightChange={setSelectedHeight}
+              onDecimalChange={setSelectedDecimal}
             />
           </View>
 
