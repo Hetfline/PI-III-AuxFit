@@ -10,7 +10,7 @@ import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function HeightScreen() {
   const router = useRouter();
-  const [currentQuestion, setCurrentQuestion] = useState(3);
+  const currentQuestion = 3; // FIXO - não precisa de useState
   const totalQuestions = 6;
 
   // Estados para altura
@@ -18,22 +18,12 @@ export default function HeightScreen() {
   const [selectedDecimal, setSelectedDecimal] = useState(0);
 
   const handleBack = () => {
-    if (currentQuestion === 1) {
-      router.back();
-    } else {
-      setCurrentQuestion(prev => prev - 1);
-      router.back();
-    }
+    router.back();
   };
 
   const handleNext = () => {
-    if (currentQuestion < totalQuestions) {
-      setCurrentQuestion(prev => prev + 1);
-      // Navegar para próxima pergunta
-      router.push('/onboarding/nextQuestion');
-    } else {
-      router.push('/home');
-    }
+    // Navegar para próxima pergunta (tela 4)
+    router.push('/onboarding/weightScreen');
   };
 
   return (

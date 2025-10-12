@@ -4,26 +4,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import AgePicker from '../../components/onboarding/AgePicker';
+import WeightPicker from '../../components/onboarding/WeightPicker';
 import Button from '../../components/universal/Button';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
-export default function AgeQuestion() {
+export default function WeightScreen() {
   const router = useRouter();
-  const currentQuestion = 2; // FIXO - não precisa de useState
+  const currentQuestion = 4;
   const totalQuestions = 6;
 
-  // Estados para data de nascimento
-  const [selectedDay, setSelectedDay] = useState(7);
-  const [selectedMonth, setSelectedMonth] = useState(7); // Julho
-  const [selectedYear, setSelectedYear] = useState(2004);
+  // Estados para peso
+  const [selectedWeight, setSelectedWeight] = useState(98);
+  const [selectedDecimal, setSelectedDecimal] = useState(2);
 
   const handleBack = () => {
     router.back();
   };
 
   const handleNext = () => {
-    router.push('/onboarding/heightScreen');
+    // Navegar para próxima pergunta (tela 5)
+    router.push('/onboarding/nextQuestion');
   };
 
   return (
@@ -48,18 +48,16 @@ export default function AgeQuestion() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.question}>Qual a sua idade?</Text>
+            <Text style={styles.question}>Qual o seu peso?</Text>
           </View>
 
-          {/* Picker de data */}
+          {/* Picker de peso */}
           <View style={styles.pickerSection}>
-            <AgePicker
-              selectedDay={selectedDay}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              onDayChange={setSelectedDay}
-              onMonthChange={setSelectedMonth}
-              onYearChange={setSelectedYear}
+            <WeightPicker
+              selectedWeight={selectedWeight}
+              selectedDecimal={selectedDecimal}
+              onWeightChange={setSelectedWeight}
+              onDecimalChange={setSelectedDecimal}
             />
           </View>
 
