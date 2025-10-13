@@ -11,10 +11,13 @@ import { Text } from "@/components/Themed";
 import InputField from "@/components/universal/InputField";
 import Button from "@/components/universal/Button";
 import React from "react";
+import {useRouter} from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 export default function Login() {
+const router = useRouter();
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg }}>
       <KeyboardAvoidingView
@@ -27,7 +30,7 @@ export default function Login() {
         >
           <View style={styles.container}>
             <Text style={Texts.title}>Index dentro de (auth)</Text>
-            <View style={styles.inputs}></View>
+            <Button onPress={() => router.push('/(tabs)/home')} title="Home"/>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
