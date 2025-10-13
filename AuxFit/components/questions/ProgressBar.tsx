@@ -12,7 +12,7 @@ let questionQuantity = 6;
     <View style={styles.container}>
       <MaterialIcons name="first-page" size={32} color={Colors.text}/>
       <View style={styles.bar}>
-        <View style={[styles.progress, { width: `${progress * questionNumber}%` }]}><Text style={{color: Colors.secondary}}>a</Text></View>
+        <View style={[styles.progress, { width: `${progress * questionNumber}%` }]}><Text style={{color: 'transparent'}}>a</Text></View>
       </View>
       <Text style={Texts.bodyBold}>{questionNumber} / {questionQuantity}</Text>
     </View>

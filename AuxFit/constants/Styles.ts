@@ -16,12 +16,22 @@ export const Colors = {
 };
 
 export const Spacing = {
+
+  // * Medidas padrão em pt
   xs: 4,
   sm: 8,
   md: 16,
   lg: 32,
   xl: 48,
   xxl: 64,
+
+  // * Conversões para px
+  // xs: 4 * 1.333,
+  // sm: 8 * 1.333,
+  // md: 16 * 1.333,
+  // lg: 32 * 1.333,
+  // xl: 48 * 1.333,
+  // xxl: 64 * 1.333,
 };
 
 export const Shadows = StyleSheet.create({

@@ -1,4 +1,4 @@
-// * Componente de tabela nutricional. Recebe os props de valores dos macros (calorias, proteínas, etc.).
+// * Componente de tabela para exibir a distribuição de macronutrientes. Recebe os valores de proteínas, carboidratos e gorduras como props.
 // ? os valores precisam ser passados como props mesmo?
 
 import { StyleSheet, Text, View } from "react-native";

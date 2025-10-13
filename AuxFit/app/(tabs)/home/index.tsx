@@ -26,7 +26,9 @@ import ProgressBar from "@/components/questions/ProgressBar";
 import FilterModal from "@/components/universal/FilterModal";
 import MacrosTable from "@/components/diet/MacrosTable";
 import MacroDonutChart from "@/components/diet/MacroDonutChart";
-import MacroLegend from "@/components/diet/MacroLegend";
+import MacroTableLegend from "@/components/diet/MacroTableLegend";
+import MacrosProgress from "@/components/diet/MacrosProgress";
+import WaterProgress from "@/components/diet/WaterProgress";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -91,7 +93,7 @@ export default function HomeScreen() {
         >
           <View style={styles.scrollContent}>
             {/* Cabeçalho */}
-            <Header
+            {/* <Header
               title="Home"
               subtitle="Bem-vindo ao seu treino"
               icon="more-vert"
@@ -146,14 +148,37 @@ export default function HomeScreen() {
               </FilterModal>
             </View>
 
-            <Button title="Abrir Modal Genérico" onPress={handleGenericModal} />
-           
+            <Button title="Abrir Modal Genérico" onPress={handleGenericModal} /> */}
 
-            <MacrosTable calories={calories} protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
+            <MacrosTable
+              calories={calories}
+              protein={macros.protein}
+              carbs={macros.carbs}
+              fats={macros.fats}
+            />
             <View style={styles.macrosContainer}>
-              <MacroLegend protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
-              <MacroDonutChart protein={macros.protein} carbs={macros.carbs} fats={macros.fats} />
+              <MacroTableLegend
+                protein={macros.protein}
+                carbs={macros.carbs}
+                fats={macros.fats}
+              />
+              <MacroDonutChart
+                protein={macros.protein}
+                carbs={macros.carbs}
+                fats={macros.fats}
+              />
             </View>
+
+            <MacrosProgress
+              calories={calories}
+              logs={2}
+              caloriesIngested={1200}
+              protein={macros.protein}
+              carbs={macros.carbs}
+              fats={macros.fats}
+            />
+
+            <WaterProgress currentWater={0}/>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

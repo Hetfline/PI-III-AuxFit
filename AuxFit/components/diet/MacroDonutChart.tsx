@@ -1,9 +1,8 @@
-// * Componente de gráfico de pizza para exibir a distribuição de macronutrientes.
-// * Recebe os valores de proteínas, carboidratos e gorduras como props.
+// * Componente de gráfico de donut para exibir a distribuição de macronutrientes. Recebe os valores de proteínas, carboidratos e gorduras como props.
 
 import { View, StyleSheet, Text } from "react-native";
-import { Pie, PolarChart } from "victory-native"; // Apenas os imports necessários
-import { Colors, Spacing, Texts } from "@/constants/Styles"; // Importando apenas o que será usado
+import { Pie, PolarChart } from "victory-native";
+import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 interface MacroPieChartProps {
   protein: number;
@@ -16,8 +15,7 @@ export default function MacroDonutChart({
   carbs,
   fats,
 }: MacroPieChartProps) {
-  // 1. Prepara os dados para o gráfico a partir das props recebidas.
-  //    Cada item é um objeto com valor, rótulo e cor.
+  // Cada item é um objeto com valor, rótulo e cor.
   const chartData = [
     { value: protein, label: "Proteínas", color: Colors.correct },
     { value: carbs, label: "Carbs", color: Colors.secondary },
@@ -29,10 +27,10 @@ export default function MacroDonutChart({
   return (
     <View style={styles.container}>
       <PolarChart
-        data={chartData} // 2. Usa os dados corretos (filtrados)
-        valueKey="value" // 3. Define a chave para os valores como a string "value"
-        labelKey="label" // 4. Define a chave para os rótulos como a string "label"
-        colorKey="color" // 5. Define a chave para as cores como a string "color"
+        data={chartData} 
+        valueKey="value"
+        labelKey="label"
+        colorKey="color"
       >
         <Pie.Chart innerRadius={"75%"} startAngle={270} size={120} />
       </PolarChart>

@@ -1,8 +1,6 @@
-// * Componente de gráfico de pizza para exibir a distribuição de macronutrientes.
-// * Recebe os valores de proteínas, carboidratos e gorduras como props.
+// * Componente de legenda da tabela de macros para informar as cores de cada nutriente. Recebe os valores de proteínas, carboidratos e gorduras como props. Será usado junto do componente MacrosTable
 
 import { View, StyleSheet, Text } from "react-native";
-import { Pie, PolarChart } from "victory-native"; // Apenas os imports necessários
 import { Colors, Spacing, Texts } from "@/constants/Styles"; // Importando apenas o que será usado
 
 interface MacroPieChartProps {
@@ -11,7 +9,7 @@ interface MacroPieChartProps {
   fats: number;
 }
 
-export default function MacroLegend({
+export default function MacroTableLegend({
   protein,
   carbs,
   fats,
