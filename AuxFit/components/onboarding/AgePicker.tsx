@@ -32,7 +32,7 @@ export default function BirthdatePicker({
   const yearScrollRef = useRef<ScrollView>(null);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - 99 + i); // Crescente: 1925, 1926... 2024
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - 99 + i);
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   // Scroll inicial para o item selecionado
