@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
-import { View, StyleSheet, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Background from "@/components/universal/Background";
@@ -24,17 +32,55 @@ import WaterProgress from "@/components/diet/WaterProgress";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
+
+  const handleStartWorkout = () => {
+    Alert.alert("Treino", "Iniciando treino!");
+  };
+
+  const handleAddNew = () => {
+    console.log("Adicionar novo item");
+  };
+
+  const handleFilter = () => {
+    setIsFilterVisible((prev) => !prev);
+  };
+
+  const handleGenericModal = () => {
+    setIsModalVisible((prev) => !prev);
+  };
+
+  const handleHeaderIcon = () => {
+    Alert.alert("Opções", "Menu de opções");
+  };
 
   const handleTestOnboarding = () => {
     router.push("/onboarding");
   };
 
+  // Dados de mock para teste
+  const macros: { protein: number; carbs: number; fats: number } = {
+    protein: 150,
+    carbs: 225,
+    fats: 56,
+  };
+
+  let calories: number =
+    macros.protein * 4 + macros.carbs * 4 + macros.fats * 9;
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.container}>
-        
-        {/* Background decorativo */}
-        <Background />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: Colors.bg,
+        paddingHorizontal: Spacing.md,
+      }}
+    >
+      {/* Background decorativo */}
+      <Background />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -57,10 +103,50 @@ export default function HomeScreen() {
             <Button
               title="Testar Onboarding"
               onPress={handleTestOnboarding}
-              bgColor={Colors.secondary}
+              bgColor="#35e1ffff"
             />
-          </View>
-        </View>
+
+            <View>
+              <ProgressBar />
+            </View>
+
+            <WeeklyStreak />
+
+            <WeightIn />
+
+            <InputField
+              icon="person"
+              placeholder="Digite seu nome"
+              value={nameValue}
+              onChangeText={setNameValue}
+            />
+
+            <InputField
+              icon="lock"
+              placeholder="Digite sua senha"
+              password={true}
+              value={passwordValue}
+              onChangeText={setPasswordValue}
+            />
+
+            <InputField placeholder="Email" keyboardType="email-address" />
+
+            <Button title="Iniciar Treino" onPress={handleStartWorkout} />
+
+            <View style={styles.smallButtonsRow}>
+              <AddBtn onPress={handleAddNew} />
+              <CheckBtn />
+              <Favorite />
+              <FilterBtn onPress={handleFilter} />
+
+              <FilterModal
+                isFilterVisible={isFilterVisible}
+                filterTitle="Teste"
+                onClose={handleFilter}
+              >
+                <Text>Olá</Text>
+              </FilterModal>
+            </View>
 
             <Button title="Abrir Modal Genérico" onPress={handleGenericModal} /> */}
 
@@ -109,29 +195,22 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.bg,
+  scrollContent: {
+    paddingTop: 24,
+    paddingBottom: 100,
+    gap: 20,
   },
-  container: {
-    flex: 1,
-    position: 'relative',
+  smallButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "100%",
+    paddingVertical: 8,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.lg,
-  },
-  title: {
-    ...Texts.title,
-    fontSize: 32,
-    textAlign: 'center',
-  },
-  buttonContainer: {
-    marginTop: Spacing.xl,
-    width: '100%',
-    maxWidth: 300,
+  macrosContainer: {
+    // backgroundColor: Colors.bgLight,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });
