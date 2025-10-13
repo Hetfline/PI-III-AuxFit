@@ -6,6 +6,7 @@ import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
 import ActivityLevel from '../../components/onboarding/ActivityLevel';
 import Button from '../../components/universal/Button';
+import Toast from '../../components/universal/Toast';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function ActivityScreen() {
@@ -14,15 +15,18 @@ export default function ActivityScreen() {
   const totalQuestions = 6;
 
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   const handleBack = () => {
     router.back();
   };
 
   const handleNext = () => {
-    if (!selectedLevel) return;
-    // Navegar para última pergunta (tela 6)
-    router.push('/onboarding/lastQuestion');
+    if (!selectedLevel) {
+      setShowToast(true);
+      return;
+    }
+    router.push('/onboarding/goalScreen');
   };
 
   return (
@@ -30,6 +34,14 @@ export default function ActivityScreen() {
       <View style={styles.container}>
         
         <Background />
+        
+        {/* Toast */}
+        <Toast
+          message="Por favor, selecione uma opção."
+          visible={showToast}
+          onHide={() => setShowToast(false)}
+          type="warning"
+        />
         
         {/* ProgressBar */}
         <ProgressBar

@@ -10,13 +10,13 @@ import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function AgeQuestion() {
   const router = useRouter();
-  const currentQuestion = 2; // FIXO - não precisa de useState
+  const currentQuestion = 2;
   const totalQuestions = 6;
 
   // Estados para data de nascimento
-  const [selectedDay, setSelectedDay] = useState(7);
-  const [selectedMonth, setSelectedMonth] = useState(7); // Julho
-  const [selectedYear, setSelectedYear] = useState(2004);
+  const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedMonth, setSelectedMonth] = useState(7);
+  const [selectedYear, setSelectedYear] = useState(2000);
 
   const handleBack = () => {
     router.back();

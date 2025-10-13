@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, ScrollView, NativeSyntheticEvent, NativeScrollE
 import { Colors, Spacing, Texts } from '@/constants/Styles';
 
 interface HeightPickerProps {
-  selectedHeight: number; // em cm (ex: 183)
-  selectedDecimal: number; // 0-9
+  selectedHeight: number;
+  selectedDecimal: number;
   onHeightChange: (height: number) => void;
   onDecimalChange: (decimal: number) => void;
 }

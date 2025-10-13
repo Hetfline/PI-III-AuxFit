@@ -98,16 +98,6 @@ export default function HomeScreen() {
               onIconPress={handleHeaderIcon}
             />
 
-            <Button
-              title="Testar Onboarding"
-              onPress={handleTestOnboarding}
-              bgColor="#35e1ffff"
-            />
-
-            <View>
-              <ProgressBar />
-            </View>
-
             <WeeklyStreak />
 
             <WeightIn />

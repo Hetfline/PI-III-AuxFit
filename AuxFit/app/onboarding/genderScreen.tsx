@@ -1,5 +1,3 @@
-// Recomendo renomear este arquivo para: screens/onboarding/genderScreen.tsx
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,12 +6,14 @@ import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
 import GenderQuestion from '../../components/onboarding/GenderPicker';
 import Button from '../../components/universal/Button';
+import Toast from '../../components/universal/Toast';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function GenderScreen() {
   const router = useRouter();
   
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const totalQuestions = 6;
 
   const handleBack = () => {
@@ -22,7 +22,7 @@ export default function GenderScreen() {
 
   const handleNext = () => {
     if (!selectedGender) {
-      alert('Por favor, selecione uma opção.');
+      setShowToast(true);
       return;
     }
     
@@ -34,6 +34,14 @@ export default function GenderScreen() {
       <View style={styles.container}>
         
         <Background />
+        
+        {/* Toast */}
+        <Toast
+          message="Por favor, selecione uma opção."
+          visible={showToast}
+          onHide={() => setShowToast(false)}
+          type="warning"
+        />
         
         <ProgressBar
           currentQuestion={1} 
@@ -66,7 +74,6 @@ export default function GenderScreen() {
               title="Voltar"
               onPress={handleBack}
               bgColor="#E8E8E8"
-              textColor="#000000"
             />
           </View>
 
@@ -75,7 +82,6 @@ export default function GenderScreen() {
               title="Próxima"
               onPress={handleNext}
               bgColor={Colors.primary}
-              disabled={!selectedGender}
             />
           </View>
         </View>
@@ -114,7 +120,6 @@ const styles = StyleSheet.create({
     ...Texts.title,
     fontSize: 20,
     textAlign: 'center',
-    color: '#F2F2F2',
   },
   cardsSection: {
     position: 'absolute',

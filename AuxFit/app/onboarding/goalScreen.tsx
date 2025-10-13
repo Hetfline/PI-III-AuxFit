@@ -4,24 +4,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import WeightPicker from '../../components/onboarding/WeightPicker';
+import GoalSelection from '../../components/onboarding/GoalSelection';
 import Button from '../../components/universal/Button';
+import Toast from '../../components/universal/Toast';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
-export default function WeightScreen() {
+export default function GoalScreen() {
   const router = useRouter();
-  const currentQuestion = 4;
+  const currentQuestion = 6;
   const totalQuestions = 6;
 
-  const [selectedWeight, setSelectedWeight] = useState(65);
-  const [selectedDecimal, setSelectedDecimal] = useState(0);
+  const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleNext = () => {
-    router.push('/onboarding/activityScreen');
+  const handleFinish = () => {
+    if (!selectedGoal) {
+      setShowToast(true);
+      return;
+    }
+    router.push('/home');
   };
 
   return (
@@ -29,6 +34,14 @@ export default function WeightScreen() {
       <View style={styles.container}>
         
         <Background />
+        
+        {/* Toast */}
+        <Toast
+          message="Por favor, selecione uma opção."
+          visible={showToast}
+          onHide={() => setShowToast(false)}
+          type="warning"
+        />
         
         {/* ProgressBar */}
         <ProgressBar
@@ -46,16 +59,14 @@ export default function WeightScreen() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.question}>Qual o seu peso?</Text>
+            <Text style={styles.question}>Qual o seu objetivo?</Text>
           </View>
 
-          {/* Picker de peso */}
-          <View style={styles.pickerSection}>
-            <WeightPicker
-              selectedWeight={selectedWeight}
-              selectedDecimal={selectedDecimal}
-              onWeightChange={setSelectedWeight}
-              onDecimalChange={setSelectedDecimal}
+          {/* Opções de objetivo */}
+          <View style={styles.optionsSection}>
+            <GoalSelection
+              selectedGoal={selectedGoal}
+              onSelect={setSelectedGoal}
             />
           </View>
 
@@ -73,11 +84,11 @@ export default function WeightScreen() {
             />
           </View>
 
-          {/* Próxima */}
+          {/* Finalizar */}
           <View style={styles.nextButtonWrapper}>
             <Button
-              title="Próxima"
-              onPress={handleNext}
+              title="Finalizar"
+              onPress={handleFinish}
               bgColor={Colors.primary}
             />
           </View>
@@ -119,9 +130,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
   },
-  pickerSection: {
+  optionsSection: {
     position: 'absolute',
-    top: 316,
+    top: 280,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.lg,

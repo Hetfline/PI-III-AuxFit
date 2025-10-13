@@ -10,11 +10,11 @@ import { Colors, Spacing, Texts } from '../../constants/Styles';
 
 export default function HeightScreen() {
   const router = useRouter();
-  const currentQuestion = 3; // FIXO - não precisa de useState
+  const currentQuestion = 3;
   const totalQuestions = 6;
 
   // Estados para altura
-  const [selectedHeight, setSelectedHeight] = useState(183);
+  const [selectedHeight, setSelectedHeight] = useState(165);
   const [selectedDecimal, setSelectedDecimal] = useState(0);
 
   const handleBack = () => {
@@ -22,7 +22,6 @@ export default function HeightScreen() {
   };
 
   const handleNext = () => {
-    // Navegar para próxima pergunta (tela 4)
     router.push('/onboarding/weightScreen');
   };
 
