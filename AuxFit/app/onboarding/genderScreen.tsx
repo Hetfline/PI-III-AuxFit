@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import GenderQuestion from '../../components/onboarding/GenderQuestion';
+import GenderQuestion from '../../components/onboarding/GenderPicker';
 import Button from '../../components/universal/Button';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 

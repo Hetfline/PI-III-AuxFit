@@ -4,26 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Background from '../../components/universal/Background';
 import ProgressBar from '../../components/onboarding/ProgressBar';
-import WeightPicker from '../../components/onboarding/WeightPicker';
+import ActivityLevel from '../../components/onboarding/ActivityLevel';
 import Button from '../../components/universal/Button';
 import { Colors, Spacing, Texts } from '../../constants/Styles';
 
-export default function WeightScreen() {
+export default function ActivityScreen() {
   const router = useRouter();
-  const currentQuestion = 4;
+  const currentQuestion = 5;
   const totalQuestions = 6;
 
-  // Estados para peso
-  const [selectedWeight, setSelectedWeight] = useState(98);
-  const [selectedDecimal, setSelectedDecimal] = useState(2);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 
   const handleBack = () => {
     router.back();
   };
 
   const handleNext = () => {
-    // Navegar para próxima pergunta (tela 5)
-    router.push('/onboarding/activityScreen');
+    if (!selectedLevel) return;
+    // Navegar para última pergunta (tela 6)
+    router.push('/onboarding/lastQuestion');
   };
 
   return (
@@ -48,16 +47,16 @@ export default function WeightScreen() {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.question}>Qual o seu peso?</Text>
+            <Text style={styles.question}>
+              Qual o seu nível de atividade{'\n'}física?
+            </Text>
           </View>
 
-          {/* Picker de peso */}
-          <View style={styles.pickerSection}>
-            <WeightPicker
-              selectedWeight={selectedWeight}
-              selectedDecimal={selectedDecimal}
-              onWeightChange={setSelectedWeight}
-              onDecimalChange={setSelectedDecimal}
+          {/* Opções de nível de atividade */}
+          <View style={styles.optionsSection}>
+            <ActivityLevel
+              selectedLevel={selectedLevel}
+              onSelect={setSelectedLevel}
             />
           </View>
 
@@ -121,9 +120,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
   },
-  pickerSection: {
+  optionsSection: {
     position: 'absolute',
-    top: 316,
+    top: 280,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.lg,
