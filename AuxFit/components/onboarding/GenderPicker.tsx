@@ -20,7 +20,7 @@ export default function GenderQuestion({ selectedGender, onSelect }: GenderQuest
           style={[
             styles.option,
             styles.optionFeminino,
-            selectedGender === 'feminino' && styles.optionSelected
+            selectedGender === 'feminino' && styles.optionFemininoSelected
           ]}
           onPress={() => onSelect('feminino')}
         >
@@ -37,7 +37,7 @@ export default function GenderQuestion({ selectedGender, onSelect }: GenderQuest
           style={[
             styles.option,
             styles.optionMasculino,
-            selectedGender === 'masculino' && styles.optionSelected
+            selectedGender === 'masculino' && styles.optionMasculinoSelected
           ]}
           onPress={() => onSelect('masculino')}
         >
@@ -83,8 +83,11 @@ const styles = StyleSheet.create({
   optionMasculino: {
     borderRadius: 20,
   },
-  optionSelected: {
-    borderColor: '#4D4D4D',
+  optionFemininoSelected: {
+    borderColor: '#FF66B2',
+  },
+  optionMasculinoSelected: {
+    borderColor: '#2196F3',
   },
   optionText: {
     ...Texts.body,
