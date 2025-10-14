@@ -10,9 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Background from "@/components/universal/Background";
-import MacrosProgress from "@/components/diet/MacrosProgress";
-import WaterProgress from "@/components/diet/WaterProgress";
 import Button from "@/components/universal/Button";
+import WaterProgress from "@/components/diet/WaterProgress";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -52,29 +51,16 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.scrollContent}>
-
             <Button
               title="Testar Onboarding"
               onPress={handleTestOnboarding}
               bgColor="#35e1ffff"
             />
 
-            <MacrosProgress
-              calories={calories}
-              logs={2}
-              caloriesIngested={1200}
-              protein={macros.protein}
-              carbs={macros.carbs}
-              fats={macros.fats}
-            />
-
-            <WaterProgress currentWater={0}/>
-
+            <WaterProgress currentWater={0} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-
     </SafeAreaView>
   );
 }
@@ -93,7 +79,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   macrosContainer: {
-    // backgroundColor: Colors.bgLight,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
