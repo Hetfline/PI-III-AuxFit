@@ -27,10 +27,11 @@ export default function ProfileScreen() {
 
   const handleAddWeight = () => {
     console.log('Adicionar pesagem');
+    // TODO: Abrir modal para adicionar pesagem
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <Background />
       
       <ScrollView 
@@ -101,10 +102,10 @@ export default function ProfileScreen() {
         <View style={styles.chartContainer}>
           <View style={styles.chartPlaceholder}>
             <Text style={styles.chartPlaceholderText}>
-              Gráfico de evolução do peso
+              📊 Gráfico de evolução do peso
             </Text>
             <Text style={styles.chartPlaceholderSubtext}>
-              (ainda vou importar a biblioteca de gráficos)
+              (necessita biblioteca de gráficos)
             </Text>
           </View>
         </View>
@@ -123,30 +124,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: Spacing.xxl,
+    paddingBottom: 100, // Espaço para bottom tab bar
     gap: Spacing.lg,
   },
   tabsContainer: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.lg,
-    gap: Spacing.md,
+    paddingTop: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
   tab: {
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginRight: Spacing.lg,
   },
   tabActive: {
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
     borderBottomColor: Colors.primary,
   },
   tabText: {
     ...Texts.body,
+    fontSize: 16,
     color: Colors.subtext,
   },
   tabTextActive: {
     ...Texts.bodyBold,
+    fontSize: 16,
     color: Colors.primary,
   },
   addWeightButton: {
@@ -154,23 +158,23 @@ const styles = StyleSheet.create({
   },
   chartContainer: {
     paddingHorizontal: Spacing.lg,
-    minHeight: 250,
+    minHeight: 280,
   },
   chartPlaceholder: {
     flex: 1,
-    backgroundColor: Colors.bgLight,
-    borderRadius: 16,
+    backgroundColor: '#2A2F38',
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: Spacing.xxl,
+    paddingVertical: Spacing.xxl * 2,
     gap: Spacing.sm,
   },
   chartPlaceholderText: {
-    ...Texts.bodyBold,
-    fontSize: 18,
+    ...Texts.title,
+    fontSize: 20,
   },
   chartPlaceholderSubtext: {
     ...Texts.subtext,
-    fontSize: 14,
+    fontSize: 13,
   },
 });
