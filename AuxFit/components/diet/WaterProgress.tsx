@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
+    
   },
   calories: {
     position: "absolute",
@@ -221,39 +222,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexWrap: "wrap",
     padding: Spacing.sm,
-    flexGrow: 1,
-    width: 200,
+    maxWidth: 180,
+    width: 180,
     gap: Spacing.md,
   },
   measuresContainer: {
     flexDirection: "row",
+    justifyContent: 'flex-start',
+    alignItems: 'center',
     gap: Spacing.xs,
     padding: Spacing.sm,
     flexWrap: "wrap",
-    maxWidth: 200,
-  },
-  dropdown: {
-    margin: 16,
-    height: 50,
-    width: 150,
-    backgroundColor: "#EEEEEE",
-    borderRadius: 22,
-    paddingHorizontal: 8,
-  },
-  imageStyle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
+    maxWidth: 180,
+    width: 180,
   },
 });

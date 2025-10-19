@@ -1,13 +1,23 @@
-// * Componente de botão de check. Alterna entre um estado marcado e desmarcado ao ser pressionado.
+// * Componente de botão de check. Alterna entre um estado marcado e desmarcado ao ser pressionado. Recebe os valores de tamanho e a lógica de mudança de estado como props
 // TODO adicionar função futuramente para mudar o estado no banco também
 
 import { useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-export default function CheckBtn() {
+interface CheckBtnProps {
+  size?: number;
+  onPress: () => void;
+}
+
+export default function CheckBtn({ size, onPress }: CheckBtnProps) {
   const [isChecked, setIsChecked] = useState(false);
+
+  const handlePress = () => {
+    setIsChecked((prev) => !prev);
+    onPress();
+  };
 
   return (
     <Pressable
@@ -15,9 +25,11 @@ export default function CheckBtn() {
         styles.container,
         isChecked ? styles.containerChecked : styles.containerUnchecked,
       ]}
-      onPress={() => setIsChecked((prev) => !prev)}
+      onPress={handlePress}
     >
-      {isChecked && <MaterialIcons name="check" size={24} color={Colors.bg} />}
+      {isChecked && (
+        <MaterialIcons name="check" size={size ? size : 24} color={Colors.bg} />
+      )}
     </Pressable>
   );
 }

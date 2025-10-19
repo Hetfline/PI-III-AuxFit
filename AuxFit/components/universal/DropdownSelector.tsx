@@ -114,7 +114,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bgLight,
     borderRadius: 12,
     padding: Spacing.xs,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: Colors.border
   },
   flatlist: {
     backgroundColor: Colors.bgLight,

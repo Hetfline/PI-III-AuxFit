@@ -6,14 +6,23 @@ import {
   StyleSheet,
 } from "react-native";
 import { useState } from "react";
-import { Text } from "@/components/Themed";
-import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import Background from "@/components/universal/Background";
+import MacrosProgress from "@/components/diet/MacrosProgress";
+import WaterProgress from "@/components/diet/WaterProgress";
+import Meal from "@/components/diet/Meal";
+import FoodHistory from "@/components/diet/FoodHistory";
 
 export default function DietScreen() {
-  // * Os useStates que controlam estados de componentes devem estar presentes na TELA DE IMPORTAÇÃO!
+  const macros: { protein: number; carbs: number; fats: number } = {
+    protein: 150,
+    carbs: 225,
+    fats: 56,
+  };
+
+  let calories: number =
+    macros.protein * 4 + macros.carbs * 4 + macros.fats * 9;
 
   return (
     <SafeAreaView
@@ -33,9 +42,24 @@ export default function DietScreen() {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.content}>
-            <Text style={Texts.title}>🍽️ Diet Screen</Text>
-            <Text style={Texts.subtitle}>Sua dieta personalizada</Text>
+          <View style={styles.scrollContent}>
+
+          <FoodHistory onPress={() => null}/>
+
+            <MacrosProgress
+              calories={calories}
+              logs={2}
+              caloriesIngested={1200}
+              protein={macros.protein}
+              carbs={macros.carbs}
+              fats={macros.fats}
+            />
+
+            <WaterProgress currentWater={0} />
+
+            <Meal name="Lanche"/>
+            <Meal name="Almoço"/>
+            <Meal name="Jantar"/>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -44,9 +68,9 @@ export default function DietScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  scrollContent: {
+    paddingTop: 24,
+    paddingBottom: 100,
+    gap: 20,
   },
 });

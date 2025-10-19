@@ -97,6 +97,11 @@ export const Texts = StyleSheet.create({
     fontSize: 14,
     color: Colors.subtext,
   },
+  subtextBold: {
+    fontFamily: "MontserratBold",
+    fontSize: 14,
+    color: Colors.subtext,
+  },
   navbar: {
     fontFamily: "MontserratBold",
     fontSize: 11,
