@@ -5,6 +5,7 @@ import Background from '@/components/universal/Background';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import WeightCards from '@/components/profile/WeightCards';
 import Button from '@/components/universal/Button';
+import WeightChart from '@/components/profile/WeightChart';
 import { Colors, Spacing, Texts } from '@/constants/Styles';
 
 export default function ProfileScreen() {
@@ -25,92 +26,104 @@ export default function ProfileScreen() {
     goalWeight: 95.0,
   };
 
+  // Dados para o gráfico (exemplo)
+  const chartData = {
+    labels: ["Ago", "Set", "Out", "Nov", "Dez", "Jan"], // Meses/Datas
+    datasets: [
+      {
+        data: [
+          98.0,
+          98.5,
+          97.0,
+          97.2,
+          96.0,
+          95.5
+        ]
+      }
+    ]
+  };
+
   const handleAddWeight = () => {
     console.log('Adicionar pesagem');
     // TODO: Abrir modal para adicionar pesagem
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <Background />
-      
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        
-        {/* Header com foto, nome, streak e barras */}
-        <ProfileHeader
-          userName={userData.name}
-          userPhoto={userData.photo}
-          date={userData.date}
-          streak={userData.streak}
-          caloriesConsumed={userData.caloriesConsumed}
-          caloriesGoal={userData.caloriesGoal}
-          waterConsumed={userData.waterConsumed}
-          waterGoal={userData.waterGoal}
-        />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Background />
 
-        {/* Tabs */}
-        <View style={styles.tabsContainer}>
-          <Pressable 
-            style={[styles.tab, activeTab === 'geral' && styles.tabActive]}
-            onPress={() => setActiveTab('geral')}
-          >
-            <Text style={[styles.tabText, activeTab === 'geral' && styles.tabTextActive]}>
-              Geral
-            </Text>
-          </Pressable>
-          
-          <Pressable 
-            style={[styles.tab, activeTab === 'dieta' && styles.tabActive]}
-            onPress={() => setActiveTab('dieta')}
-          >
-            <Text style={[styles.tabText, activeTab === 'dieta' && styles.tabTextActive]}>
-              Dieta
-            </Text>
-          </Pressable>
-          
-          <Pressable 
-            style={[styles.tab, activeTab === 'treino' && styles.tabActive]}
-            onPress={() => setActiveTab('treino')}
-          >
-            <Text style={[styles.tabText, activeTab === 'treino' && styles.tabTextActive]}>
-              Treino
-            </Text>
-          </Pressable>
-        </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
 
-        {/* Cards de Peso */}
-        <WeightCards
-          initialWeight={userData.initialWeight}
-          currentWeight={userData.currentWeight}
-          goalWeight={userData.goalWeight}
-        />
-
-        {/* Botão Adicionar Pesagem */}
-        <View style={styles.addWeightButton}>
-          <Button
-            title="Adicionar uma pesagem +"
-            onPress={handleAddWeight}
-            bgColor={Colors.primary}
+          {/* Header com foto, nome, streak e barras */}
+          <ProfileHeader
+            userName={userData.name}
+            userPhoto={userData.photo}
+            date={userData.date}
+            streak={userData.streak}
+            caloriesConsumed={userData.caloriesConsumed}
+            caloriesGoal={userData.caloriesGoal}
+            waterConsumed={userData.waterConsumed}
+            waterGoal={userData.waterGoal}
           />
-        </View>
 
-        {/* Gráfico - Placeholder por enquanto */}
-        <View style={styles.chartContainer}>
-          <View style={styles.chartPlaceholder}>
-            <Text style={styles.chartPlaceholderText}>
-              📊 Gráfico de evolução do peso
-            </Text>
-            <Text style={styles.chartPlaceholderSubtext}>
-              (necessita biblioteca de gráficos)
-            </Text>
+          {/* Tabs */}
+          <View style={styles.tabsContainer}>
+            <Pressable
+              style={[styles.tab, activeTab === 'geral' && styles.tabActive]}
+              onPress={() => setActiveTab('geral')}
+            >
+              <Text style={[styles.tabText, activeTab === 'geral' && styles.tabTextActive]}>
+                Geral
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.tab, activeTab === 'dieta' && styles.tabActive]}
+              onPress={() => setActiveTab('dieta')}
+            >
+              <Text style={[styles.tabText, activeTab === 'dieta' && styles.tabTextActive]}>
+                Dieta
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.tab, activeTab === 'treino' && styles.tabActive]}
+              onPress={() => setActiveTab('treino')}
+            >
+              <Text style={[styles.tabText, activeTab === 'treino' && styles.tabTextActive]}>
+                Treino
+              </Text>
+            </Pressable>
           </View>
-        </View>
 
-      </ScrollView>
+          {/* Cards de Peso */}
+          <WeightCards
+            initialWeight={userData.initialWeight}
+            currentWeight={userData.currentWeight}
+            goalWeight={userData.goalWeight}
+          />
+
+          {/* Botão Adicionar Pesagem */}
+          <View style={styles.addWeightButton}>
+            <Button
+              title="Adicionar uma pesagem +"
+              onPress={handleAddWeight}
+              bgColor={Colors.primary}
+            />
+          </View>
+
+          {/* Gráfico - Placeholder por enquanto */}
+          <View style={styles.chartContainer}>
+            <WeightChart data={chartData} />
+          </View>
+
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -120,6 +133,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.bg,
   },
+  container: {
+    flex: 1,
+    position: 'relative',
+  },
   scrollView: {
     flex: 1,
   },
@@ -128,35 +145,38 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   tabsContainer: {
+    top: -45,
     flexDirection: 'row',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
+    marginTop: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#999999',
   },
   tab: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    marginRight: Spacing.lg,
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomWidth: 3,
     borderBottomColor: Colors.primary,
   },
   tabText: {
     ...Texts.body,
-    fontSize: 16,
-    color: Colors.subtext,
+    fontSize: 18,
+    color: '#999999',
   },
   tabTextActive: {
     ...Texts.bodyBold,
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.primary,
   },
   addWeightButton: {
+    top: -45,
     paddingHorizontal: Spacing.lg,
   },
   chartContainer: {
+    top: -45,
     paddingHorizontal: Spacing.lg,
     minHeight: 280,
   },
@@ -175,6 +195,6 @@ const styles = StyleSheet.create({
   },
   chartPlaceholderSubtext: {
     ...Texts.subtext,
-    fontSize: 13,
+    fontSize: 14,
   },
 });

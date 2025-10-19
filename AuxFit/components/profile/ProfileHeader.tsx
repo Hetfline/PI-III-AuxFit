@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 100,
     height: 100,
-    borderRadius: 36,
+    borderRadius: 50,
     shadowColor: '#000000',
     shadowOffset: {
       width: 0,
@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   barsContainer: {
+    top: Spacing.sm,
     gap: 8,
     marginTop: 2,
   },
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     bottom: 0,
-    borderRadius: 7,
+    borderRadius: 20,
   },
   barContent: {
     flexDirection: 'row',
