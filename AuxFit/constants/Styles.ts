@@ -1,22 +1,22 @@
 import { StyleSheet } from "react-native";
 
 export const Colors = {
-  bg: "hsl(230, 10%, 5%)",
-  bgMedium: "hsl(220, 15%, 12%)",
-  bgLight: "hsl(220, 15%, 18%)",
-  text: "hsl(0, 0%, 95%)",
-  subtext: "hsl(0, 0%, 60%)",
-  primary: "hsl(151, 100%, 45%)",
-  secondary: "hsl(207, 90%, 54%)",
-  accent: "hsl(18, 100%, 60%)",
-  border: "hsl(0, 0%, 30%)",
-  correct: "hsl(122, 39%, 53%)",
-  incorrect: "hsl(4, 90%, 58%)",
-  warning: "hsl(36, 100%, 50%)",
+  bg: "hsla(230, 10%, 5%, 1.0)",
+  bgMedium: "hsla(220, 15%, 12%, 1.0)",
+  bgLight: "hsla(220, 15%, 18%, 1.0)",
+  text: "hsla(0, 0%, 95%, 1.0)",
+  subtext: "hsla(0, 0%, 60%, 1.0)",
+  primary: "hsla(151, 100%, 45%, 1.0)",
+  secondary: "hsla(207, 90%, 54%, 1.0)",
+  accent: "hsla(18, 100%, 60%, 1.0)",
+  border: "hsla(0, 0%, 30%, 1.0)",
+  correct: "hsla(122, 39%, 53%, 1.0)",
+  incorrect: "hsla(4, 90%, 58%, 1.0)",
+  warning: "hsla(36, 100%, 50%, 1.0)",
+  info: "hsla(207, 90%, 54%, 1.0)",
 };
 
 export const Spacing = {
-
   // * Medidas padrão em pt
   xs: 4,
   sm: 8,

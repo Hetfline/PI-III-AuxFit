@@ -88,7 +88,7 @@ export default function Meal({ name }: MealProps) {
         <View style={styles.progressContainer}>
           <View style={styles.progressText}>
             <Text style={Texts.bodyBold}>{name}</Text>
-            <Text style={Texts.body}>0 / {totalFoodCalories}</Text>
+            <Text style={Texts.body}>{currentCalories} / {totalFoodCalories}</Text>
           </View>
 
           {/* Barra de progresso */}
@@ -134,7 +134,7 @@ export default function Meal({ name }: MealProps) {
             <Text style={[Texts.subtextBold, { color: Colors.secondary }]}>
               {foodItems.length}
             </Text>
-            {<Text style={Texts.subtext}> </Text>} {/* espaço em branco */}
+            <Text style={Texts.subtext}> </Text>
             <Text style={[Texts.subtext, { color: Colors.text }]}>items</Text>
           </View>
           <MaterialIcons

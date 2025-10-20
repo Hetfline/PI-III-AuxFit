@@ -57,7 +57,6 @@ export default function HomeScreen() {
               bgColor="#35e1ffff"
             />
 
-            <WaterProgress currentWater={0} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

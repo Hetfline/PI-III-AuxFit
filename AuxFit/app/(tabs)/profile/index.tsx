@@ -91,7 +91,8 @@ export default function ProfileScreen() {
         {/* Botão Adicionar Pesagem */}
         <View style={styles.addWeightButton}>
           <Button
-            title="Adicionar uma pesagem +"
+            title="Adicionar uma pesagem"
+            icon='add'
             onPress={handleAddWeight}
             bgColor={Colors.primary}
           />
