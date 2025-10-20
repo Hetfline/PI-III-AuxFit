@@ -31,59 +31,75 @@ export default function ProfileHeader({
   return (
     <View style={styles.container}>
       
-      {/* Foto + Nome + Data + Streak */}
-      <View style={styles.topRow}>
+      {/* Header com foto e informações */}
+      <View style={styles.header}>
+        {/* Foto do usuário */}
         <Image
-          source={userPhoto ? { uri: userPhoto } : require('../../assets/icons/logo/logoOnboarding.png')}
+          source={require('../../assets/icons/logo/image.png')}
           style={styles.avatar}
         />
+        
+        {/* Informações do usuário */}
         <View style={styles.userInfo}>
+          {/* Nome + Streak */}
           <View style={styles.nameRow}>
             <Text style={styles.userName}>{userName}</Text>
             <View style={styles.streakContainer}>
-              <MaterialIcons name="local-fire-department" size={16} color="#FF6B35" />
+              <MaterialIcons name="local-fire-department" size={18} color="#FF6B35" />
               <Text style={styles.streakText}>{streak}</Text>
             </View>
           </View>
+          
+          {/* Data */}
           <Text style={styles.date}>{date}</Text>
+          
+          {/* Barras de Progresso */}
+          <View style={styles.barsContainer}>
+            
+            {/* Barra de Calorias */}
+            <View style={styles.progressRow}>
+              <View style={styles.barBackground}>
+                <View 
+                  style={[
+                    styles.barFill, 
+                    { 
+                      width: `${Math.min(caloriesPercent, 100)}%`, 
+                      backgroundColor: '#FF6B35' 
+                    }
+                  ]} 
+                />
+                <View style={styles.barContent}>
+                  <MaterialIcons name="local-fire-department" size={12} color="#000" />
+                  <Text style={styles.barValue}>{caloriesConsumed}</Text>
+                </View>
+              </View>
+              <Text style={styles.barGoal}>{caloriesGoal} kcal / d</Text>
+            </View>
+
+            {/* Barra de Água */}
+            <View style={styles.progressRow}>
+              <View style={styles.barBackground}>
+                <View 
+                  style={[
+                    styles.barFill, 
+                    { 
+                      width: `${Math.min(waterPercent, 100)}%`, 
+                      backgroundColor: '#42A5F5' 
+                    }
+                  ]} 
+                />
+                <View style={styles.barContent}>
+                  <MaterialIcons name="water-drop" size={12} color="#000" />
+                  <Text style={styles.barValue}>{waterConsumed}</Text>
+                </View>
+              </View>
+              <Text style={styles.barGoalWater}>{waterGoal} ml / d</Text>
+            </View>
+
+          </View>
         </View>
       </View>
-
-      {/* Barras de Progresso*/}
-      <View style={styles.progressBars}>
-        
-        {/* Calorias */}
-        <View style={styles.progressRow}>
-          <MaterialIcons name="local-fire-department" size={14} color="#FF6B35" />
-          <Text style={styles.progressValue}>{caloriesConsumed}</Text>
-          <View style={styles.progressBarBackground}>
-            <View 
-              style={[
-                styles.progressBarFill, 
-                { width: `${Math.min(caloriesPercent, 100)}%`, backgroundColor: '#FF6B35' }
-              ]} 
-            />
-          </View>
-          <Text style={styles.progressGoal}>{caloriesGoal} kcal / d</Text>
-        </View>
-
-        {/* Água */}
-        <View style={styles.progressRow}>
-          <MaterialIcons name="water-drop" size={14} color="#42A5F5" />
-          <Text style={styles.progressValue}>{waterConsumed}</Text>
-          <View style={styles.progressBarBackground}>
-            <View 
-              style={[
-                styles.progressBarFill, 
-                { width: `${Math.min(waterPercent, 100)}%`, backgroundColor: '#42A5F5' }
-              ]} 
-            />
-          </View>
-          <Text style={styles.progressGoal}>{waterGoal} ml / d</Text>
-        </View>
-
-      </View>
-
+      
     </View>
   );
 }
@@ -91,36 +107,39 @@ export default function ProfileHeader({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    gap: Spacing.md,
+    paddingVertical: Spacing.lg,
   },
-  topRow: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: Spacing.md,
+    alignItems: 'center',
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.bgLight,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // Para Android
   },
   userInfo: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 16,
   },
   userName: {
-    ...Texts.bodyBold,
-    fontSize: 18,
-  },
-  date: {
-    ...Texts.subtext,
-    fontSize: 13,
+    ...Texts.title,
+    fontSize: 22,
+    color: Colors.text,
   },
   streakContainer: {
     flexDirection: 'row',
@@ -128,38 +147,60 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   streakText: {
-    ...Texts.bodyBold,
-    fontSize: 14,
+    ...Texts.title,
+    fontSize: 16,
     color: '#FF6B35',
   },
-  progressBars: {
-    gap: Spacing.xs,
+  date: {
+    ...Texts.subtext,
+    fontSize: 14,
+    color: '#FFF',
+  },
+  barsContainer: {
+    top: Spacing.sm,
+    gap: 8,
+    marginTop: 2,
   },
   progressRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: 16,
   },
-  progressValue: {
-    ...Texts.bodyBold,
-    fontSize: 12,
-    minWidth: 40,
-  },
-  progressBarBackground: {
-    flex: 1,
-    height: 6,
-    backgroundColor: Colors.bgLight,
-    borderRadius: 3,
+  barBackground: {
+    width: 120,
+    height: 14,
+    backgroundColor: '#4D4D4D',
+    borderRadius: 20,
     overflow: 'hidden',
   },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 3,
+  barFill: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 20,
   },
-  progressGoal: {
+  barContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingLeft: 4,
+    zIndex: 1,
+    height: '100%',
+  },
+  barValue: {
+    ...Texts.bodyBold,
+    fontSize: 10,
+    color: '#000',
+  },
+  barGoal: {
     ...Texts.subtext,
     fontSize: 11,
-    minWidth: 80,
-    textAlign: 'right',
+    color: '#FF6933',
+  },
+    barGoalWater: {
+    ...Texts.subtext,
+    fontSize: 11,
+    color: '#2196F3',
   },
 });

@@ -36,6 +36,7 @@ export default function WeightCards({ initialWeight, currentWeight, goalWeight }
 
 const styles = StyleSheet.create({
   container: {
+    top: -45,
     flexDirection: 'row',
     gap: Spacing.sm,
     paddingHorizontal: Spacing.lg,
@@ -51,6 +52,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...Texts.subtext,
-    fontSize: 12,
+    fontSize: 14,
   },
 });
