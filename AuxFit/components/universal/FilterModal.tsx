@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "100%",
     height: "90%",
-    backgroundColor: Colors.bgLight,
+    backgroundColor: Colors.bgMedium,
     padding: Spacing.md,
     borderRadius: 20,
   },
@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
   },
   childrenContainer: {
     flex: 1,
-    padding: Spacing.md,
-    backgroundColor: Colors.border,
+    gap: Spacing.sm
   },
 });

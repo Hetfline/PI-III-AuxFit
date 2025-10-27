@@ -12,6 +12,8 @@ import { useRouter } from "expo-router";
 import Background from "@/components/universal/Background";
 import Button from "@/components/universal/Button";
 import WaterProgress from "@/components/diet/WaterProgress";
+import Favorite from "@/components/universal/FavoriteBtn";
+import InputField from "@/components/universal/InputField";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -57,7 +59,30 @@ export default function HomeScreen() {
               bgColor="#35e1ffff"
             />
 
-            <WaterProgress currentWater={0} />
+            <Button title="Botão" onPress={() => null} />
+            <Button
+              title="Botão de adicionar"
+              icon="add"
+              onPress={() => null}
+            />
+            <Button
+              title="Botão de adicionar"
+              icon="add"
+              dashBorder
+              bgColor="transparent"
+              borderColor={Colors.border}
+              color={Colors.text}
+              onPress={() => null}
+            />
+
+            <Favorite/>
+
+            <InputField placeholder="Senha" icon="person"/>
+            <InputField placeholder="Senha" icon="lock" password/>
+            <InputField placeholder="Pesquisar" icon="search"/>
+            <InputField placeholder="Genérico"/>
+
+            
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

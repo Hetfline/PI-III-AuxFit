@@ -12,6 +12,7 @@ interface MacrosProgressProps {
   protein: number;
   carbs: number;
   fats: number;
+  
 }
 
 export default function MacrosProgress({

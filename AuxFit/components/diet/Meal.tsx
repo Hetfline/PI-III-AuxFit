@@ -16,6 +16,8 @@ import CheckBtn from "../universal/CheckBtn";
 
 interface MealProps {
   name: string;
+  increaseLogs: () => void
+  decreaseLogs: () => void
 }
 
 // * Dados mockados para renderizar os componentes
@@ -25,21 +27,28 @@ const foodItems = [
   { id: 3, name: "Alimento 3", quantity: "50g", calories: 50 },
 ];
 
-const totalFoodCalories = foodItems.reduce((sum, item) => sum + item.calories, 0);
+const totalFoodCalories = foodItems.reduce(
+  (sum, item) => sum + item.calories,
+  0
+);
 
-export default function Meal({ name }: MealProps) {
+export default function Meal({ name, increaseLogs, decreaseLogs }: MealProps) {
   const [isMealCompleted, setIsMealCompleted] = useState(false);
   const [currentCalories, setCurrentCalories] = useState(0);
   const [isFocus, setIsFocus] = useState(false); // state para lidar com o estado do componente (aberto e fechado)
+  const [isBtnChecked, setIsBtnChecked] = useState(false)
 
   const handleCheckBtnPress = () => {
-    // TODO: A lógica para atualizar as calorias deve ser feita no componente pai passada para este componente. A reatribuição de props não funciona.
     if (!isMealCompleted) {
       setIsMealCompleted((prev) => !prev);
+      setIsBtnChecked((prev) => !prev);
       setCurrentCalories(totalFoodCalories);
+      increaseLogs()
     } else {
       setIsMealCompleted((prev) => !prev);
+      setIsBtnChecked((prev) => !prev);
       setCurrentCalories(0);
+      decreaseLogs()
     }
   };
 
@@ -51,31 +60,31 @@ export default function Meal({ name }: MealProps) {
     switch (name) {
       case "Café da manhã":
         return (
-          <MaterialIcons name="local-cafe" size={40} color={Colors.warning} />
+          <MaterialIcons name="local-cafe" size={36} color={Colors.warning} />
         );
       case "Almoço":
         return (
-          <MaterialIcons name="restaurant" size={40} color={Colors.correct} />
+          <MaterialIcons name="restaurant" size={36} color={Colors.correct} />
         );
       case "Lanche":
         return (
           <MaterialCommunityIcons
             name="food-apple"
-            size={40}
+            size={36}
             color={Colors.incorrect}
           />
         );
       case "Jantar":
         return (
-          <MaterialIcons name="soup-kitchen" size={40} color={Colors.warning} />
+          <MaterialIcons name="soup-kitchen" size={36} color={Colors.warning} />
         );
       case "Ceia":
         return (
-          <MaterialIcons name="nightlight" size={40} color={Colors.secondary} />
+          <MaterialIcons name="nightlight" size={36} color={Colors.secondary} />
         );
       default:
         return (
-          <MaterialIcons name="fastfood" size={40} color={Colors.warning} />
+          <MaterialIcons name="fastfood" size={36} color={Colors.warning} />
         );
     }
   };
@@ -88,7 +97,9 @@ export default function Meal({ name }: MealProps) {
         <View style={styles.progressContainer}>
           <View style={styles.progressText}>
             <Text style={Texts.bodyBold}>{name}</Text>
-            <Text style={Texts.body}>0 / {totalFoodCalories}</Text>
+            <Text style={Texts.body}>
+              {currentCalories} / {totalFoodCalories}
+            </Text>
           </View>
 
           {/* Barra de progresso */}
@@ -116,7 +127,7 @@ export default function Meal({ name }: MealProps) {
           </View>
         </View>
 
-        <CheckBtn size={23} onPress={handleCheckBtnPress} />
+        <CheckBtn size={32} onPress={handleCheckBtnPress} isChecked={isBtnChecked}/>
       </View>
 
       <Pressable
@@ -134,7 +145,7 @@ export default function Meal({ name }: MealProps) {
             <Text style={[Texts.subtextBold, { color: Colors.secondary }]}>
               {foodItems.length}
             </Text>
-            {<Text style={Texts.subtext}> </Text>} {/* espaço em branco */}
+            <Text style={Texts.subtext}> </Text>
             <Text style={[Texts.subtext, { color: Colors.text }]}>items</Text>
           </View>
           <MaterialIcons
@@ -189,6 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: Spacing.md,
+    paddingHorizontal: Spacing.sm,
     gap: Spacing.md,
   },
   infoContainer: {
@@ -209,11 +221,10 @@ const styles = StyleSheet.create({
   progressBarContainer: {
     borderRadius: 100,
     flexDirection: "row",
-    height: 12,
-    flexGrow: 1,
+    height: 8,
   },
   progressBar: {
-    height: 12,
+    height: 8,
     borderRadius: 100,
   },
   foodQuantityContainer: {

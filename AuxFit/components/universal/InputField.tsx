@@ -13,6 +13,7 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface InputFieldProps extends TextInputProps {
+  placeholder: string,
   // esse extends faz com que o componente InputFieldProps receba também os props que o componente padrão TextInput
   icon?: React.ComponentProps<typeof MaterialIcons>["name"];
   iconColor?: string;

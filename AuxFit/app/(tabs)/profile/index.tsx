@@ -108,14 +108,15 @@ export default function ProfileScreen() {
             goalWeight={userData.goalWeight}
           />
 
-          {/* Botão Adicionar Pesagem */}
-          <View style={styles.addWeightButton}>
-            <Button
-              title="Adicionar uma pesagem +"
-              onPress={handleAddWeight}
-              bgColor={Colors.primary}
-            />
-          </View>
+        {/* Botão Adicionar Pesagem */}
+        <View style={styles.addWeightButton}>
+          <Button
+            title="Adicionar uma pesagem"
+            icon='add'
+            onPress={handleAddWeight}
+            bgColor={Colors.primary}
+          />
+        </View>
 
           {/* Gráfico - Placeholder por enquanto */}
           <View style={styles.chartContainer}>

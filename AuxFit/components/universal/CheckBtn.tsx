@@ -8,27 +8,37 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface CheckBtnProps {
   size?: number;
+  iconSize?: number;
   onPress: () => void;
+  isChecked: boolean;
 }
 
-export default function CheckBtn({ size, onPress }: CheckBtnProps) {
-  const [isChecked, setIsChecked] = useState(false);
-
-  const handlePress = () => {
-    setIsChecked((prev) => !prev);
-    onPress();
-  };
+export default function CheckBtn({
+  size,
+  iconSize,
+  onPress,
+  isChecked,
+}: CheckBtnProps) {
+  // const handlePress = () => {
+  //   setIsChecked((prev) => !prev);
+  //   onPress();
+  // };
 
   return (
     <Pressable
       style={[
         styles.container,
         isChecked ? styles.containerChecked : styles.containerUnchecked,
+        { width: size ?? 32, height: size ?? 32 }, // condição de estilo pra caso haja a prop "size"
       ]}
-      onPress={handlePress}
+      onPress={onPress}
     >
       {isChecked && (
-        <MaterialIcons name="check" size={size ? size : 24} color={Colors.bg} />
+        <MaterialIcons
+          name="check"
+          size={iconSize ? iconSize : 24}
+          color={Colors.bg}
+        />
       )}
     </Pressable>
   );
@@ -36,8 +46,6 @@ export default function CheckBtn({ size, onPress }: CheckBtnProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: Spacing.lg,
-    height: Spacing.lg,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
