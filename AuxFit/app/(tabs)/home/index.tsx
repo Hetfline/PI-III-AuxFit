@@ -14,6 +14,7 @@ import Button from "@/components/universal/Button";
 import WaterProgress from "@/components/diet/WaterProgress";
 import Favorite from "@/components/universal/FavoriteBtn";
 import InputField from "@/components/universal/InputField";
+import WeeklyStreak from "@/components/universal/WeeklyStreak";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -74,6 +75,8 @@ export default function HomeScreen() {
               color={Colors.text}
               onPress={() => null}
             />
+
+            <WeeklyStreak/>
 
             <Favorite/>
 
