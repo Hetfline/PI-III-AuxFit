@@ -1,9 +1,9 @@
 import { StyleSheet } from "react-native";
 
 export const Colors = {
-  bg: "hsla(230, 10%, 5%, 1.0)",
-  bgMedium: "hsla(220, 15%, 12%, 1.0)",
-  bgLight: "hsla(220, 15%, 18%, 1.0)",
+  bg: "hsla(230, 10%, 8%, 1.0)",
+  bgMedium: "hsla(220, 15%, 15%, 1.0)",
+  bgLight: "hsla(220, 15%, 25%, 1.0)",
   text: "hsla(0, 0%, 95%, 1.0)",
   subtext: "hsla(0, 0%, 60%, 1.0)",
   primary: "hsla(151, 100%, 45%, 1.0)",

@@ -16,7 +16,7 @@ export default function WorkoutCard({ focusArea }: WorkoutCardProps) {
 
   return (
     <Pressable
-      style={[styles.container, isFocus ? styles.border : null]}
+      style={[styles.container, isFocus ? styles.borderOn : styles.borderOff]}
       onPress={handleCardPress}
     >
       <View style={styles.content}>
@@ -53,8 +53,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
   },
-  border: {
-    borderWidth: 2,
+  borderOn: {
+    borderWidth: 3,
     borderColor: Colors.accent,
+  },
+  borderOff: {
+    borderWidth: 3,
+    borderColor: Colors.bgLight,
   },
 });

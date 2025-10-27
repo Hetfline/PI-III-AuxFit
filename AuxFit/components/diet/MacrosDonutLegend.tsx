@@ -1,4 +1,4 @@
-// * Componente de legenda da tabela de macros para informar as cores de cada nutriente. Recebe os valores de proteínas, carboidratos e gorduras como props. Será usado junto do componente MacrosTable
+// * Componente de legenda do gráfico de donut de macros para informar as cores de cada nutriente. Recebe os valores de proteínas, carboidratos e gorduras como props. Será usado junto do componente MacrosDonutChart
 
 import { View, StyleSheet, Text } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles"; // Importando apenas o que será usado
@@ -9,7 +9,7 @@ interface MacroPieChartProps {
   fats: number;
 }
 
-export default function MacroTableLegend({
+export default function MacrosDonutLegend({
   protein,
   carbs,
   fats,

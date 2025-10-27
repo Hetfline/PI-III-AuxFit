@@ -13,8 +13,28 @@ import MacrosProgress from "@/components/diet/MacrosProgress";
 import WaterProgress from "@/components/diet/WaterProgress";
 import Meal from "@/components/diet/Meal";
 import FoodHistory from "@/components/diet/FoodHistory";
+import Button from "@/components/universal/Button";
+import MacroDonutChart from "@/components/diet/MacroDonutChart";
+import MacrosDonutLegend from "@/components/diet/MacrosDonutLegend";
+import MacrosTable from "@/components/diet/MacrosTable";
 
 export default function DietScreen() {
+  // State que armazena a quantidade de registros de alimentos
+  const [logs, setLogs] = useState(0);
+
+  // Função que será passada como prop para um componente filho para alterar seu estado
+  const handleIncreaseLogs = () => {
+    setLogs((prev) => prev + 1);
+  };
+
+  // Função que será passada como prop para um componente filho para alterar seu estado
+  const handleDecreaseLogs = () => {
+    setLogs((prev) =>
+      // Garante que o contador não seja negativo, se desejar
+      Math.max(0, prev - 1)
+    );
+  };
+
   const macros: { protein: number; carbs: number; fats: number } = {
     protein: 150,
     carbs: 225,
@@ -43,13 +63,33 @@ export default function DietScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.scrollContent}>
-
-          <FoodHistory onPress={() => null}/>
-
             <MacrosProgress
               calories={calories}
-              logs={2}
+              logs={logs}
               caloriesIngested={1200}
+              protein={macros.protein}
+              carbs={macros.carbs}
+              fats={macros.fats}
+            />
+
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <MacrosDonutLegend
+                protein={macros.protein}
+                carbs={macros.carbs}
+                fats={macros.fats}
+              />
+
+              <MacroDonutChart
+                protein={macros.protein}
+                carbs={macros.carbs}
+                fats={macros.fats}
+              />
+            </View>
+
+            <MacrosTable
+              calories={calories}
               protein={macros.protein}
               carbs={macros.carbs}
               fats={macros.fats}
@@ -57,9 +97,23 @@ export default function DietScreen() {
 
             <WaterProgress currentWater={0} />
 
-            <Meal name="Lanche"/>
-            <Meal name="Almoço"/>
-            <Meal name="Jantar"/>
+            <Meal
+              name="Almoço"
+              increaseLogs={() => handleIncreaseLogs()}
+              decreaseLogs={() => handleDecreaseLogs()}
+            />
+            <Meal
+              name="Lanche"
+              increaseLogs={() => handleIncreaseLogs()}
+              decreaseLogs={() => handleDecreaseLogs()}
+            />
+            <Meal
+              name="Jantar"
+              increaseLogs={() => handleIncreaseLogs()}
+              decreaseLogs={() => handleDecreaseLogs()}
+            />
+
+            <FoodHistory onPress={() => null} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

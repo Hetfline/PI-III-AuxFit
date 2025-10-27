@@ -35,7 +35,8 @@ export default function Button({
         {
           backgroundColor: bgColor || Colors.primary,
           borderRadius: radius || 40,
-          borderColor: borderColor || 'transparent'
+          borderColor: borderColor || 'transparent',
+          borderWidth: 3
         },
       ]}
     >

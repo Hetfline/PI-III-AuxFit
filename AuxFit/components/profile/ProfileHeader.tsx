@@ -106,8 +106,8 @@ export default function ProfileHeader({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
   },
   header: {
     flexDirection: 'row',

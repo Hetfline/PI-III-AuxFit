@@ -133,7 +133,7 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
 
       <View style={styles.waterHistory}>
         <DropdownSelector
-          placeholder="Medida"
+          placeholder="Copo (200ml)"
           data={data}
           onValueChange={handleDropdownChange}
           initialValue={waterMeasure}

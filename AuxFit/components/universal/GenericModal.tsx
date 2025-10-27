@@ -7,19 +7,19 @@ import { ReactNode } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 interface GenericModalProps {
-  isVisible: boolean;
+  isModalVisible: boolean;
   onClose: () => void;
   children: ReactNode;
 }
 
 export default function GenericModal({
-  isVisible,
+  isModalVisible,
   onClose,
   children,
 }: GenericModalProps) {
   return (
     <Modal
-      isVisible={isVisible}
+      isVisible={isModalVisible}
       onBackdropPress={onClose}
       style={styles.modal}
     >
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: Colors.bgLight,
     borderRadius: 20,
     padding: Spacing.lg,
     width: '90%',
