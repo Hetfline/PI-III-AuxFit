@@ -31,7 +31,7 @@ export default function Header({
     <View style={styles.wrapper}>
       <View style={styles.containerArrowTitles}>
         <MaterialIcons
-          name="arrow-back-ios"
+          name="arrow-back"
           size={32}
           color={Colors.primary}
           style={{ marginRight: Spacing.md }}
@@ -68,7 +68,7 @@ export default function Header({
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: "100%",
+    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

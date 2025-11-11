@@ -74,7 +74,7 @@ export const Shadows = StyleSheet.create({
 export const Texts = StyleSheet.create({
   title: {
     fontFamily: "MontserratBold",
-    fontSize: 28,
+    fontSize: 22,
     color: Colors.text,
   },
   subtitle: {

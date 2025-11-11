@@ -1,5 +1,4 @@
 // * Componente de modal do filtro de seleção. Esse modal permite que sejam passados props de título, estado de visibilidade (isVisible), um título e seu conteúdo interior (children). Ele usa o Modal da biblioteca react-native-modal ao invés do Modal padrão do react native, pois essa biblioteca permite mais estilos e ações
-// TODO quando for criado os elementos que vão ser colocados no modal, é necessário editar o container de conteúdo para dar um espaçamento inferior
 
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import Modal from "react-native-modal";

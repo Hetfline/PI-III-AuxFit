@@ -10,7 +10,7 @@ interface CheckBtnProps {
   size?: number;
   iconSize?: number;
   onPress: () => void;
-  isChecked: boolean;
+  isChecked?: boolean;
 }
 
 export default function CheckBtn({

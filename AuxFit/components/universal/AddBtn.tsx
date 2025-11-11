@@ -8,12 +8,14 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface AddBtnProps {
   onPress: () => void;
+  backgroundColor?: boolean
+  size?: number
 }
 
-export default function AddBtn({ onPress }: AddBtnProps) {
+export default function AddBtn({ onPress, backgroundColor, size }: AddBtnProps) {
   return (
-    <Pressable style={styles.container} onPress={onPress}>
-      <MaterialIcons name="add" size={24} color={Colors.primary} />
+    <Pressable style={[styles.container, {backgroundColor: backgroundColor? Colors.bgLight : "transparent"}]} onPress={onPress}>
+      <MaterialIcons name="add" size={size? size : 24} color={Colors.primary} />
     </Pressable>
   );
 }

@@ -16,8 +16,9 @@ import CheckBtn from "../universal/CheckBtn";
 
 interface MealProps {
   name: string;
-  increaseLogs: () => void
-  decreaseLogs: () => void
+  increaseLogs: () => void;
+  decreaseLogs: () => void;
+  onPress: () => void;
 }
 
 // * Dados mockados para renderizar os componentes
@@ -32,23 +33,28 @@ const totalFoodCalories = foodItems.reduce(
   0
 );
 
-export default function Meal({ name, increaseLogs, decreaseLogs }: MealProps) {
-  const [isMealCompleted, setIsMealCompleted] = useState(false);
+export default function Meal({
+  name,
+  increaseLogs,
+  decreaseLogs,
+  onPress,
+}: MealProps) {
   const [currentCalories, setCurrentCalories] = useState(0);
+   const [isMealCompleted, setIsMealCompleted] = useState(false);
   const [isFocus, setIsFocus] = useState(false); // state para lidar com o estado do componente (aberto e fechado)
-  const [isBtnChecked, setIsBtnChecked] = useState(false)
+  const [isBtnChecked, setIsBtnChecked] = useState(false);
 
   const handleCheckBtnPress = () => {
     if (!isMealCompleted) {
       setIsMealCompleted((prev) => !prev);
       setIsBtnChecked((prev) => !prev);
       setCurrentCalories(totalFoodCalories);
-      increaseLogs()
+      increaseLogs();
     } else {
       setIsMealCompleted((prev) => !prev);
       setIsBtnChecked((prev) => !prev);
       setCurrentCalories(0);
-      decreaseLogs()
+      decreaseLogs();
     }
   };
 
@@ -94,7 +100,7 @@ export default function Meal({ name, increaseLogs, decreaseLogs }: MealProps) {
       <View style={styles.infoContainer}>
         {renderIcon()}
 
-        <View style={styles.progressContainer}>
+        <Pressable style={styles.progressContainer} onPress={onPress}>
           <View style={styles.progressText}>
             <Text style={Texts.bodyBold}>{name}</Text>
             <Text style={Texts.body}>
@@ -125,9 +131,13 @@ export default function Meal({ name, increaseLogs, decreaseLogs }: MealProps) {
               <Text style={{ color: Colors.warning }}>a</Text>
             </View>
           </View>
-        </View>
+        </Pressable>
 
-        <CheckBtn size={32} onPress={handleCheckBtnPress} isChecked={isBtnChecked}/>
+        <CheckBtn
+          size={32}
+          onPress={handleCheckBtnPress}
+          isChecked={isBtnChecked}
+        />
       </View>
 
       <Pressable

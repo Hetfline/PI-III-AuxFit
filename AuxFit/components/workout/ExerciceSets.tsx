@@ -1,3 +1,5 @@
+// * Componente de card de exercícios com séries e repetições. Recebe o prop de nome e quantidade de séries como prop.
+
 import { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
@@ -91,7 +93,7 @@ export default function ExerciseSets({ name, totalSets }: ExerciceSetsProps) {
                 <Text style={Texts.body}>Repetições</Text>
               </View>
 
-              <CheckBtn onPress={() => null} size={24} iconSize={18} />
+              <CheckBtn onPress={() => null} size={24} iconSize={18}/>
             </View>
           </View>
         ))}

@@ -1,3 +1,5 @@
+// * Componente de card simples de exercícios. Recebe os props de nome, quantidade total de séries e de repetições.
+
 import { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
