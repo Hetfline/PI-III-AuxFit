@@ -113,7 +113,10 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
               {currentWaterProgress} ml
             </Text>
           </View>
+
+          
         </View>
+    
 
         <View style={styles.waterLeftContainer}>
           <Text style={[Texts.bodyBold, { color: Colors.secondary }]}>
@@ -186,13 +189,12 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
 
 const styles = StyleSheet.create({
   container: {
+    minHeight: 260,
     gap: Spacing.md,
-    backgroundColor: Colors.bgMedium,
     borderRadius: 20,
     padding: Spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
-    
   },
   calories: {
     position: "absolute",

@@ -14,7 +14,7 @@ export default function FoodHistory({onPress}: FoodHistoryProps) {
     <View style={styles.container}>
       <View style={styles.foodItem}>
         <MaterialIcons name="history" size={24} color={Colors.subtext} />
-        <Text style={Texts.body}>Alimento</Text>
+        <Text style={[Texts.body, {color: Colors.subtext}]}>Alimento</Text>
       </View>
       <Pressable hitSlop={15} onPress={onPress}>
         <MaterialIcons color={Colors.primary} name="arrow-outward" size={24} />
@@ -25,11 +25,12 @@ export default function FoodHistory({onPress}: FoodHistoryProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.bgLight,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: Spacing.md
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border
   },
   foodItem: {
     flexDirection: "row",

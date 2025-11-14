@@ -1,5 +1,7 @@
+// * Componente de notificação Toast. Permite que sejam passados vários props que definem a mensagem, a visibilidade, a função para esconder e o tipo de notificação ("error", "success" e "warning").
+
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Animated } from "react-native";
+import { Text, StyleSheet, Animated } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 

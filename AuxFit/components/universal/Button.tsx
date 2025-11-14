@@ -59,9 +59,8 @@ export default function Button({
 
 const styles = StyleSheet.create({
   container: {
-    height: 40,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.xs,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",

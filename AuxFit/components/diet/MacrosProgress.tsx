@@ -161,6 +161,7 @@ export default function MacrosProgress({
 
 const styles = StyleSheet.create({
   container: {
+    height: 260,
     gap: Spacing.md,
     backgroundColor: Colors.bgMedium,
     borderRadius: 20,
@@ -174,7 +175,6 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   progressContainer: {
-    // height: 75,
     overflow: "hidden",
   },
   infoContainer: {
@@ -183,12 +183,10 @@ const styles = StyleSheet.create({
   },
   calories: {
     position: "absolute",
-    // Faz a View ocupar todo o espaço do container pai
     top: 0, // caso for deixar o semi-círculo, tem que deixar aqui com o valor 30
     left: 0,
     right: 0,
     bottom: 0,
-    // Usa flexbox para centralizar o conteúdo (o Text)
     justifyContent: "center",
     alignItems: "center",
   },

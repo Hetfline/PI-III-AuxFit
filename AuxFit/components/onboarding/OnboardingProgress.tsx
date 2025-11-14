@@ -8,7 +8,7 @@ interface ProgressBarProps {
   onBack: () => void;
 }
 
-export default function ProgressBar({ currentQuestion, totalQuestions, onBack }: ProgressBarProps) {
+export default function OnboardingProgress({ currentQuestion, totalQuestions, onBack }: ProgressBarProps) {
   const progress = (currentQuestion / totalQuestions) * 100;
 
   return (

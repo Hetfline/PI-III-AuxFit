@@ -1,4 +1,6 @@
-import { useState } from "react";
+// * Componente de card de exercícios com séries e repetições. Recebe o prop de nome e quantidade de séries como prop.
+
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -8,40 +10,65 @@ import Button from "../universal/Button";
 interface ExerciceSetsProps {
   name: string;
   totalSets: number;
+  exerciseId: number;
+  onSetCompletion: (exerciseId: number, count: number) => void;
 }
 
+// Nota: O estado inicial DEVE ter o mesmo número de sets que totalSets, ou ser adaptado
+// para renderizar corretamente a proporção inicial.
 const initialSets = [
-  { id: 1, set: 1, weight: 40, reps: 12 },
-  { id: 2, set: 2, weight: 40, reps: 10 },
-  { id: 3, set: 3, weight: 40, reps: 8 },
-  { id: 4, set: 4, weight: 40, reps: 6 },
+  { id: 1, set: 1, weight: 40, reps: 12, isDone: false },
+  { id: 2, set: 2, weight: 40, reps: 10, isDone: false },
+  { id: 3, set: 3, weight: 40, reps: 8, isDone: false },
+  { id: 4, set: 4, weight: 40, reps: 6, isDone: false },
 ];
 
-export default function ExerciseSets({ name, totalSets }: ExerciceSetsProps) {
+export default function ExerciseSets({
+  name,
+  totalSets,
+  exerciseId,
+  onSetCompletion,
+}: ExerciceSetsProps) {
+  // ✅ Corrigido: Usaremos currentSet para armazenar a contagem de sets concluídos
   const [currentSet, setCurrentSet] = useState(0);
   const [sets, setSets] = useState(initialSets);
-  const [isFocus, setIsFocus] = useState(false); // state para lidar com o estado do componente (aberto e fechado)
+  const [isFocus, setIsFocus] = useState(false);
 
-  const handleArrowPress = () => {
-    setIsFocus((prev) => !prev);
+  useEffect(() => {
+    const completedCount = sets.filter((set) => set.isDone).length;
+
+    setCurrentSet(completedCount);
+
+    onSetCompletion(exerciseId, completedCount);
+  }, [sets, exerciseId]);
+
+  const handleSetCheckBtnPress = (idDoSet: number) => {
+    setSets((prevSets) =>
+      prevSets.map((set) =>
+        set.id === idDoSet ? { ...set, isDone: !set.isDone } : set
+      )
+    );
   };
 
   const handleBtnPress = () => {
-    const lastExercice = sets[sets.length - 1]; // Última série
+    const lastExercice = sets[sets.length - 1];
 
-    const newId = lastExercice ? lastExercice.id + 1 : 1; // ID da série a ser adicionada
-    const newSet = lastExercice ? lastExercice.set + 1 : 1; // Número da série a ser adicionada
+    const newId = lastExercice ? lastExercice.id + 1 : 1;
+    const newSet = lastExercice ? lastExercice.set + 1 : 1;
 
-    // Cria o novo objeto a ser adicionado no array. Mantendo 'weight' e 'reps' como valores padrão/mock para o novo set.
     const newExercice = {
       id: newId,
       set: newSet,
       weight: lastExercice ? lastExercice.weight : 0,
       reps: lastExercice ? lastExercice.reps : 0,
+      isDone: false,
     };
 
-    // 3. Atualiza o estado de forma IMUTÁVEL
     setSets((prevSets) => [...prevSets, newExercice]);
+  };
+
+  const handleArrowPress = () => {
+    setIsFocus((prev) => !prev);
   };
 
   return (
@@ -51,32 +78,37 @@ export default function ExerciseSets({ name, totalSets }: ExerciceSetsProps) {
         hitSlop={15}
         onPress={handleArrowPress}
       >
+        {/* ... Conteúdo da Imagem (IMG) ... */}
         <View style={styles.imgContainer}>
           <Text>IMG</Text>
         </View>
-        <View style={{ flex: 1 }}>
+
+        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
           <View style={styles.infoContainer}>
             <View>
               <Text style={Texts.bodyBold}>{name}</Text>
+              {/* ✅ Exibe a contagem ATUALIZADA de sets concluídos */}
               <Text style={[Texts.subtext, { color: Colors.secondary }]}>
                 {currentSet} / {totalSets} Série(s)
               </Text>
             </View>
-            <MaterialIcons
-              name="keyboard-arrow-down"
-              size={24}
-              color={Colors.text}
-              style={isFocus && { transform: [{ rotate: "180deg" }] }}
-            />
           </View>
+          <MaterialIcons
+            name="keyboard-arrow-down"
+            size={24}
+            color={Colors.text}
+            style={isFocus && { transform: [{ rotate: "180deg" }] }}
+          />
         </View>
       </Pressable>
 
+      {/* Conteúdo Expansível (Séries) */}
       {isFocus &&
         sets.map((item) => (
-          <View key={item.id} style={styles.setsContainer}>
+          <View key={item.id}>
             <View style={styles.set}>
-              <Text style={Texts.bodyBold}>{1}</Text>
+              <Text style={Texts.bodyBold}>{item.set}</Text>
+
               <View style={styles.setInfoContainer}>
                 <View style={styles.setInfo}>
                   <Text style={Texts.bodyBold}>{item.weight}</Text>
@@ -91,7 +123,12 @@ export default function ExerciseSets({ name, totalSets }: ExerciceSetsProps) {
                 <Text style={Texts.body}>Repetições</Text>
               </View>
 
-              <CheckBtn onPress={() => null} size={24} iconSize={18} />
+              <CheckBtn
+                onPress={() => handleSetCheckBtnPress(item.id)}
+                isChecked={item.isDone}
+                size={24}
+                iconSize={18}
+              />
             </View>
           </View>
         ))}
@@ -139,8 +176,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     flex: 1,
-  },
-  setsContainer: {
     gap: Spacing.sm,
   },
   set: {

@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import Background from '../../components/universal/Background';
-import ProgressBar from '../../components/onboarding/ProgressBar';
-import GenderQuestion from '../../components/onboarding/GenderPicker';
-import Button from '../../components/universal/Button';
-import Toast from '../../components/universal/Toast';
-import { Colors, Spacing, Texts } from '../../constants/Styles';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import Background from "../../components/universal/Background";
+import ProgressBar from "../../components/onboarding/OnboardingProgress";
+import GenderQuestion from "../../components/onboarding/GenderPicker";
+import Button from "../../components/universal/Button";
+import Toast from "../../components/universal/Toast";
+import { Colors, Spacing, Texts } from "../../constants/Styles";
 
 export default function GenderScreen() {
   const router = useRouter();
-  
+
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const totalQuestions = 6;
@@ -25,16 +25,15 @@ export default function GenderScreen() {
       setShowToast(true);
       return;
     }
-    
-    router.push('/onboarding/ageScreen');
+
+    router.push("/onboarding/ageScreen");
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        
         <Background />
-        
+
         {/* Toast */}
         <Toast
           message="Por favor, selecione uma opção."
@@ -42,18 +41,17 @@ export default function GenderScreen() {
           onHide={() => setShowToast(false)}
           type="warning"
         />
-        
+
         <ProgressBar
-          currentQuestion={1} 
+          currentQuestion={1}
           totalQuestions={totalQuestions}
           onBack={handleBack}
         />
-        
+
         <View style={styles.content}>
-          
           <View style={styles.topSection}>
             <Image
-              source={require('../../assets/icons/logo/logoOnboarding.png')}
+              source={require("../../assets/icons/logo/logoOnboarding.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -70,11 +68,7 @@ export default function GenderScreen() {
 
         <View style={styles.navigationButtons}>
           <View style={styles.backButtonWrapper}>
-            <Button
-              title="Voltar"
-              onPress={handleBack}
-              bgColor="#E8E8E8"
-            />
+            <Button title="Voltar" onPress={handleBack} bgColor="#E8E8E8" />
           </View>
 
           <View style={styles.nextButtonWrapper}>
@@ -85,7 +79,6 @@ export default function GenderScreen() {
             />
           </View>
         </View>
-
       </View>
     </SafeAreaView>
   );
@@ -98,18 +91,18 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   content: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   topSection: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     left: Spacing.lg,
     right: Spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 50,
   },
   logo: {
@@ -119,17 +112,17 @@ const styles = StyleSheet.create({
   question: {
     ...Texts.title,
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   cardsSection: {
-    position: 'absolute',
+    position: "absolute",
     top: 317,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.lg,
   },
   navigationButtons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.md,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.xl,

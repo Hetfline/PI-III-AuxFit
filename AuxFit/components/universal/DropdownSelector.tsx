@@ -17,7 +17,8 @@ interface DropdownSelectorProps {
   data: DropdownItem[];
   search?: boolean;
   onValueChange: (value: number) => void;
-  initialValue: number | null;
+  initialValue?: number;
+  // initialValue: number || null;
 }
 
 export default function DropdownSelector({
@@ -27,71 +28,67 @@ export default function DropdownSelector({
   onValueChange,
   initialValue,
 }: DropdownSelectorProps) {
-  const [value, setValue] = useState(
-    initialValue !== null ? initialValue.toString() : null
-  );
+  // const [value, setValue] = useState(
+  //   initialValue !== null ? initialValue.toString() : null
+  // );
+  const [value, setValue] = useState(initialValue);
   const [isFocus, setIsFocus] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: Colors.text }]}
-        placeholderStyle={[styles.placeholderStyle, Texts.body]}
-        selectedTextStyle={[styles.selectedTextStyle, Texts.body]}
-        inputSearchStyle={[styles.inputSearchStyle, Texts.body]}
-        itemContainerStyle={styles.dropdownItem}
-        containerStyle={styles.flatlistContainer}
-        iconStyle={styles.iconStyle}
-        itemTextStyle={[
-          Texts.body,
-          styles.dropdownItemText,
-          isFocus && { color: Colors.text },
-        ]}
-        flatListProps={{ contentContainerStyle: styles.flatlist }}
-        data={data}
-        search={search}
-        showsVerticalScrollIndicator={false}
-        autoScroll={false}
-        activeColor={Colors.correct}
-        maxHeight={135}
-        labelField="label"
-        valueField="value"
-        placeholder={placeholder}
-        searchPlaceholder="Pesquisar..."
-        value={value}
-        onFocus={() => setIsFocus(true)}
-        onBlur={() => setIsFocus(false)}
-        onChange={(item) => {
-          const selectedValue =
-            typeof item.value === "string" ? parseInt(item.value) : item.value;
-          setValue(item.value);
-          setIsFocus(false);
-          onValueChange(selectedValue);
-        }}
-        renderRightIcon={() => (
-          <MaterialIcons
-            style={[
-              styles.icon,
-              isFocus && { transform: [{ rotate: "270deg" }] },
-            ]}
-            color={Colors.primary}
-            name="arrow-right"
-            size={24}
-          />
-        )}
-      />
-    </View>
+    <Dropdown
+      style={[styles.dropdown, isFocus && { borderColor: Colors.text }]}
+      placeholderStyle={[styles.placeholderStyle, Texts.body]}
+      selectedTextStyle={[styles.selectedTextStyle, Texts.body]}
+      inputSearchStyle={[styles.inputSearchStyle, Texts.body]}
+      itemContainerStyle={styles.dropdownItem}
+      containerStyle={styles.flatlistContainer}
+      iconStyle={styles.iconStyle}
+      itemTextStyle={[
+        Texts.body,
+        styles.dropdownItemText,
+        isFocus && { color: Colors.text },
+      ]}
+      flatListProps={{ contentContainerStyle: styles.flatlist }}
+      data={data}
+      search={search}
+      showsVerticalScrollIndicator={false}
+      autoScroll={false}
+      activeColor={Colors.correct}
+      maxHeight={135}
+      labelField="label"
+      valueField="value"
+      placeholder={placeholder}
+      searchPlaceholder="Pesquisar..."
+      value={value}
+      onFocus={() => setIsFocus(true)}
+      onBlur={() => setIsFocus(false)}
+      onChange={(item) => {
+        const selectedValue =
+          typeof item.value === "string" ? parseInt(item.value) : item.value;
+        setValue(item.value);
+        setIsFocus(false);
+        onValueChange(selectedValue);
+      }}
+      renderRightIcon={() => (
+        <MaterialIcons
+          style={[
+            styles.icon,
+            isFocus && { transform: [{ rotate: "270deg" }] },
+          ]}
+          color={Colors.primary}
+          name="arrow-right"
+          size={24}
+        />
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.bgLight,
-    borderRadius: 40,
-  },
   dropdown: {
-    height: 50,
     flex: 1,
+    height: 48,
+    maxHeight: 50,
     backgroundColor: Colors.bgLight,
     borderColor: Colors.border,
     borderWidth: 0.5,
@@ -115,7 +112,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: Spacing.xs,
     borderWidth: 1,
-    borderColor: Colors.border
+    borderColor: Colors.border,
   },
   flatlist: {
     backgroundColor: Colors.bgLight,

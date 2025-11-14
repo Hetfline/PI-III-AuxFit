@@ -1,5 +1,4 @@
 // * Componente de campo de input. Permite que sejam passados vários props que definem o ícone, placeholder e tipo do input (senha, texto normal, etc.)
-// ? precisa adicionar prop para mudar o tamanho do input?
 
 import React, { useState } from "react";
 import {
@@ -13,11 +12,11 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface InputFieldProps extends TextInputProps {
-  placeholder: string,
   // esse extends faz com que o componente InputFieldProps receba também os props que o componente padrão TextInput
   icon?: React.ComponentProps<typeof MaterialIcons>["name"];
   iconColor?: string;
   password?: boolean;
+  message?: boolean;
   onIconPress?: () => void;
 }
 
@@ -26,6 +25,7 @@ export default function InputField({
   iconColor,
   placeholder,
   password,
+  message,
   onIconPress,
   ...rest
 }: InputFieldProps) {
@@ -33,7 +33,7 @@ export default function InputField({
 
   if (password) {
     return (
-      <View style={styles.passwordContainer}>
+      <View style={styles.specialContainer}>
         {icon && (
           <MaterialIcons
             name={icon}
@@ -59,11 +59,39 @@ export default function InputField({
         </Pressable>
       </View>
     );
-  } else {
+  } else if (message) {
+    return (
+      <View style={styles.specialContainer}>
+        {icon && (
+          <MaterialIcons
+            name={icon}
+            size={24}
+            color={Colors.subtext}
+            style={{ marginRight: Spacing.sm }}
+          />
+        )}
+        <TextInput
+          style={[Texts.body, { flexGrow: 1, color: Colors.text }]}
+          placeholder={placeholder}
+          placeholderTextColor={Colors.subtext}
+          {...rest}
+        />
+
+        <Pressable onPress={onIconPress} hitSlop={15}>
+          <MaterialIcons
+            name={"send"}
+            size={24}
+            color={Colors.primary}
+          />
+        </Pressable>
+      </View>
+    );
+  }
+  else {
     return (
       <View style={styles.container}>
         {icon && (
-          <Pressable onPress={onIconPress}>
+          <Pressable onPress={() => onIconPress}>
             <MaterialIcons
               name={icon}
               size={24}
@@ -79,14 +107,14 @@ export default function InputField({
           {...rest}
         />
       </View>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     height: 48,
-    minWidth: 200,
+    flexGrow: 1,
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
@@ -94,9 +122,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderRadius: 40,
   },
-  passwordContainer: {
+  specialContainer: {
     height: 48,
-    minWidth: 200,
+    flexGrow: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
