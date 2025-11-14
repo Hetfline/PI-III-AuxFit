@@ -9,32 +9,47 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 interface WorkoutCardProps {
   title: string;
   focusAreas: string;
+  duration: number;
+  numExercises: number;
+  editable?: boolean;
+  onPress: () => void;
 }
 
-export default function WorkoutCard({ title, focusAreas }: WorkoutCardProps) {
+export default function WorkoutCard({
+  title,
+  focusAreas,
+  duration,
+  numExercises,
+  editable,
+  onPress,
+}: WorkoutCardProps) {
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.topContent}>
         <View>
-          <Text style={Texts.subtitle}>{title}</Text>
+          <Text style={Texts.bodyBold}>{title}</Text>
           <Text style={[Texts.subtext, { color: Colors.accent }]}>
             {focusAreas}
           </Text>
         </View>
 
-        <Pressable>
-          <MaterialCommunityIcons
-            name="pencil"
-            size={24}
-            color={Colors.primary}
-          />
-        </Pressable>
+        {editable && (
+          <Pressable>
+            <MaterialCommunityIcons
+              name="pencil"
+              size={24}
+              color={Colors.primary}
+            />
+          </Pressable>
+        )}
       </View>
 
       <View style={styles.infoContainer}>
         <View style={styles.info}>
           <MaterialIcons name="alarm" size={18} color={Colors.warning} />
-          <Text style={[Texts.subtext, { color: Colors.text }]}>50 min</Text>
+          <Text style={[Texts.subtext, { color: Colors.text }]}>
+            {duration} min
+          </Text>
         </View>
         <View style={styles.info}>
           <MaterialCommunityIcons
@@ -43,11 +58,11 @@ export default function WorkoutCard({ title, focusAreas }: WorkoutCardProps) {
             color={Colors.secondary}
           />
           <Text style={[Texts.subtext, { color: Colors.text }]}>
-            5 exercícios
+            {numExercises} exercícios
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

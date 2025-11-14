@@ -1,24 +1,25 @@
 // * Componente de área de foco de exerício. Recebe o prop de nome.
 
-import { useState } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 
 interface WorkoutCardProps {
   focusArea: string;
+  isSelected: boolean; // 💡
+  onPress: (area: string) => void;
 }
 
-export default function WorkoutCard({ focusArea }: WorkoutCardProps) {
-  const [isFocus, setIsFocus] = useState(false);
+export default function WorkoutCard({ focusArea, isSelected, onPress }: WorkoutCardProps) {
+  
 
-  const handleCardPress = () => {
-    setIsFocus((prev) => !prev);
-  };
+  // const handleCardPress = () => {
+  //   setIsFocus((prev) => !prev);
+  // };
 
   return (
     <Pressable
-      style={[styles.container, isFocus ? styles.borderOn : styles.borderOff]}
-      onPress={handleCardPress}
+      style={[styles.container, isSelected ? styles.borderOn : styles.borderOff]}
+      onPress={() => onPress(focusArea)}
     >
       <View style={styles.content}>
         <Text style={Texts.bodyBold}>{focusArea}</Text>

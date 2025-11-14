@@ -111,6 +111,7 @@ export default function foodScreen() {
           <View style={styles.scrollContent}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Header
+              backArrow
                 title={foodData.foodName}
                 subtitle={`${foodData.weight}g`}
                 subtitleColor={Colors.correct}

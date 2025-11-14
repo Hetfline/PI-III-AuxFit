@@ -5,14 +5,13 @@ import { StyleSheet, Text, View, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
+import { useState, useEffect } from "react";
 
 interface HeaderProps {
   title: string;
   subtitle?: string;
   subtitleColor?: string;
-  timer?: boolean;
-  icon?: React.ComponentProps<typeof MaterialIcons>["name"];
-  iconColor?: string;
+  backArrow?: boolean,
   onIconPress?: () => void;
 }
 
@@ -20,23 +19,22 @@ export default function Header({
   title,
   subtitle,
   subtitleColor,
-  timer,
-  icon,
-  iconColor,
-  onIconPress,
+  backArrow
 }: HeaderProps) {
   const router = useRouter();
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.containerArrowTitles}>
-        <MaterialIcons
+        {backArrow && (
+          <MaterialIcons
           name="arrow-back"
           size={32}
           color={Colors.primary}
           style={{ marginRight: Spacing.md }}
-          onPress={() => router.back()} // faz com que independente de onde o componente esteja instanciado, o usuário vai voltar à tela anterior
+          onPress={() => router.back()}
         />
+        )}
         <View style={styles.containerTitles}>
           <Text style={Texts.subtitle}>{title}</Text>
           {subtitle && (
@@ -46,21 +44,9 @@ export default function Header({
           )}
         </View>
       </View>
-      <View style={styles.containerTimerIcon}>
-        {timer && (
-          <Text style={[Texts.bodyBold, { marginRight: Spacing.md }]}>
-            00:00
-          </Text>
-        )}
-        {icon && (
-          <Pressable onPress={onIconPress}>
-            <MaterialIcons
-              name={icon}
-              size={32}
-              color={iconColor || Colors.text}
-            />
-          </Pressable>
-        )}
+      <View style={styles.streakContainer}>
+            <MaterialIcons name="local-fire-department" size={24} color={Colors.accent} />
+            <Text style={[Texts.bodyBold, {color: Colors.accent}]}>3</Text>
       </View>
     </View>
   );
@@ -69,7 +55,8 @@ export default function Header({
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    flexDirection: "row",
+    gap: Spacing.lg,
+    flexDirection: 'row',
     justifyContent: "space-between",
     alignItems: "center",
   },
@@ -82,9 +69,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-start",
   },
-  containerTimerIcon: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-  },
+  streakContainer: {
+    flexDirection: 'row',
+    gap: Spacing.xs,
+    alignItems: 'center',
+  }
 });

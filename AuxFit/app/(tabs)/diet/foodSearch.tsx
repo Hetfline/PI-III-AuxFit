@@ -48,6 +48,7 @@ export default function foodSearch() {
             <Header
               title={"Café da manhã"}
               subtitle={date}
+              backArrow
               subtitleColor={Colors.text}
             />
 

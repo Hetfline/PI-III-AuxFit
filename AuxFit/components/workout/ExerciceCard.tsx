@@ -1,35 +1,44 @@
 // * Componente de card simples de exercícios. Recebe os props de nome, quantidade total de séries e de repetições.
 
-import { useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
+import { useState } from "react";
 
 interface ExerciceSetsProps {
   name: string;
-  totalSets: number;
-  totalReps: number;
+  focusArea: string;
+  totalSets?: number;
+  totalReps?: number;
+  pressable?: boolean;
+  onPress?: () => void;
 }
-
-// const initialSets = [
-//   { id: 1, set: 1, weight: 40, reps: 12 },
-//   { id: 2, set: 2, weight: 40, reps: 10 },
-//   { id: 3, set: 3, weight: 40, reps: 8 },
-//   { id: 4, set: 4, weight: 40, reps: 6 },
-// ];
 
 export default function ExerciseCard({
   name,
   totalSets,
   totalReps,
+  focusArea,
+  pressable,
+  onPress,
 }: ExerciceSetsProps) {
-  const [isFocus, setIsFocus] = useState(false); // state para lidar com o estado do componente (aberto e fechado)
+  const [isFocus, setIsFocus] = useState(false);
 
-  const handleCardPress = () => {
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    }
     setIsFocus((prev) => !prev);
   };
 
   return (
-    <Pressable style={styles.container} hitSlop={15} onPress={handleCardPress}>
+    <Pressable
+      style={[
+        styles.container,
+        (pressable && isFocus) ? { borderColor: Colors.accent } : null,
+      ]}
+      hitSlop={15}
+      onPress={handlePress}
+    >
       <View style={styles.imgContainer}>
         <Text>IMG</Text>
       </View>
@@ -37,9 +46,14 @@ export default function ExerciseCard({
         <View style={styles.infoContainer}>
           <View>
             <Text style={Texts.bodyBold}>{name}</Text>
-            <Text style={[Texts.subtext, { color: Colors.secondary }]}>
-              {totalSets} Séries x {totalReps} Repetições
+            <Text style={[Texts.subtext, { color: Colors.accent }]}>
+              {focusArea}
             </Text>
+            {totalSets && totalReps && (
+              <Text style={[Texts.subtext, { color: Colors.secondary }]}>
+                {`${totalSets} Séries x ${totalReps} Repetições`}
+              </Text>
+            )}
           </View>
         </View>
       </View>
@@ -58,11 +72,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   infoContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     flex: 1,
-    // backgroundColor: Colors.secondary
   },
   imgContainer: {
     width: 50,

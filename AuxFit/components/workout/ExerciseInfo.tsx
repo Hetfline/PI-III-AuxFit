@@ -5,11 +5,11 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { StyleSheet, View, Text, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
-interface AboutExerciceProps {
+interface ExerciseInfoProps {
   about?: boolean;
 }
 
-export default function AboutExercice({ about }: AboutExerciceProps) {
+export default function ExerciseInfo({ about }: ExerciseInfoProps) {
   const [isFocus, setIsFocus] = useState(false);
 
   const handleArrowPress = () => {

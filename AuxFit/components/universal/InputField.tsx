@@ -119,8 +119,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: Colors.bgLight,
-    paddingLeft: Spacing.sm,
-    paddingRight: Spacing.md,
+    paddingHorizontal: Spacing.md,
     borderRadius: 40,
   },
   specialContainer: {

@@ -112,6 +112,7 @@ export default function mealScreen() {
         >
           <View style={styles.scrollContent}>
             <Header
+            backArrow
               title={mealData.mealName}
               subtitle={date}
               subtitleColor={Colors.text}

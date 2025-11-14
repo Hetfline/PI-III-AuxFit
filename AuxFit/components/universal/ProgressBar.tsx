@@ -30,7 +30,7 @@ export default function ProgressBar({
         >
           {/* Garante que o texto dentro de fill não corte */}
           {progress > 35 && (
-            <Text style={[styles.progressText, { color: progressTextColor }]}>
+            <Text style={[Texts.bodyBold, { color: progressTextColor }]}>
               {progress}
             </Text>
           )}
