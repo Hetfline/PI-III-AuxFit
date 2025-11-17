@@ -3,9 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Background from '@/components/universal/Background';
 import ProfileHeader from '@/components/profile/ProfileHeader';
-import WeightCards from '@/components/profile/WeightCards';
-import Button from '@/components/universal/Button';
-import WeightChart from '@/components/profile/WeightChart';
+import { WeightChart } from '@/components/profile/WeightChart';
 import { Colors, Spacing, Texts } from '@/constants/Styles';
 
 export default function ProfileScreen() {
@@ -26,26 +24,32 @@ export default function ProfileScreen() {
     goalWeight: 95.0,
   };
 
-  // Dados para o gráfico (exemplo)
-  const chartData = {
-    labels: ["Ago", "Set", "Out", "Nov", "Dez", "Jan"], // Meses/Datas
-    datasets: [
-      {
-        data: [
-          98.0,
-          98.5,
-          97.0,
-          97.2,
-          96.0,
-          95.5
-        ]
-      }
-    ]
-  };
-
-  const handleAddWeight = () => {
-    console.log('Adicionar pesagem');
-    // TODO: Abrir modal para adicionar pesagem
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'geral':
+        return (
+          <View style={styles.tabContent}>
+            <WeightChart />
+          </View>
+        );
+      
+      case 'dieta':
+        return (
+          <View style={styles.tabContent}>
+            <Text style={Texts.subtitle}>Conteúdo de Dieta</Text>
+          </View>
+        );
+      
+      case 'treino':
+        return (
+          <View style={styles.tabContent}>
+            <Text style={Texts.subtitle}>Conteúdo de Treino</Text>
+          </View>
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
@@ -58,7 +62,6 @@ export default function ProfileScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-
           {/* Header com foto, nome, streak e barras */}
           <ProfileHeader
             userName={userData.name}
@@ -101,28 +104,8 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* Cards de Peso */}
-          <WeightCards
-            initialWeight={userData.initialWeight}
-            currentWeight={userData.currentWeight}
-            goalWeight={userData.goalWeight}
-          />
-
-        {/* Botão Adicionar Pesagem */}
-        <View style={styles.addWeightButton}>
-          <Button
-            title="Adicionar uma pesagem"
-            icon='add'
-            onPress={handleAddWeight}
-            bgColor={Colors.primary}
-          />
-        </View>
-
-          {/* Gráfico - Placeholder por enquanto */}
-          <View style={styles.chartContainer}>
-            <WeightChart data={chartData} />
-          </View>
-
+          {/* Conteúdo da tab ativa */}
+          {renderTabContent()}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -172,30 +155,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.primary,
   },
-  addWeightButton: {
-    top: -45,
-    paddingHorizontal: Spacing.lg,
-  },
-  chartContainer: {
-    top: -45,
-    paddingHorizontal: Spacing.lg,
-    minHeight: 280,
-  },
-  chartPlaceholder: {
-    flex: 1,
-    backgroundColor: '#2A2F38',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: Spacing.xxl * 2,
-    gap: Spacing.sm,
-  },
-  chartPlaceholderText: {
-    ...Texts.title,
-    fontSize: 20,
-  },
-  chartPlaceholderSubtext: {
-    ...Texts.subtext,
-    fontSize: 14,
+  tabContent: {
+    marginTop: Spacing.md,
+    top: -90,
   },
 });

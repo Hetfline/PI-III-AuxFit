@@ -1,80 +1,259 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions, Text } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { Colors, Spacing, Texts } from '@/constants/Styles';
+import React, { useState, useMemo } from 'react';
+import { View, TouchableOpacity, Text, Alert } from 'react-native';
+import { Colors } from '@/constants/Styles';
+import { WeightChartHeader } from '@/components/profile/WeightCharts/WeightChartHeader';
+import { WeightStats } from '@/components/profile/WeightCharts/WeightStats';
+import { PeriodSelector } from '@/components/profile/WeightCharts/PeriodSelector';
+import { Chart } from '@/components/profile/WeightCharts/Chart';
+import { MetricSelector } from '@/components/profile/WeightCharts/MetricSelector';
+import { WeightHistory } from '@/components/profile/WeightCharts/WeightHistory';
+import { AddMeasurementModal } from '@/components/profile/WeightCharts/AddMeasurementModal';
+import { EditGoalModal } from '@/components/profile/WeightCharts/EditGoalModal';
+import { styles } from '@/components/profile/WeightCharts/styles';
+import {
+    MetricType,
+    PeriodType,
+    MetricsData,
+    DataPoint,
+    Stats,
+    MetricConfig,
+    HistoryEntry,
+} from '@/components/profile/WeightCharts/types';
 
-// Tipagem para os dados que o gráfico espera
-interface ChartData {
-  labels: string[];
-  datasets: {
-    data: number[];
-  }[];
-}
 
-interface WeightChartProps {
-  data: ChartData;
-}
+export const WeightChart: React.FC = () => {
+    const [selectedMetric, setSelectedMetric] = useState<MetricType>('weight');
+    const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('3M');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [goalWeight, setGoalWeight] = useState(70);
+    const [showGoalModal, setShowGoalModal] = useState(false);
 
-export default function WeightChart({ data }: WeightChartProps) {
-  // Se não houver dados, exibe uma mensagem
-  if (!data || data.datasets[0].data.length === 0) {
+    const [metricsData, setMetricsData] = useState<MetricsData>({
+        weight: [
+            { date: '2024-08-15', value: 66.2 },
+            { date: '2024-08-16', value: 66.4 },
+            { date: '2024-08-17', value: 66.3 },
+            { date: '2024-08-18', value: 66.5 },
+        ],
+        waist: [
+            { date: '2024-08-15', value: 82 },
+            { date: '2024-09-01', value: 81.5 },
+            { date: '2024-09-15', value: 81 },
+        ],
+        bf: [
+            { date: '2024-08-15', value: 18.5 },
+            { date: '2024-09-01', value: 18.2 },
+            { date: '2024-09-15', value: 17.8 },
+        ],
+    });
+
+    const getFilteredData = useMemo((): DataPoint[] => {
+        const data = metricsData[selectedMetric];
+        const now = new Date('2024-11-03');
+        let startDate: Date;
+
+        switch (selectedPeriod) {
+            case '1M':
+                startDate = new Date(now);
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            case '3M':
+                startDate = new Date(now);
+                startDate.setMonth(now.getMonth() - 3);
+                break;
+            case '6M':
+                startDate = new Date(now);
+                startDate.setMonth(now.getMonth() - 6);
+                break;
+            case '1A':
+                startDate = new Date(now);
+                startDate.setFullYear(now.getFullYear() - 1);
+                break;
+            case 'ALL':
+                return data;
+            default:
+                startDate = new Date(now);
+                startDate.setMonth(now.getMonth() - 3);
+        }
+
+        return data.filter((item) => new Date(item.date) >= startDate);
+    }, [selectedMetric, selectedPeriod, metricsData]);
+
+
+    const stats = useMemo((): Stats => {
+        if (selectedMetric !== 'weight') {
+            const currentData = metricsData[selectedMetric];
+            const currentValue = currentData[currentData.length - 1]?.value || 0;
+            const firstValue = currentData[0]?.value || 0;
+            const change = currentValue - firstValue;
+
+            return {
+                current: currentValue,
+                change: change,
+                unit: selectedMetric === 'waist' ? 'cm' : '%',
+                goal: selectedMetric === 'waist' ? 75 : 15,
+                remaining:
+                    selectedMetric === 'waist' ? currentValue - 75 : currentValue - 15,
+            };
+        }
+
+        const weightData = metricsData.weight;
+        const currentWeight = weightData[weightData.length - 1]?.value || 0;
+        const initialWeight = weightData[0]?.value || currentWeight;
+        const remaining = goalWeight - currentWeight;
+        const progress =
+            ((currentWeight - initialWeight) / (goalWeight - initialWeight)) * 100;
+
+        return {
+            current: currentWeight,
+            goal: goalWeight,
+            remaining: remaining,
+            progress: Math.min(Math.max(progress, 0), 100),
+            change: currentWeight - initialWeight,
+            unit: 'kg',
+        };
+    }, [selectedMetric, goalWeight, metricsData]);
+
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString);
+        const months = [
+            'Jan',
+            'Fev',
+            'Mar',
+            'Abr',
+            'Mai',
+            'Jun',
+            'Jul',
+            'Ago',
+            'Set',
+            'Out',
+            'Nov',
+            'Dez',
+        ];
+        return `${months[date.getMonth()]} ${date.getDate()}`;
+    };
+
+    const getMetricConfig = (): MetricConfig => {
+        switch (selectedMetric) {
+            case 'weight':
+                return { label: 'Peso Atual', unit: 'kg', color: Colors.primary, goal: goalWeight };
+            case 'bf':
+                return { label: '% Gordura Atual', unit: '%', color: Colors.accent, goal: 15 };
+            default:
+                return { label: 'Valor Atual', unit: '', color: Colors.primary, goal: 0 };
+        }
+    };
+
+    const metricConfig = getMetricConfig();
+
+
+    const historyData = useMemo((): HistoryEntry[] => {
+        const data = [...metricsData[selectedMetric]].reverse().slice(0, 5);
+        return data.map((item, index, arr) => {
+            const prevValue = arr[index + 1]?.value || item.value;
+            const change = item.value - prevValue;
+            return {
+                date: formatDate(item.date),
+                value: item.value,
+                change: change,
+                unit: selectedMetric === 'weight' ? 'kg' : selectedMetric === 'waist' ? 'cm' : '%',
+            };
+        });
+    }, [metricsData, selectedMetric]);
+
+    const handleAddMeasurement = (value: number) => {
+        const newEntry: DataPoint = {
+            date: new Date().toISOString().split('T')[0],
+            value: value,
+        };
+
+        setMetricsData((prev) => ({
+            ...prev,
+            [selectedMetric]: [...prev[selectedMetric], newEntry],
+        }));
+
+        setModalVisible(false);
+        Alert.alert('Sucesso', 'Medição adicionada com sucesso!');
+    };
+
+    const handleUpdateGoal = (value: number) => {
+        setGoalWeight(value);
+        setShowGoalModal(false);
+        Alert.alert('Sucesso', 'Meta atualizada com sucesso!');
+    };
+
     return (
-      <View style={styles.placeholderContainer}>
-        <Text style={styles.placeholderText}>Adicione uma pesagem para ver seu progresso.</Text>
-      </View>
+        <View style={styles.container}>
+            {/* Header with current value */}
+            <WeightChartHeader
+                currentValue={stats.current}
+                lastMeasurementDate={
+                    metricsData[selectedMetric][metricsData[selectedMetric].length - 1]
+                        ?.date
+                }
+                metricConfig={metricConfig}
+                formatDate={formatDate}
+            />
+
+            {/* Statistics */}
+            <WeightStats
+                stats={stats}
+                selectedMetric={selectedMetric}
+                onPressGoal={() => setShowGoalModal(true)}
+            />
+
+            {/* Period selector */}
+            <PeriodSelector
+                selectedPeriod={selectedPeriod}
+                onSelectPeriod={setSelectedPeriod}
+            />
+
+            {/* Chart */}
+            <Chart
+                data={getFilteredData}
+                metricConfig={metricConfig}
+                formatDate={formatDate}
+            />
+
+            {/* Metric selector */}
+            <MetricSelector
+                selectedMetric={selectedMetric}
+                onSelectMetric={setSelectedMetric}
+            />
+
+            {/* History */}
+            <WeightHistory
+                historyData={historyData}
+                selectedMetric={selectedMetric}
+                onPressSeeAll={() => {
+                    // TODO: Navigate to full history screen
+                    Alert.alert('Em breve', 'Tela de histórico completo em desenvolvimento');
+                }}
+            />
+
+            {/* Add measurement button */}
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => setModalVisible(true)}
+            >
+                <Text style={styles.addButtonText}>+ Adicionar Medição</Text>
+            </TouchableOpacity>
+
+            {/* Add measurement modal */}
+            <AddMeasurementModal
+                visible={modalVisible}
+                metricConfig={metricConfig}
+                onClose={() => setModalVisible(false)}
+                onSubmit={handleAddMeasurement}
+            />
+
+            {/* Edit goal modal */}
+            <EditGoalModal
+                visible={showGoalModal}
+                currentGoal={goalWeight}
+                onClose={() => setShowGoalModal(false)}
+                onSubmit={handleUpdateGoal}
+            />
+        </View>
     );
-  }
-  
-  // Configuração de cores e estilo do gráfico para o seu tema escuro
-  const chartConfig = {
-    backgroundColor: '#2A2F38',
-    backgroundGradientFrom: '#2A2F38',
-    backgroundGradientTo: '#2A2F38',
-    decimalPlaces: 1, // Casas decimais para os valores do eixo Y
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // Cor das linhas e legendas
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    style: {
-      borderRadius: 16,
-    },
-    propsForDots: {
-      r: '6',
-      strokeWidth: '2',
-      stroke: Colors.primary, // Cor das bolinhas nos pontos de dados
-    },
-  };
-
-  return (
-    <View style={styles.container}>
-      <LineChart
-        data={data}
-        width={Dimensions.get('window').width - Spacing.lg * 2} // Largura responsiva
-        height={280}
-        yAxisLabel=""
-        yAxisSuffix=" kg"
-        chartConfig={chartConfig}
-        bezier // Deixa as linhas curvadas
-        style={styles.chartStyle}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-  },
-  chartStyle: {
-    borderRadius: 20,
-  },
-  placeholderContainer: {
-    height: 280,
-    backgroundColor: '#2A2F38',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    ...Texts.body,
-    color: '#999999',
-  },
-});
+};
