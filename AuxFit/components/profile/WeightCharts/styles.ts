@@ -20,21 +20,21 @@ export const styles = StyleSheet.create({
   },
   label: {
     ...Texts.subtext,
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'MontserratSemiBold',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   currentWeight: {
     fontFamily: 'MontserratBold',
-    fontSize: 48,
+    fontSize: 36,
     color: Colors.text,
     marginBottom: 4,
   },
   date: {
     ...Texts.subtext,
-    fontSize: 13,
+    fontSize: 12,
   },
 
   // Stats Container
@@ -51,13 +51,13 @@ export const styles = StyleSheet.create({
   },
   statLabel: {
     ...Texts.subtext,
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'MontserratSemiBold',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   statValue: {
     fontFamily: 'MontserratBold',
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.text,
   },
   statDivider: {
@@ -83,7 +83,7 @@ export const styles = StyleSheet.create({
   },
   periodButtonText: {
     ...Texts.subtext,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'MontserratSemiBold',
   },
   periodButtonTextActive: {
@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
   },
   metricText: {
     ...Texts.subtext,
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'MontserratSemiBold',
   },
   metricTextActive: {
@@ -147,10 +147,12 @@ export const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   historyTitle: {
-    ...Texts.subtitle,
+    fontSize: 16,
+    fontFamily: 'MontserratSemiBold',
+    color: Colors.text,
   },
   seeAll: {
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.primary,
     fontFamily: 'MontserratSemiBold',
   },
@@ -164,17 +166,18 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   historyDate: {
-    ...Texts.body,
+    fontSize: 14,
     fontFamily: 'MontserratSemiBold',
+    color: Colors.text,
     marginBottom: 4,
   },
   historyChange: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: 'MontserratRegular',
   },
   historyValue: {
     fontFamily: 'MontserratBold',
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.text,
   },
   emptyHistoryText: {
@@ -213,7 +216,7 @@ export const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: 'MontserratBold',
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.text,
     marginBottom: Spacing.md,
     textAlign: 'center',
@@ -222,7 +225,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.bg,
     borderRadius: 12,
     padding: Spacing.md,
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'MontserratRegular',
     color: Colors.text,
     marginBottom: Spacing.md,
