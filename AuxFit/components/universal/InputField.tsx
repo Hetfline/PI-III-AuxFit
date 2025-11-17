@@ -1,5 +1,3 @@
-// * Componente de campo de input. Permite que sejam passados vários props que definem o ícone, placeholder e tipo do input (senha, texto normal, etc.)
-
 import React, { useState } from "react";
 import {
   View,
@@ -71,13 +69,15 @@ export default function InputField({
           />
         )}
         <TextInput
-          style={[Texts.body, { flexGrow: 1, color: Colors.text }]}
+          // 💡 MUDANÇA AQUI: Removido flexGrow e adicionado flex: 1 para controle total do espaço
+          style={[Texts.body, styles.messageInputText]} 
           placeholder={placeholder}
           placeholderTextColor={Colors.subtext}
           {...rest}
         />
 
-        <Pressable onPress={onIconPress} hitSlop={15}>
+        {/* 💡 Adicionada margem à esquerda (marginLeft) para dar um espaçamento entre o fim do texto e o ícone */}
+        <Pressable onPress={onIconPress} hitSlop={15} style={{marginLeft: Spacing.sm}}>
           <MaterialIcons
             name={"send"}
             size={24}
@@ -132,4 +132,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     borderRadius: 40,
   },
+  messageInputText: {
+    flex: 1,
+    flexShrink: 1,
+    color: Colors.text,
+  }
 });
