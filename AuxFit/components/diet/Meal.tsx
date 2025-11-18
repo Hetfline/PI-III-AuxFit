@@ -103,8 +103,8 @@ export default function Meal({
         <Pressable style={styles.progressContainer} onPress={onPress}>
           <View style={styles.progressText}>
             <Text style={Texts.bodyBold}>{name}</Text>
-            <Text style={Texts.body}>
-              {currentCalories} / {totalFoodCalories}
+            <Text style={[Texts.subtext, {color: Colors.text}]}>
+              {currentCalories} / {totalFoodCalories} kcal
             </Text>
           </View>
 
@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
   progressText: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: 'baseline'
   },
   progressBarContainer: {
     borderRadius: 100,

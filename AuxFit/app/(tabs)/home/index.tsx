@@ -357,6 +357,12 @@ export default function HomeScreen() {
               bgColor="#35e1ffff"
             />
 
+            <Button
+              title="Testar Login"
+              onPress={() => router.push("/(auth)")}
+              bgColor="#35e1ffff"
+            />
+
             <Header
               title="Olá, Virgulino"
               subtitle={date}
@@ -458,7 +464,7 @@ export default function HomeScreen() {
                   />
                 ))}
               </ScrollView>
-              <View style={{ paddingHorizontal: 64 }}>
+              <View style={{ paddingHorizontal: 32 }}>
                 <Button
                   title="Explorar exercícios"
                   bgColor={Colors.accent}

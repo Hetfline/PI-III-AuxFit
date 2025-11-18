@@ -16,37 +16,54 @@ import ExerciseSets from "@/components/workout/ExerciceSets";
 import Button from "@/components/universal/Button";
 import Timer from "@/components/workout/Timer";
 
+interface Exercise {
+  id: number;
+  name: string;
+  totalSets: number;
+  // Outras propriedades do exercício, se houver
+}
+
 interface Workout {
   id: number;
   title: string;
   duration: number;
   numExercises: number;
   focusAreas: string;
-  exercises: any[];
+  exercises: Exercise[];
 }
 
-export default function ongoingWorkoutScreen() {
-  const [timeInSeconds, setTimeInSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(true); // Timer começa rodando
-  // Ex: { 101: 4, 102: 3 } -> (4 sets concluídos para o exercício 101 e 3 para o 102)
-  const [completedSetsCount, setCompletedSetsCount] = useState<
-    Record<number, number>
-  >({});
+interface ExerciseMetrics {
+  completedSets: number;
+  volume: number;
+}
 
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const rawData = params.workoutData;
+// Função utilitária para fazer o parse
+const parseWorkoutData = (rawData: any): Workout | null => {
   const workoutDataString = Array.isArray(rawData) ? rawData[0] : rawData;
-
-  let workout: Workout | null = null;
-
   if (workoutDataString) {
     try {
-      workout = JSON.parse(workoutDataString) as Workout;
+      return JSON.parse(workoutDataString) as Workout;
     } catch (e) {
       console.error("Erro ao fazer parse dos dados do treino:", e);
     }
   }
+  return null;
+};
+
+export default function OngoingWorkoutScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const initialWorkout = parseWorkoutData(params.workoutData);
+
+  const [workout, setWorkout] = useState<Workout | null>(initialWorkout);
+  const [timeInSeconds, setTimeInSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(true);
+
+  // ✅ NOVO ESTADO: Rastreia sets concluídos E volume por exercício
+  const [exerciseMetrics, setExerciseMetrics] = useState<
+    Record<number, ExerciseMetrics>
+  >({});
 
   if (!workout) {
     return (
@@ -56,26 +73,58 @@ export default function ongoingWorkoutScreen() {
     );
   }
 
-  // Atualiza a contagem quando um set é marcado como concluído
-  const handleSetCompletion = (exerciseId: number, count: number) => {
-    // Atualiza a contagem de sets concluídos para aquele exercício específico
-    setCompletedSetsCount((prev) => ({
+  // ✅ ATUALIZAÇÃO DA FUNÇÃO DE CALLBACK: Recebe contagem E volume
+  const handleSetCompletion = (
+    exerciseId: number,
+    count: number,
+    volume: number
+  ) => {
+    setExerciseMetrics((prev) => ({
       ...prev,
-      [exerciseId]: count,
+      [exerciseId]: { completedSets: count, volume: volume },
     }));
   };
 
-  // 💡 CALCULA O TOTAL FINAL: Soma todos os valores do objeto de contagem
-  const totalCompletedSets = Object.values(completedSetsCount).reduce(
-    (sum, count) => sum + count,
+  // ✅ FUNÇÃO PARA ADICIONAR SÉRIE (Aumenta totalSets)
+  const handleSetAdd = (exerciseId: number) => {
+    setWorkout((prevWorkout) => {
+      if (!prevWorkout) return null;
+
+      const updatedExercises = prevWorkout.exercises.map((exercise) => {
+        if (exercise.id === exerciseId) {
+          return {
+            ...exercise,
+            totalSets: exercise.totalSets + 1,
+          };
+        }
+        return exercise;
+      });
+
+      return {
+        ...prevWorkout,
+        exercises: updatedExercises,
+      };
+    });
+  };
+
+  // 💡 CÁLCULO DAS MÉTRICAS GERAIS
+  const totalCompletedSets = Object.values(exerciseMetrics).reduce(
+    (sum, metrics) => sum + metrics.completedSets,
+    0
+  );
+  
+  const totalVolume = Object.values(exerciseMetrics).reduce(
+    (sum, metrics) => sum + metrics.volume,
     0
   );
 
-    const feedbackData = {
-      title: workout.title,
-      focusAreas: workout.focusAreas,
-      workoutTime: (timeInSeconds),
-      totalSetsDone: totalCompletedSets.toString(),
+  const feedbackData = {
+    title: workout.title,
+    focusAreas: workout.focusAreas,
+    workoutTime: timeInSeconds,
+    // ✅ PASSANDO VOLUME E SÉRIES CONCLUÍDAS
+    totalVolume: totalVolume.toString(),
+    totalSetsDone: totalCompletedSets.toString(),
   };
 
   return (
@@ -120,6 +169,7 @@ export default function ongoingWorkoutScreen() {
                     totalSets={exercise.totalSets}
                     exerciseId={exercise.id}
                     onSetCompletion={handleSetCompletion}
+                    onSetAdd={handleSetAdd}
                   />
                 ))}
               </View>
@@ -129,7 +179,7 @@ export default function ongoingWorkoutScreen() {
                   router.push({
                     pathname: "/workout/workoutFeedbackScreen",
                     params: {
-                      feedback: JSON.stringify(feedbackData)
+                      feedback: JSON.stringify(feedbackData),
                     },
                   })
                 }

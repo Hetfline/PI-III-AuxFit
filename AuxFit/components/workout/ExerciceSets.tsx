@@ -7,16 +7,26 @@ import { MaterialIcons } from "@expo/vector-icons";
 import CheckBtn from "../universal/CheckBtn";
 import Button from "../universal/Button";
 
+interface SetItem {
+  id: number;
+  set: number;
+  weight: number;
+  reps: number;
+  isDone: boolean;
+}
+
 interface ExerciceSetsProps {
   name: string;
   totalSets: number;
   exerciseId: number;
-  onSetCompletion: (exerciseId: number, count: number) => void;
+  // ✅ ATUALIZADO: onSetCompletion agora passa o volume total do exercício.
+  onSetCompletion: (exerciseId: number, count: number, volume: number) => void;
+  onSetAdd: (exerciseId: number) => void;
 }
 
 // Nota: O estado inicial DEVE ter o mesmo número de sets que totalSets, ou ser adaptado
 // para renderizar corretamente a proporção inicial.
-const initialSets = [
+const initialSets: SetItem[] = [
   { id: 1, set: 1, weight: 40, reps: 12, isDone: false },
   { id: 2, set: 2, weight: 40, reps: 10, isDone: false },
   { id: 3, set: 3, weight: 40, reps: 8, isDone: false },
@@ -28,18 +38,26 @@ export default function ExerciseSets({
   totalSets,
   exerciseId,
   onSetCompletion,
+  onSetAdd,
 }: ExerciceSetsProps) {
-  // ✅ Corrigido: Usaremos currentSet para armazenar a contagem de sets concluídos
   const [currentSet, setCurrentSet] = useState(0);
-  const [sets, setSets] = useState(initialSets);
+  const [sets, setSets] = useState<SetItem[]>(initialSets);
   const [isFocus, setIsFocus] = useState(false);
 
   useEffect(() => {
-    const completedCount = sets.filter((set) => set.isDone).length;
+    const completedSets = sets.filter((set) => set.isDone);
+    const completedCount = completedSets.length;
+
+    // ✅ CÁLCULO DO VOLUME
+    const totalVolume = completedSets.reduce(
+      (sum, set) => sum + set.weight * set.reps,
+      0
+    );
 
     setCurrentSet(completedCount);
 
-    onSetCompletion(exerciseId, completedCount);
+    // ✅ Chamada com a contagem e o volume
+    onSetCompletion(exerciseId, completedCount, totalVolume);
   }, [sets, exerciseId]);
 
   const handleSetCheckBtnPress = (idDoSet: number) => {
@@ -56,7 +74,7 @@ export default function ExerciseSets({
     const newId = lastExercice ? lastExercice.id + 1 : 1;
     const newSet = lastExercice ? lastExercice.set + 1 : 1;
 
-    const newExercice = {
+    const newExercice: SetItem = {
       id: newId,
       set: newSet,
       weight: lastExercice ? lastExercice.weight : 0,
@@ -65,6 +83,7 @@ export default function ExerciseSets({
     };
 
     setSets((prevSets) => [...prevSets, newExercice]);
+    onSetAdd(exerciseId);
   };
 
   const handleArrowPress = () => {

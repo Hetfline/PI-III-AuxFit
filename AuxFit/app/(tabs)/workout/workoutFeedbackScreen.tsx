@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -6,13 +6,16 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Background from "@/components/universal/Background";
+import Button from "@/components/universal/Button";
 
 export default function workoutFeedbackScreen() {
   const params = useLocalSearchParams();
+  const router = useRouter();
 
   // 1. Normalizar o parâmetro 'feedback' para garantir que seja uma única string (ou undefined)
   const rawFeedbackData = params.feedback;
@@ -32,15 +35,19 @@ export default function workoutFeedbackScreen() {
     }
   }
 
-  // 3. Desestruturar os dados (para uso limpo no JSX)
+  // 3. Desestruturar os dados (incluindo o novo totalVolume)
   const {
     title,
     focusAreas,
     workoutTime: rawWorkoutTime,
     totalSetsDone,
+    // ✅ NOVO DADO
+    totalVolume,
   } = feedback;
 
   const workoutTimeInSeconds = Number(rawWorkoutTime) || 0;
+  const setsDone = Number(totalSetsDone) || 0;
+  const volumeDone = Number(totalVolume) || 0;
 
   const formatTime = (totalSeconds: number): string => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -66,48 +73,68 @@ export default function workoutFeedbackScreen() {
 
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
+          // Garante que o ScrollView ocupe o espaço mínimo e máximo
+          contentContainerStyle={{ flexGrow: 1 }} 
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.container}>
-            <View style={{ alignItems: "center", gap: Spacing.sm }}>
-              <Text style={[Texts.title]}>Parabéns</Text>
-              <View>
+          {/* Este container usa 'space-between' e 'flex: 1' para empurrar o botão para baixo */}
+          <View style={styles.viewParaConsertarEssaMerda}>
+            
+            {/* ⬆️ PARTE DE CIMA (Parabéns e Métricas) ⬆️ */}
+            {/* O container principal usa justifyContent: 'center' para centralizar VERTICALMENTE o conteúdo */}
+            <View style={styles.container}> 
+              <View style={{ alignItems: "center", gap: Spacing.sm }}>
+                <Text style={[Texts.title]}>Parabéns</Text>
+                <View>
+                  <Text style={[Texts.subtitle, { textAlign: "center" }]}>
+                    Treino concluído!
+                  </Text>
+                  <Text style={[Texts.body, { color: Colors.accent }]}>
+                    {focusAreas}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.infoContainer}>
                 <Text style={[Texts.subtitle, { textAlign: "center" }]}>
-                  Treino concluído!
+                  Métricas
                 </Text>
-                <Text style={[Texts.body, { color: Colors.accent }]}>
-                  {focusAreas}
-                </Text>
+                <View style={styles.metricsContainer}>
+                  {/* 🏋️ VOLUME TOTAL */}
+                  <View style={styles.metrics}>
+                    <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
+                      {/* ✅ Exibe o volume total calculado */}
+                      {volumeDone.toLocaleString('pt-BR')} kg
+                    </Text>
+                    <Text style={Texts.body}>Volume</Text>
+                  </View>
+
+                  {/* ⏱️ DURAÇÃO */}
+                  <View style={styles.metrics}>
+                    <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
+                      {formatTime(workoutTimeInSeconds)}
+                    </Text>
+                    <Text style={Texts.body}>Duração</Text>
+                  </View>
+
+                  {/* 🔢 SÉRIES CONCLUÍDAS */}
+                  <View style={styles.metrics}>
+                    <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
+                      {/* ✅ Exibe o número de séries concluídas */}
+                      {setsDone}
+                    </Text>
+                    <Text style={Texts.body}>Séries</Text>
+                  </View>
+                </View>
               </View>
             </View>
 
-            <View style={styles.infoContainer}>
-              <Text style={[Texts.subtitle, { textAlign: "center" }]}>
-                Métricas
-              </Text>
-              <View style={styles.metricsContainer}>
-                <View style={styles.metrics}>
-                  <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
-                    3200 kg
-                  </Text>
-                  <Text style={Texts.body}>Volume</Text>
-                </View>
-
-                <View style={styles.metrics}>
-                  <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
-                    {formatTime(workoutTimeInSeconds)}
-                  </Text>
-                  <Text style={Texts.body}>Duração</Text>
-                </View>
-
-                <View style={styles.metrics}>
-                  <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
-                    20
-                  </Text>
-                  <Text style={Texts.body}>Séries</Text>
-                </View>
-              </View>
+            {/* ⬇️ PARTE DE BAIXO (Botão Concluir) ⬇️ */}
+            <View>
+              <Button 
+                title="Concluir" 
+                onPress={() => router.push('/(tabs)/workout')}
+              />
             </View>
           </View>
         </ScrollView>
@@ -118,11 +145,17 @@ export default function workoutFeedbackScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingVertical: 24,
-    gap: Spacing.md,
+    gap: Spacing.xl,
     alignItems: "center",
     justifyContent: "center",
+    width: '100%'
+  },
+  
+  viewParaConsertarEssaMerda: {
+    justifyContent: "space-between",
+    flex: 1,
+    paddingBottom: Spacing.md,
   },
   infoContainer: {
     borderRadius: 10,
