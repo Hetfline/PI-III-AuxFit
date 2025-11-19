@@ -8,9 +8,12 @@ import ActivityLevel from "../../components/onboarding/ActivityLevel";
 import Button from "../../components/universal/Button";
 import Toast from "../../components/universal/Toast";
 import { Colors, Spacing, Texts } from "../../constants/Styles";
+import { useOnboarding } from "../../context/OnboardingContext";
 
 export default function ActivityScreen() {
   const router = useRouter();
+  const { updateOnboardingData } = useOnboarding();
+
   const currentQuestion = 5;
   const totalQuestions = 6;
 
@@ -26,6 +29,7 @@ export default function ActivityScreen() {
       setShowToast(true);
       return;
     }
+    updateOnboardingData('nivel_atividade', selectedLevel);
     router.push("/onboarding/goalScreen");
   };
 
@@ -33,112 +37,41 @@ export default function ActivityScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Background />
-
-        {/* Toast */}
-        <Toast
-          message="Por favor, selecione uma opção."
-          visible={showToast}
-          onHide={() => setShowToast(false)}
-          type="warning"
-        />
-
-        {/* ProgressBar */}
-        <ProgressBar
-          currentQuestion={currentQuestion}
-          totalQuestions={totalQuestions}
-          onBack={handleBack}
-        />
+        <Toast message="Por favor, selecione uma opção." visible={showToast} onHide={() => setShowToast(false)} type="warning" />
+        <ProgressBar currentQuestion={currentQuestion} totalQuestions={totalQuestions} onBack={handleBack} />
 
         <View style={styles.content}>
-          {/* Logo e Pergunta */}
           <View style={styles.topSection}>
-            <Image
-              source={require("../../assets/icons/logo/logoOnboarding.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <Text style={styles.question}>
-              Qual o seu nível de atividade{"\n"}física?
-            </Text>
+            <Image source={require("../../assets/icons/logo/logoOnboarding.png")} style={styles.logo} resizeMode="contain" />
+            <Text style={styles.question}>Qual o seu nível de atividade{"\n"}física?</Text>
           </View>
-
-          {/* Opções de nível de atividade */}
           <View style={styles.optionsSection}>
-            <ActivityLevel
-              selectedLevel={selectedLevel}
-              onSelect={setSelectedLevel}
-            />
+            <ActivityLevel selectedLevel={selectedLevel} onSelect={setSelectedLevel} />
           </View>
         </View>
 
-        {/* Botões de navegação */}
         <View style={styles.navigationButtons}>
-          {/* Anterior */}
           <View style={styles.backButtonWrapper}>
             <Button title="Anterior" onPress={handleBack} bgColor="#E8E8E8" />
           </View>
-
-          {/* Próxima */}
           <View style={styles.nextButtonWrapper}>
-            <Button
-              title="Próxima"
-              onPress={handleNext}
-              bgColor={Colors.primary}
-            />
+            <Button title="Próxima" onPress={handleNext} bgColor={Colors.primary} />
           </View>
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
+// ... Mesmos styles
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  content: {
-    flex: 1,
-    position: "relative",
-  },
-  topSection: {
-    position: "absolute",
-    top: 50,
-    left: Spacing.lg,
-    right: Spacing.lg,
-    alignItems: "center",
-    gap: 50,
-  },
-  logo: {
-    width: 50,
-    height: 62.7,
-  },
-  question: {
-    ...Texts.title,
-    fontSize: 20,
-    textAlign: "center",
-  },
-  optionsSection: {
-    position: "absolute",
-    top: 280,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.lg,
-  },
-  navigationButtons: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xl,
-  },
-  backButtonWrapper: {
-    flex: 1,
-  },
-  nextButtonWrapper: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1, position: "relative" },
+  content: { flex: 1, position: "relative" },
+  topSection: { position: "absolute", top: 50, left: Spacing.lg, right: Spacing.lg, alignItems: "center", gap: 50 },
+  logo: { width: 50, height: 62.7 },
+  question: { ...Texts.title, fontSize: 20, textAlign: "center" },
+  optionsSection: { position: "absolute", top: 280, left: 0, right: 0, paddingHorizontal: Spacing.lg },
+  navigationButtons: { flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl },
+  backButtonWrapper: { flex: 1 },
+  nextButtonWrapper: { flex: 1 },
 });

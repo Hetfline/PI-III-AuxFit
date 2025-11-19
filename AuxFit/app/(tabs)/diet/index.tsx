@@ -174,11 +174,11 @@ export default function dietScreen() {
                 fats={macros.fats}
               />
 
-              <MacroDonutChart
+              {/* <MacroDonutChart
                 protein={macros.protein}
                 carbs={macros.carbs}
                 fats={macros.fats}
-              />
+              /> */}
             </View>
 
             <View style={styles.macroTableContainer}>

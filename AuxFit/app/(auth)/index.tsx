@@ -7,37 +7,75 @@ import {
   Platform,
   ScrollView,
   Pressable,
-  Image,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import InputField from "@/components/universal/InputField";
 import Button from "@/components/universal/Button";
 import Background from "@/components/universal/Background";
+import { api } from "@/services/api";
+import { authStorage } from "@/services/auth-storage";
 
 export default function LoginScreen() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Estados dos inputs
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (isLogin) {
-      console.log("Login:", { email, password });
-      // Lógica de login aqui
-    } else {
-      console.log("Cadastro:", { name, email, password, confirmPassword });
-      // Lógica de cadastro aqui
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      let response;
+
+      if (isLogin) {
+        // --- LOGIN ---
+        response = await api.login(email, password);
+
+        // 1. Salva o token de forma segura
+        if (response.session?.access_token) {
+          await authStorage.saveToken(response.session.access_token);
+        }
+
+        // 2. Redireciona para Home
+        router.replace("/(tabs)/home");
+      } else {
+        // --- CADASTRO ---
+        if (password !== confirmPassword) {
+          Alert.alert("Erro", "As senhas não conferem.");
+          setLoading(false);
+          return;
+        }
+
+        const payload = { email, password, nome: name };
+
+        // O backend modificado já retorna o 'session' no cadastro também!
+        response = await api.register(payload);
+
+        // 1. Salva o token de forma segura (Auto-login)
+        if (response.session?.access_token) {
+          await authStorage.saveToken(response.session.access_token);
+        }
+
+        Alert.alert("Sucesso", "Conta criada! Vamos finalizar seu perfil.");
+
+        // 2. Redireciona para o Onboarding
+        router.replace("/onboarding");
+      }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro desconhecido";
+      Alert.alert("Erro", msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    // Limpa os campos ao trocar de modo
     setName("");
     setEmail("");
     setPassword("");
@@ -45,34 +83,20 @@ export default function LoginScreen() {
   };
 
   return (
-    
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={"padding"} style={{ flex: 1 }}
     >
-      <Background/>
+      <Background />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("@/assets/images/logoAux.svg")} // Ajuste o caminho conforme necessário
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Título */}
         <Text style={[Texts.title, styles.title]}>
           {isLogin ? "LOGIN" : "CADASTRO"}
         </Text>
 
-        {/* Formulário */}
         <View style={styles.formContainer}>
-          {/* Campo Nome (apenas no cadastro) */}
           {!isLogin && (
             <InputField
               icon="person"
@@ -83,7 +107,6 @@ export default function LoginScreen() {
             />
           )}
 
-          {/* Campo Email */}
           <InputField
             icon="email"
             placeholder="Email"
@@ -93,7 +116,6 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
 
-          {/* Campo Senha */}
           <InputField
             icon="lock"
             placeholder="Senha"
@@ -103,7 +125,6 @@ export default function LoginScreen() {
             autoCapitalize="none"
           />
 
-          {/* Campo Confirmar Senha (apenas no cadastro) */}
           {!isLogin && (
             <InputField
               icon="lock"
@@ -116,48 +137,38 @@ export default function LoginScreen() {
           )}
         </View>
 
-        {/* Botão Principal */}
         <View style={styles.buttonContainer}>
-          <Button
-            title={isLogin ? "Entrar" : "Cadastrar"}
-            onPress={handleSubmit}
-            bgColor={Colors.primary}
-            color={Colors.bg}
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.primary} />
+          ) : (
+            <Button
+              title={isLogin ? "Entrar" : "Cadastrar"}
+              onPress={handleSubmit}
+              bgColor={Colors.primary}
+              color={Colors.bg}
+            />
+          )}
         </View>
 
-        {/* Links de navegação */}
         <View style={styles.linksContainer}>
           {isLogin ? (
-            <>
-              <View style={styles.linkRow}>
-                <Text style={[Texts.body, { color: Colors.text }]}>
-                  Não tem uma conta?{" "}
+            <View style={styles.linkRow}>
+              <Text style={[Texts.body, { color: Colors.text }]}>
+                Não tem uma conta?{" "}
+              </Text>
+              <Pressable onPress={toggleMode}>
+                <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
+                  Cadastre-se
                 </Text>
-                <Pressable onPress={toggleMode}>
-                  <Text
-                    style={[
-                      Texts.bodyBold,
-                      { color: Colors.primary },
-                    ]}
-                  >
-                    Cadastre-se
-                  </Text>
-                </Pressable>
-              </View>
-            </>
+              </Pressable>
+            </View>
           ) : (
             <View style={styles.linkRow}>
               <Text style={[Texts.body, { color: Colors.text }]}>
                 Já tem uma conta?{" "}
               </Text>
               <Pressable onPress={toggleMode}>
-                <Text
-                  style={[
-                    Texts.bodyBold,
-                    { color: Colors.primary },
-                  ]}
-                >
+                <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
                   Conecte-se
                 </Text>
               </Pressable>
@@ -199,6 +210,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: Spacing.md,
+    height: 50,
+    justifyContent: "center",
   },
   linksContainer: {
     gap: Spacing.sm,

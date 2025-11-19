@@ -8,13 +8,17 @@ import GenderQuestion from "../../components/onboarding/GenderPicker";
 import Button from "../../components/universal/Button";
 import Toast from "../../components/universal/Toast";
 import { Colors, Spacing, Texts } from "../../constants/Styles";
+import { useOnboarding } from "../../context/OnboardingContext";
 
 export default function GenderScreen() {
   const router = useRouter();
-
+  const { updateOnboardingData } = useOnboarding();
+  
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
-  const totalQuestions = 6;
+  
+  // Definição da variável que faltava
+  const totalQuestions = 6; 
 
   const handleBack = () => {
     router.back();
@@ -26,6 +30,13 @@ export default function GenderScreen() {
       return;
     }
 
+    // LÓGICA DE MAPEAMENTO: UI -> Backend
+    let genderForBackend = 'Outro';
+    if (selectedGender === 'masculino') genderForBackend = 'M';
+    if (selectedGender === 'feminino') genderForBackend = 'F';
+
+    updateOnboardingData('sexo', genderForBackend); 
+
     router.push("/onboarding/ageScreen");
   };
 
@@ -34,7 +45,6 @@ export default function GenderScreen() {
       <View style={styles.container}>
         <Background />
 
-        {/* Toast */}
         <Toast
           message="Por favor, selecione uma opção."
           visible={showToast}
@@ -85,52 +95,14 @@ export default function GenderScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  content: {
-    flex: 1,
-    position: "relative",
-  },
-  topSection: {
-    position: "absolute",
-    top: 50,
-    left: Spacing.lg,
-    right: Spacing.lg,
-    alignItems: "center",
-    gap: 50,
-  },
-  logo: {
-    width: 50,
-    height: 62.7,
-  },
-  question: {
-    ...Texts.title,
-    fontSize: 20,
-    textAlign: "center",
-  },
-  cardsSection: {
-    position: "absolute",
-    top: 317,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.lg,
-  },
-  navigationButtons: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xl,
-  },
-  backButtonWrapper: {
-    flex: 1,
-  },
-  nextButtonWrapper: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1, position: "relative" },
+  content: { flex: 1, position: "relative" },
+  topSection: { position: "absolute", top: 50, left: Spacing.lg, right: Spacing.lg, alignItems: "center", gap: 50 },
+  logo: { width: 50, height: 62.7 },
+  question: { ...Texts.title, fontSize: 20, textAlign: "center" },
+  cardsSection: { position: "absolute", top: 317, left: 0, right: 0, paddingHorizontal: Spacing.lg },
+  navigationButtons: { flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl },
+  backButtonWrapper: { flex: 1 },
+  nextButtonWrapper: { flex: 1 },
 });

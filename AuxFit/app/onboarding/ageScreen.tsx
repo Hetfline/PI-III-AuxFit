@@ -4,16 +4,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Background from "../../components/universal/Background";
 import ProgressBar from "../../components/onboarding/OnboardingProgress";
-import AgePicker from "../../components/onboarding/AgePicker";
+import BirthdatePicker from "../../components/onboarding/AgePicker"; // Ajustei o nome do import se necessário
 import Button from "../../components/universal/Button";
 import { Colors, Spacing, Texts } from "../../constants/Styles";
+import { useOnboarding } from "../../context/OnboardingContext";
 
 export default function AgeQuestion() {
   const router = useRouter();
+  const { updateOnboardingData } = useOnboarding();
+
   const currentQuestion = 2;
   const totalQuestions = 6;
 
-  // Estados para data de nascimento
   const [selectedDay, setSelectedDay] = useState(1);
   const [selectedMonth, setSelectedMonth] = useState(7);
   const [selectedYear, setSelectedYear] = useState(2000);
@@ -23,6 +25,13 @@ export default function AgeQuestion() {
   };
 
   const handleNext = () => {
+    // Formatar para YYYY-MM-DD
+    const year = selectedYear;
+    const month = String(selectedMonth).padStart(2, '0');
+    const day = String(selectedDay).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+    updateOnboardingData('data_nascimento', formattedDate);
     router.push("/onboarding/heightScreen");
   };
 
@@ -30,28 +39,16 @@ export default function AgeQuestion() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Background />
-
-        {/* ProgressBar */}
-        <ProgressBar
-          currentQuestion={currentQuestion}
-          totalQuestions={totalQuestions}
-          onBack={handleBack}
-        />
+        <ProgressBar currentQuestion={currentQuestion} totalQuestions={totalQuestions} onBack={handleBack} />
 
         <View style={styles.content}>
-          {/* Logo e Pergunta */}
           <View style={styles.topSection}>
-            <Image
-              source={require("../../assets/icons/logo/logoOnboarding.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <Text style={styles.question}>Qual a sua idade?</Text>
+            <Image source={require("../../assets/icons/logo/logoOnboarding.png")} style={styles.logo} resizeMode="contain" />
+            <Text style={styles.question}>Qual a sua data de nascimento?</Text>
           </View>
 
-          {/* Picker de data */}
           <View style={styles.pickerSection}>
-            <AgePicker
+            <BirthdatePicker
               selectedDay={selectedDay}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
@@ -62,20 +59,12 @@ export default function AgeQuestion() {
           </View>
         </View>
 
-        {/* Botões de navegação */}
         <View style={styles.navigationButtons}>
-          {/* Anterior */}
           <View style={styles.backButtonWrapper}>
             <Button title="Anterior" onPress={handleBack} bgColor="#E8E8E8" />
           </View>
-
-          {/* Próxima */}
           <View style={styles.nextButtonWrapper}>
-            <Button
-              title="Próxima"
-              onPress={handleNext}
-              bgColor={Colors.primary}
-            />
+            <Button title="Próxima" onPress={handleNext} bgColor={Colors.primary} />
           </View>
         </View>
       </View>
@@ -84,52 +73,14 @@ export default function AgeQuestion() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  container: {
-    flex: 1,
-    position: "relative",
-  },
-  content: {
-    flex: 1,
-    position: "relative",
-  },
-  topSection: {
-    position: "absolute",
-    top: 50,
-    left: Spacing.lg,
-    right: Spacing.lg,
-    alignItems: "center",
-    gap: 50,
-  },
-  logo: {
-    width: 50,
-    height: 62.7,
-  },
-  question: {
-    ...Texts.title,
-    fontSize: 20,
-    textAlign: "center",
-  },
-  pickerSection: {
-    position: "absolute",
-    top: 316,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.lg,
-  },
-  navigationButtons: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xl,
-  },
-  backButtonWrapper: {
-    flex: 1,
-  },
-  nextButtonWrapper: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1, position: "relative" },
+  content: { flex: 1, position: "relative" },
+  topSection: { position: "absolute", top: 50, left: Spacing.lg, right: Spacing.lg, alignItems: "center", gap: 50 },
+  logo: { width: 50, height: 62.7 },
+  question: { ...Texts.title, fontSize: 20, textAlign: "center" },
+  pickerSection: { position: "absolute", top: 316, left: 0, right: 0, paddingHorizontal: Spacing.lg },
+  navigationButtons: { flexDirection: "row", gap: Spacing.md, paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl },
+  backButtonWrapper: { flex: 1 },
+  nextButtonWrapper: { flex: 1 },
 });
