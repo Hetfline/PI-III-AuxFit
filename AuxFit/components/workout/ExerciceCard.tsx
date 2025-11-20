@@ -1,12 +1,11 @@
-// * Componente de card simples de exercícios. Recebe os props de nome, quantidade total de séries e de repetições.
-
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { useState } from "react";
 
 interface ExerciceSetsProps {
   name: string;
   focusArea: string;
+  imageUrl?: string | null; // Nova prop opcional
   totalSets?: number;
   totalReps?: number;
   pressable?: boolean;
@@ -18,6 +17,7 @@ export default function ExerciseCard({
   totalSets,
   totalReps,
   focusArea,
+  imageUrl,
   pressable,
   onPress,
 }: ExerciceSetsProps) {
@@ -27,7 +27,11 @@ export default function ExerciseCard({
     if (onPress) {
       onPress();
     }
-    setIsFocus((prev) => !prev);
+    // Se for apenas para navegação, talvez não precise do setIsFocus,
+    // mas mantive para preservar sua lógica original.
+    if (pressable) {
+      setIsFocus((prev) => !prev);
+    }
   };
 
   return (
@@ -40,12 +44,20 @@ export default function ExerciseCard({
       onPress={handlePress}
     >
       <View style={styles.imgContainer}>
-        <Text>IMG</Text>
+        {imageUrl ? (
+          <Image 
+            source={{ uri: imageUrl }} 
+            style={styles.image} 
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.placeholderText}>IMG</Text>
+        )}
       </View>
       <View style={{ flex: 1 }}>
         <View style={styles.infoContainer}>
           <View>
-            <Text style={Texts.bodyBold}>{name}</Text>
+            <Text style={Texts.bodyBold} numberOfLines={2}>{name}</Text>
             <Text style={[Texts.subtext, { color: Colors.accent }]}>
               {focusArea}
             </Text>
@@ -70,6 +82,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     gap: Spacing.md,
     flexDirection: "row",
+    alignItems: 'center'
   },
   infoContainer: {
     alignItems: "flex-start",
@@ -78,9 +91,19 @@ const styles = StyleSheet.create({
   imgContainer: {
     width: 50,
     height: 50,
-    backgroundColor: Colors.text,
+    backgroundColor: Colors.text, // Cor de fundo se não houver imagem
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 5,
+    overflow: 'hidden', // Importante para a imagem respeitar a borda
   },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  placeholderText: {
+    color: Colors.bg,
+    fontWeight: 'bold',
+    fontSize: 10
+  }
 });

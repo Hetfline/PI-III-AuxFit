@@ -11,7 +11,8 @@ interface HeaderProps {
   title: string;
   subtitle?: string;
   subtitleColor?: string;
-  backArrow?: boolean,
+  backArrow?: boolean;
+  streak?: boolean;
   onIconPress?: () => void;
 }
 
@@ -19,7 +20,8 @@ export default function Header({
   title,
   subtitle,
   subtitleColor,
-  backArrow
+  backArrow,
+  streak,
 }: HeaderProps) {
   const router = useRouter();
 
@@ -28,26 +30,33 @@ export default function Header({
       <View style={styles.containerArrowTitles}>
         {backArrow && (
           <MaterialIcons
-          name="arrow-back"
-          size={32}
-          color={Colors.primary}
-          style={{ marginRight: Spacing.md }}
-          onPress={() => router.back()}
-        />
+            name="arrow-back"
+            size={32}
+            color={Colors.primary}
+            style={{ marginRight: Spacing.md }}
+            onPress={() => router.back()}
+          />
         )}
         <View style={styles.containerTitles}>
           <Text style={Texts.subtitle}>{title}</Text>
           {subtitle && (
-            <Text style={[Texts.subtext, { color: subtitleColor }]}>
+            <Text style={[Texts.subtext, { color: subtitleColor, flexShrink: 1,
+        flexWrap: "wrap" }]}>
               {subtitle}
             </Text>
           )}
         </View>
       </View>
-      <View style={styles.streakContainer}>
-            <MaterialIcons name="local-fire-department" size={24} color={Colors.accent} />
-            <Text style={[Texts.bodyBold, {color: Colors.accent}]}>3</Text>
-      </View>
+      {streak && (
+        <View style={styles.streakContainer}>
+          <MaterialIcons
+            name="local-fire-department"
+            size={24}
+            color={Colors.accent}
+          />
+          <Text style={[Texts.bodyBold, { color: Colors.accent }]}>3</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -56,7 +65,7 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     gap: Spacing.lg,
-    flexDirection: 'row',
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
@@ -68,10 +77,11 @@ const styles = StyleSheet.create({
   containerTitles: {
     justifyContent: "center",
     alignItems: "flex-start",
+    maxWidth: "90%",
   },
   streakContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.xs,
-    alignItems: 'center',
-  }
+    alignItems: "center",
+  },
 });

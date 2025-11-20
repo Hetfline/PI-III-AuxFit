@@ -1,6 +1,3 @@
-// * Componente de notificação toast. Permite que sejam passados vários props que definem a mensagem, a visibilidade, a função para esconder e o tipo de notificação ("error", "success" e "warning").
-// TODO PRECISAR CRIAR A FUNCIONALIDADE DE EDITAR O TREINO!!!
-
 import React from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { View, Text, Pressable, StyleSheet } from "react-native";
@@ -13,6 +10,7 @@ interface WorkoutCardProps {
   numExercises: number;
   editable?: boolean;
   onPress: () => void;
+  onEdit?: () => void; // Nova prop para ação de editar
 }
 
 export default function WorkoutCard({
@@ -22,19 +20,20 @@ export default function WorkoutCard({
   numExercises,
   editable,
   onPress,
+  onEdit,
 }: WorkoutCardProps) {
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.topContent}>
-        <View>
+        <View style={{ flex: 1 }}> 
           <Text style={Texts.bodyBold}>{title}</Text>
-          <Text style={[Texts.subtext, { color: Colors.accent }]}>
+          <Text style={[Texts.subtext, { color: Colors.accent }]} numberOfLines={1}>
             {focusAreas}
           </Text>
         </View>
 
         {editable && (
-          <Pressable>
+          <Pressable onPress={onEdit} hitSlop={10} style={{ paddingLeft: 10 }}>
             <MaterialCommunityIcons
               name="pencil"
               size={24}
@@ -78,8 +77,8 @@ const styles = StyleSheet.create({
   topContent: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     flex: 1,
-    // backgroundColor: Colors.secondary
   },
   infoContainer: {
     flexDirection: "row",
@@ -88,5 +87,6 @@ const styles = StyleSheet.create({
   info: {
     flexDirection: "row",
     gap: Spacing.xs,
+    alignItems: 'center'
   },
 });

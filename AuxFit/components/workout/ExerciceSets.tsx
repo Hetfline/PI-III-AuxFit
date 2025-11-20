@@ -1,7 +1,5 @@
-// * Componente de card de exercícios com séries e repetições. Recebe o prop de nome e quantidade de séries como prop.
-
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
 import CheckBtn from "../universal/CheckBtn";
@@ -19,46 +17,56 @@ interface ExerciceSetsProps {
   name: string;
   totalSets: number;
   exerciseId: number;
-  // ✅ ATUALIZADO: onSetCompletion agora passa o volume total do exercício.
+  targetReps: number;
+  targetWeight: number;
+  imageUrl?: string;
+  
   onSetCompletion: (exerciseId: number, count: number, volume: number) => void;
   onSetAdd: (exerciseId: number) => void;
 }
-
-// Nota: O estado inicial DEVE ter o mesmo número de sets que totalSets, ou ser adaptado
-// para renderizar corretamente a proporção inicial.
-const initialSets: SetItem[] = [
-  { id: 1, set: 1, weight: 40, reps: 12, isDone: false },
-  { id: 2, set: 2, weight: 40, reps: 10, isDone: false },
-  { id: 3, set: 3, weight: 40, reps: 8, isDone: false },
-  { id: 4, set: 4, weight: 40, reps: 6, isDone: false },
-];
 
 export default function ExerciseSets({
   name,
   totalSets,
   exerciseId,
+  targetReps,
+  targetWeight,
+  imageUrl,
   onSetCompletion,
   onSetAdd,
 }: ExerciceSetsProps) {
+  
+  const [sets, setSets] = useState<SetItem[]>(() => {
+    const safeTotalSets = totalSets || 0;
+    return Array.from({ length: safeTotalSets }, (_, i) => ({
+      id: i + 1,
+      set: i + 1,
+      weight: targetWeight || 0,
+      reps: targetReps || 0,
+      isDone: false,
+    }));
+  });
+
   const [currentSet, setCurrentSet] = useState(0);
-  const [sets, setSets] = useState<SetItem[]>(initialSets);
-  const [isFocus, setIsFocus] = useState(false);
+  const [isFocus, setIsFocus] = useState(true);
 
   useEffect(() => {
     const completedSets = sets.filter((set) => set.isDone);
     const completedCount = completedSets.length;
 
-    // ✅ CÁLCULO DO VOLUME
     const totalVolume = completedSets.reduce(
       (sum, set) => sum + set.weight * set.reps,
       0
     );
 
     setCurrentSet(completedCount);
-
-    // ✅ Chamada com a contagem e o volume
-    onSetCompletion(exerciseId, completedCount, totalVolume);
-  }, [sets, exerciseId]);
+    
+    // --- CORREÇÃO DE SEGURANÇA ---
+    // Verifica se a função existe antes de chamar para evitar o crash
+    if (onSetCompletion) {
+      onSetCompletion(exerciseId, completedCount, totalVolume);
+    }
+  }, [sets, exerciseId, onSetCompletion]); 
 
   const handleSetCheckBtnPress = (idDoSet: number) => {
     setSets((prevSets) =>
@@ -70,20 +78,22 @@ export default function ExerciseSets({
 
   const handleBtnPress = () => {
     const lastExercice = sets[sets.length - 1];
-
     const newId = lastExercice ? lastExercice.id + 1 : 1;
     const newSet = lastExercice ? lastExercice.set + 1 : 1;
 
     const newExercice: SetItem = {
       id: newId,
       set: newSet,
-      weight: lastExercice ? lastExercice.weight : 0,
-      reps: lastExercice ? lastExercice.reps : 0,
+      weight: lastExercice ? lastExercice.weight : targetWeight,
+      reps: lastExercice ? lastExercice.reps : targetReps,
       isDone: false,
     };
 
     setSets((prevSets) => [...prevSets, newExercice]);
-    onSetAdd(exerciseId);
+    
+    if (onSetAdd) {
+      onSetAdd(exerciseId);
+    }
   };
 
   const handleArrowPress = () => {
@@ -97,18 +107,24 @@ export default function ExerciseSets({
         hitSlop={15}
         onPress={handleArrowPress}
       >
-        {/* ... Conteúdo da Imagem (IMG) ... */}
         <View style={styles.imgContainer}>
-          <Text>IMG</Text>
+          {imageUrl ? (
+            <Image 
+              source={{ uri: imageUrl }} 
+              style={styles.image} 
+              resizeMode="cover" 
+            />
+          ) : (
+            <Text style={{ fontSize: 10, color: Colors.bg, fontWeight: 'bold' }}>IMG</Text>
+          )}
         </View>
 
         <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
           <View style={styles.infoContainer}>
             <View>
               <Text style={Texts.bodyBold}>{name}</Text>
-              {/* ✅ Exibe a contagem ATUALIZADA de sets concluídos */}
               <Text style={[Texts.subtext, { color: Colors.secondary }]}>
-                {currentSet} / {totalSets} Série(s)
+                {currentSet} / {sets.length} Série(s)
               </Text>
             </View>
           </View>
@@ -121,12 +137,11 @@ export default function ExerciseSets({
         </View>
       </Pressable>
 
-      {/* Conteúdo Expansível (Séries) */}
       {isFocus &&
         sets.map((item) => (
           <View key={item.id}>
             <View style={styles.set}>
-              <Text style={Texts.bodyBold}>{item.set}</Text>
+              <Text style={[Texts.bodyBold, { width: 20, textAlign: 'center' }]}>{item.set}</Text>
 
               <View style={styles.setInfoContainer}>
                 <View style={styles.setInfo}>
@@ -139,7 +154,7 @@ export default function ExerciseSets({
                 <View style={styles.setInfo}>
                   <Text style={Texts.bodyBold}>{item.reps}</Text>
                 </View>
-                <Text style={Texts.body}>Repetições</Text>
+                <Text style={Texts.body}>Reps</Text>
               </View>
 
               <CheckBtn
@@ -151,6 +166,7 @@ export default function ExerciseSets({
             </View>
           </View>
         ))}
+        
       {isFocus && (
         <View style={{ marginTop: Spacing.md }}>
           <Button
@@ -189,6 +205,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 5,
+    overflow: 'hidden'
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   infoContainer: {
     flexDirection: "row",
@@ -204,6 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bgLight,
     borderRadius: 10,
     padding: Spacing.sm,
+    marginTop: Spacing.sm
   },
   setInfoContainer: {
     flexDirection: "row",
@@ -215,7 +237,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
     paddingHorizontal: Spacing.xs,
     borderRadius: 5,
-    width: 40,
+    minWidth: 40,
+    height: 30,
     justifyContent: "center",
     alignItems: "center",
   },

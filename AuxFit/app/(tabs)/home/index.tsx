@@ -367,6 +367,7 @@ export default function HomeScreen() {
               title="Olá, Virgulino"
               subtitle={date}
               subtitleColor={Colors.text}
+              streak
             />
 
             {/* Progresso do dia */}

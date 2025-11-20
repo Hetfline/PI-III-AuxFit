@@ -10,7 +10,7 @@ interface FilterModalProps {
   isFilterVisible: boolean;
   onClose: () => void;
   filterTitle: string;
-  children: ReactNode; // "ReactNode" é o tipo para qualquer coisa que o React pode renderizar. Definimos o prop "children" com esse tipo pois o modal vai envolver outros elementos React Native
+  children: ReactNode; // * "ReactNode" é o tipo para qualquer coisa que o React pode renderizar. Definimos o prop "children" com esse tipo pois o modal vai envolver outros elementos React Native
 }
 
 export default function FilterModal({
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bgMedium,
     padding: Spacing.md,
     borderRadius: 20,
+    flexDirection: 'column'
   },
   modalTop: {
     flexDirection: "row",

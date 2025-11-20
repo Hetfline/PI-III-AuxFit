@@ -69,14 +69,12 @@ export default function InputField({
           />
         )}
         <TextInput
-          // 💡 MUDANÇA AQUI: Removido flexGrow e adicionado flex: 1 para controle total do espaço
           style={[Texts.body, styles.messageInputText]} 
           placeholder={placeholder}
           placeholderTextColor={Colors.subtext}
           {...rest}
         />
 
-        {/* 💡 Adicionada margem à esquerda (marginLeft) para dar um espaçamento entre o fim do texto e o ícone */}
         <Pressable onPress={onIconPress} hitSlop={15} style={{marginLeft: Spacing.sm}}>
           <MaterialIcons
             name={"send"}

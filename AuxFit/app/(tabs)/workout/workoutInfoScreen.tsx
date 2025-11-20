@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
   ScrollView,
   KeyboardAvoidingView,
   StyleSheet,
+  ActivityIndicator,
+  Alert
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,48 +16,143 @@ import Header from "@/components/universal/Header";
 import AddBtn from "@/components/universal/AddBtn";
 import ExerciseCard from "@/components/workout/ExerciceCard";
 import Button from "@/components/universal/Button";
+import { api } from "@/services/api";
+import Background from "@/components/universal/Background";
+import EditWorkoutItemModal from "@/components/workout/EditWorkoutItemModal";
 
 interface Workout {
   id: number;
-  title: string;
-  duration: number;
-  numExercises: number;
-  focusAreas: string;
-  exercises: any[];
+  nome: string;
+  duracao: number;
+  ativo: boolean;
+  areas_foco: string[];
+}
+
+interface WorkoutItem {
+  id: number;
+  treino_fk: number;
+  exercicio_fk: number;
+  series: number;
+  repeticoes: number;
+  carga: number;
+  descanso_segundos: number;
+  exercicios: { 
+    id: number;
+    nome_exercicio: string;
+    grupo_muscular_geral: string;
+    imagem_url?: string;
+  };
 }
 
 export default function workoutInfoScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  
+  const [workout, setWorkout] = useState<Workout | null>(null);
+  const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 1. Pega a string do parâmetro (pode ser string ou string[])
-  const rawData = params.workoutData;
+  // Estados para Edição
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [selectedItemToEdit, setSelectedItemToEdit] = useState<WorkoutItem | null>(null);
 
-  // 2. Normaliza para string única (lida com o erro de tipagem)
-  const workoutDataString = Array.isArray(rawData) ? rawData[0] : rawData;
+  useEffect(() => {
+    const rawData = params.workoutData;
+    const workoutDataString = Array.isArray(rawData) ? rawData[0] : rawData;
 
-  let workout: Workout | null = null;
-
-  // 3. Desserializa o JSON
-  if (workoutDataString) {
-    try {
-      // ✅ Converte a string JSON de volta para o objeto de Treino
-      workout = JSON.parse(workoutDataString) as Workout;
-    } catch (e) {
-      console.error("Erro ao fazer parse dos dados do treino:", e);
-      // Pode ser útil redirecionar o usuário se os dados forem inválidos
+    if (workoutDataString) {
+      try {
+        const parsed = JSON.parse(workoutDataString);
+        setWorkout(parsed);
+      } catch (e) {
+        console.error("Erro parse workout:", e);
+      }
     }
-  }
+  }, [params.workoutData]);
 
-  // --- Lógica de Renderização ---
+  useFocusEffect(
+    useCallback(() => {
+      if (workout) {
+        fetchExercises();
+      }
+    }, [workout?.id])
+  );
+
+  const fetchExercises = async () => {
+    if (!workout) return;
+    try {
+        setLoading(true);
+        const data = await api.getWorkoutExercises(workout.id);
+        setWorkoutItems(data);
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const handleAddExercise = () => {
+    if (!workout) return;
+    router.push({
+        pathname: "/(tabs)/workout/searchExerciseScreen",
+        params: { workoutId: workout.id }
+    });
+  };
+
+  // --- Lógica de Edição ---
+  const handleItemPress = (item: WorkoutItem) => {
+    setSelectedItemToEdit(item);
+    setIsEditModalVisible(true);
+  };
+
+  const handleUpdateItem = async (id: number, data: any) => {
+    try {
+        await api.updateWorkoutItem(id, {
+            series: data.series,
+            repeticoes: data.repeticoes,
+            carga: data.carga,
+            descanso_segundos: data.descanso
+        });
+        Alert.alert("Sucesso", "Exercício atualizado!");
+        fetchExercises(); // Recarrega lista
+    } catch (error) {
+        Alert.alert("Erro", "Falha ao atualizar.");
+    }
+  };
+
+  const handleDeleteItem = async (id: number) => {
+    try {
+        await api.deleteWorkoutItem(id);
+        fetchExercises(); // Recarrega lista
+    } catch (error) {
+        Alert.alert("Erro", "Falha ao remover.");
+    }
+  };
+
+  // --- Navegação para Iniciar Treino ---
+  const handleStartWorkout = () => {
+    if (!workout) return;
+    
+    // Navega para a tela de execução passando os dados do treino
+    router.push({
+      pathname: "/workout/ongoingWorkoutScreen",
+      params: {
+        workoutData: JSON.stringify(workout),
+      },
+    });
+  };
 
   if (!workout) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Carregando ou treino não encontrado...</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
+
+  const focusAreasString = workout.areas_foco && workout.areas_foco.length > 0 
+    ? workout.areas_foco.join(", ") 
+    : "Geral";
 
   return (
     <SafeAreaView
@@ -66,6 +162,7 @@ export default function workoutInfoScreen() {
         paddingHorizontal: Spacing.md,
       }}
     >
+      <Background/>
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -73,98 +170,80 @@ export default function workoutInfoScreen() {
         >
           <View style={styles.container}>
             <Header
-            backArrow
-              title={workout.title}
-              subtitle={workout.focusAreas}
+              backArrow
+              title={workout.nome} 
+              subtitle={focusAreasString}
               subtitleColor={Colors.accent}
             />
 
             <View style={{ gap: Spacing.sm }}>
               <View style={styles.workoutOverview}>
-                {/* Tempo de treino */}
-
-                <View
-                  style={{
-                    gap: Spacing.sm,
-                    alignItems: "center",
-                  }}
-                >
-                  <MaterialIcons
-                    name="alarm"
-                    size={20}
-                    color={Colors.warning}
-                  />
-                  <Text style={Texts.bodyBold}>{workout.duration} minutos</Text>
+                <View style={styles.infoItem}>
+                  <MaterialIcons name="alarm" size={20} color={Colors.warning} />
+                  <Text style={Texts.bodyBold}>{workout.duracao} minutos</Text>
                 </View>
-
-                {/* Tempo de treino */}
-
-                <View
-                  style={{
-                    gap: Spacing.sm,
-                    alignItems: "center",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="dumbbell"
-                    size={20}
-                    color={Colors.secondary}
-                  />
+                <View style={styles.infoItem}>
+                  <MaterialCommunityIcons name="dumbbell" size={20} color={Colors.secondary} />
                   <Text style={Texts.bodyBold}>
-                    {workout.numExercises} exercícios
+                    {workoutItems.length} exercícios
                   </Text>
                 </View>
               </View>
+              
               <Button
                 title="Iniciar treino"
-                onPress={() =>
-                  router.push({
-                    pathname: "/workout/ongoingWorkoutScreen",
-                    params: {
-                      workoutData: workoutDataString,
-                    },
-                  })
-                }
+                onPress={handleStartWorkout} // <--- AQUI ESTÁ A MUDANÇA
               />
             </View>
 
-            {/* Container da Lista de exercícios */}
             <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: Spacing.sm,
-                }}
-              >
+              <View style={styles.listHeader}>
                 <Text style={[Texts.subtitle, { marginBottom: Spacing.sm }]}>
                   Exercícios
                 </Text>
-                {/* // TODO adicionar função de adicionar alimento no botão AddBtn */}
                 <AddBtn
-                  onPress={() => router.push("/workout/searchExerciseScreen")}
+                  onPress={handleAddExercise}
                   size={30}
                 />
               </View>
 
-              {/* Lista de exercícios */}
-              <View style={{ gap: 12 }}>
-                {workout.exercises.map((exercise) => (
-                  // Use o seu componente ExerciseCard aqui para cada exercício
-
-                  <ExerciseCard
-                    key={exercise.id}
-                    name={exercise.name}
-                    focusArea={exercise.focusArea}
-                    totalSets={exercise.totalSets}
-                    totalReps={exercise.totalReps}
-                    onPress={() => router.push("/(tabs)/workout/exerciseScreen")}
-                  />
-                ))}
-              </View>
+              {loading ? (
+                 <ActivityIndicator color={Colors.primary} />
+              ) : (
+                <View style={{ gap: 12 }}>
+                    {workoutItems.map((item) => (
+                    <ExerciseCard
+                        key={item.id}
+                        name={item.exercicios.nome_exercicio}
+                        focusArea={item.exercicios.grupo_muscular_geral}
+                        imageUrl={item.exercicios.imagem_url}
+                        totalSets={item.series} 
+                        totalReps={item.repeticoes}
+                        onPress={() => handleItemPress(item)} // Abre modal de edição
+                    />
+                    ))}
+                    {workoutItems.length === 0 && (
+                        <Text style={{ color: Colors.subtext, textAlign: 'center', marginTop: 20 }}>
+                            Nenhum exercício neste treino. Adicione um!
+                        </Text>
+                    )}
+                </View>
+              )}
             </View>
           </View>
         </ScrollView>
+
+        {/* Modal de Edição */}
+        {selectedItemToEdit && (
+            <EditWorkoutItemModal
+                visible={isEditModalVisible}
+                item={selectedItemToEdit}
+                onClose={() => setIsEditModalVisible(false)}
+                onSave={handleUpdateItem}
+                onDelete={handleDeleteItem}
+            />
+        )}
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -179,4 +258,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
   },
+  infoItem: {
+    gap: Spacing.sm,
+    alignItems: "center",
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: Spacing.sm,
+    alignItems: 'center'
+  }
 });

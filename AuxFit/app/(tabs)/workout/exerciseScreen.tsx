@@ -1,18 +1,29 @@
-
-
+import React from "react";
 import {
   View,
   StyleSheet,
   KeyboardAvoidingView,
   ScrollView,
+  Text,
 } from "react-native";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Background from "@/components/universal/Background";
 import ExerciseInfo from "@/components/workout/ExerciseInfo";
 import Header from "@/components/universal/Header";
+import { useLocalSearchParams } from "expo-router";
+import { Video, ResizeMode } from "expo-av";
 
-export default function exerciseScreen() {
+export default function ExerciseScreen() {
+  // Pegar os parâmetros passados na navegação
+  const params = useLocalSearchParams();
+
+  const { nome, grupoGeral, grupoEspecifico, descricao, execucao, video } =
+    params;
+
+  // Montar subtítulo dinâmico
+  const subtitle = [grupoGeral, grupoEspecifico].filter(Boolean).join(", ");
+
   return (
     <SafeAreaView
       style={{
@@ -21,7 +32,6 @@ export default function exerciseScreen() {
         paddingHorizontal: Spacing.md,
       }}
     >
-      {/* Background decorativo */}
       <Background />
 
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
@@ -31,18 +41,39 @@ export default function exerciseScreen() {
         >
           <View style={styles.container}>
             <Header
-            backArrow
-              title="Exercício supimpa"
-              subtitle="Peito, Peito debaixo, Peito de cima"
+              backArrow
+              title={(nome as string) || "Exercício"}
+              subtitle={subtitle}
               subtitleColor={Colors.accent}
             />
 
             <View style={{ gap: Spacing.md }}>
-              {/* GIF container */}
-              <View style={styles.gifContainer}></View>
+              {/* GIF/Video container */}
+              <View style={styles.gifContainer}>
+                {video ? (
+                  <Video
+                    source={{ uri: video as string }}
+                    style={styles.video}
+                    resizeMode={ResizeMode.COVER}
+                    isLooping
+                    shouldPlay={true}
+                    isMuted={true}
+                    useNativeControls={false}
+                  />
+                ) : (
+                  <View style={styles.placeholder}>
+                    <Text style={{ color: Colors.subtext }}>
+                      Sem demonstração visual
+                    </Text>
+                  </View>
+                )}
+              </View>
 
-              <ExerciseInfo about />
-              <ExerciseInfo />
+              {/* Sobre o exercício */}
+              <ExerciseInfo about description={descricao as string} />
+
+              {/* Execução */}
+              <ExerciseInfo steps={execucao as string} />
             </View>
           </View>
         </ScrollView>
@@ -59,7 +90,21 @@ const styles = StyleSheet.create({
   gifContainer: {
     width: "100%",
     aspectRatio: 1 / 1,
-    backgroundColor: Colors.text,
+    backgroundColor: "#1E1E1E",
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: "100%",
+    height: "100%",
+  },
+  placeholder: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

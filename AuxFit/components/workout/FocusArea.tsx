@@ -1,21 +1,14 @@
-// * Componente de área de foco de exerício. Recebe o prop de nome.
-
 import { Colors, Spacing, Texts } from "@/constants/Styles";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 
-interface WorkoutCardProps {
+interface FocusAreaProps {
   focusArea: string;
-  isSelected: boolean; // 💡
+  imageUrl?: string | null;
+  isSelected: boolean;
   onPress: (area: string) => void;
 }
 
-export default function WorkoutCard({ focusArea, isSelected, onPress }: WorkoutCardProps) {
-  
-
-  // const handleCardPress = () => {
-  //   setIsFocus((prev) => !prev);
-  // };
-
+export default function FocusArea({ focusArea, imageUrl, isSelected, onPress }: FocusAreaProps) {
   return (
     <Pressable
       style={[styles.container, isSelected ? styles.borderOn : styles.borderOff]}
@@ -24,7 +17,15 @@ export default function WorkoutCard({ focusArea, isSelected, onPress }: WorkoutC
       <View style={styles.content}>
         <Text style={Texts.bodyBold}>{focusArea}</Text>
         <View style={styles.imgContainer}>
-          <Text>IMG</Text>
+          {imageUrl ? (
+            <Image 
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text style={{ fontSize: 10, color: Colors.bg, fontWeight: 'bold' }}>IMG</Text>
+          )}
         </View>
       </View>
     </Pressable>
@@ -36,14 +37,16 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     backgroundColor: Colors.bgLight,
-    flex: 1,
-    borderRadius: 10
+    //flex: 1, // Removido flex:1 para não esticar demais se houver poucos itens na linha
+    borderRadius: 10,
+    minWidth: '100%', // Ocupa aprox metade da largura no modal
+    marginBottom: 8
   },
   content: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    flex: 1,
+    gap: 8
   },
   imgContainer: {
     width: 50,
@@ -52,13 +55,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 5,
+    overflow: 'hidden'
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   borderOn: {
-    borderWidth: 3,
+    borderWidth: 2, // Ajustei para 2px para ficar mais elegante
     borderColor: Colors.accent,
   },
   borderOff: {
-    borderWidth: 3,
-    borderColor: Colors.bgLight,
+    borderWidth: 2,
+    borderColor: Colors.bgLight, // Borda transparente ou igual ao fundo
   },
 });

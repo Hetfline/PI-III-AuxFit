@@ -1,4 +1,4 @@
-// * Componente híbrido de informaçõe sobre exercício e execução de exercício 
+// * Componente híbrido de informações sobre exercício e execução de exercício 
 
 import { useState } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
@@ -7,9 +7,11 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 interface ExerciseInfoProps {
   about?: boolean;
+  description?: string;
+  steps?: string;
 }
 
-export default function ExerciseInfo({ about }: ExerciseInfoProps) {
+export default function ExerciseInfo({ about, description, steps }: ExerciseInfoProps) {
   const [isFocus, setIsFocus] = useState(false);
 
   const handleArrowPress = () => {
@@ -23,7 +25,8 @@ export default function ExerciseInfo({ about }: ExerciseInfoProps) {
         { borderLeftColor: about ? Colors.secondary : Colors.correct },
       ]}
     >
-      <View
+      <Pressable 
+        onPress={handleArrowPress}
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
@@ -39,40 +42,28 @@ export default function ExerciseInfo({ about }: ExerciseInfoProps) {
           {about ? "Sobre o exercício" : "Como executar"}
         </Text>
         <View>
-          <Pressable hitSlop={15} onPress={handleArrowPress}>
-            <MaterialIcons
-              name="keyboard-arrow-down"
-              size={32}
-              color={about ? Colors.secondary : Colors.primary}
-              style={
-                isFocus && {
-                  transform: [{ rotate: "180deg" }],
-                }
+          <MaterialIcons
+            name="keyboard-arrow-down"
+            size={32}
+            color={about ? Colors.secondary : Colors.primary}
+            style={
+              isFocus && {
+                transform: [{ rotate: "180deg" }],
               }
-            />
-          </Pressable>
+            }
+          />
         </View>
-      </View>
+      </Pressable>
 
       {isFocus && about && (
-        <Text style={Texts.body}>
-          Exercício clássico de peito, realizado deitado em banco reto,
-          utilizando barra. Trabalha principalmente o peitoral maior, além de
-          deltoides anteriores e tríceps. É um dos movimentos básicos de força e
-          hipertrofia para a parte superior do corpo.
+        <Text style={[Texts.body, { marginTop: Spacing.sm }]}>
+          {description || "Descrição não disponível."}
         </Text>
       )}
+      
       {isFocus && !about && (
-        <Text style={Texts.body}>
-          1. Deite-se no banco reto e posicione os pés firmes no chão.{"\n"}
-          2. Segure a barra com pegada um pouco maior que a largura dos ombros.{" "}
-          {"\n"}
-          3. Retire a barra do suporte e mantenha os braços estendidos acima do
-          peito. {"\n"}
-          4. Desça a barra de forma controlada até encostar levemente no meio do
-          peito.{"\n"}
-          5. Empurre a barra para cima até estender completamente os braços
-          novamente.
+        <Text style={[Texts.body, { marginTop: Spacing.sm }]}>
+           {steps || "Passo a passo não disponível."}
         </Text>
       )}
     </View>
@@ -81,11 +72,12 @@ export default function ExerciseInfo({ about }: ExerciseInfoProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1, // Removi flex:1 para não esticar desnecessariamente se estiver dentro de ScrollView
+    width: '100%',
     padding: Spacing.md,
     backgroundColor: Colors.bgLight,
     borderRadius: 10,
     borderLeftWidth: 2,
-    gap: Spacing.md
+    // gap: Spacing.md // Gap removido pois aplicamos margin no texto condicional
   },
 });
