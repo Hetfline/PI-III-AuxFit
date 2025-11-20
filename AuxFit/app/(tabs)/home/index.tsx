@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import {
   View,
@@ -8,9 +8,11 @@ import {
   Platform,
   Text,
   Pressable,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import Background from "@/components/universal/Background";
 import Button from "@/components/universal/Button";
 import WaterProgress from "@/components/diet/WaterProgress";
@@ -18,317 +20,282 @@ import MacrosProgress from "@/components/diet/MacrosProgress";
 import WorkoutCard from "@/components/workout/WorkoutCard";
 import Header from "@/components/universal/Header";
 import getFormattedDate from "@/utils/getFormattedDate";
-import Meal from "@/components/diet/Meal";
+import Meal from "@/components/diet/Meal"; 
 import WeightIn from "@/components/universal/WeightIn";
+import EditMealModal from "@/components/diet/EditMealModal";
+
+// Importações da API e Storage
+import { api } from "@/services/api";
+import { authStorage } from "@/services/auth-storage";
 
 export default function HomeScreen() {
-  // * Mocks
-  const foodItems = [
-    {
-      id: 1,
-      name: "Alimento 1",
-      weight: 150,
-      calories: 357,
-      protein: 20,
-      carbs: 30,
-      fats: 15,
-    },
-    {
-      id: 2,
-      name: "Alimento 2",
-      weight: 100,
-      calories: 120,
-      protein: 10,
-      carbs: 20,
-      fats: 5,
-    },
-    {
-      id: 3,
-      name: "Alimento 3",
-      weight: 50,
-      calories: 50,
-      protein: 5,
-      carbs: 10,
-      fats: 2,
-    },
-  ];
+  const router = useRouter();
 
-  const data = [
-    { label: "Copo (200ml)", value: 200 },
-    { label: "Garrafa (500ml)", value: 500 },
-    { label: "Garrafa (1L)", value: 1000 },
-  ];
+  // --- ESTADOS DO BACKEND ---
+  const [userName, setUserName] = useState("Usuário");
+  const [currentWater, setCurrentWater] = useState(0);
+  const [userWorkouts, setUserWorkouts] = useState([]);
+  const [meals, setMeals] = useState<any[]>([]);
+  const [nextMeal, setNextMeal] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const mockWorkouts = [
-    // 1. TREINO A - EMPURRAR (Push)
-    {
-      id: 1,
-      title: "Peito, Ombro e Tríceps",
-      duration: 60,
-      numExercises: 6,
-      focusAreas: "Peito, Ombro, Tríceps",
-      exercises: [
-        {
-          id: 101,
-          name: "Supino Reto com Barra",
-          focusArea: "Peito",
-          totalSets: 4,
-          totalReps: 10,
-        },
-        {
-          id: 102,
-          name: "Desenvolvimento com Halteres",
-          focusArea: "Ombro",
-          totalSets: 4,
-          totalReps: 12,
-        },
-        {
-          id: 103,
-          name: "Crossover (Cabo)",
-          focusArea: "Peito",
-          totalSets: 3,
-          totalReps: 15,
-        },
-        {
-          id: 104,
-          name: "Elevação Lateral",
-          focusArea: "Ombro",
-          totalSets: 3,
-          totalReps: 15,
-        },
-        {
-          id: 105,
-          name: "Tríceps Testa",
-          focusArea: "Tríceps",
-          totalSets: 4,
-          totalReps: 10,
-        },
-        {
-          id: 106,
-          name: "Extensão de Tríceps na Polia",
-          focusArea: "Tríceps",
-          totalSets: 3,
-          totalReps: 12,
-        },
-      ],
-    },
+  // --- ESTADOS DE DIETA E MACROS ---
+  const [completedMealIds, setCompletedMealIds] = useState<number[]>([]);
+  const [dailyTotals, setDailyTotals] = useState({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    logs: 0 
+  });
 
-    // 2. TREINO B - PUXAR (Pull)
-    {
-      id: 2,
-      title: "Costas e Bíceps",
-      duration: 55,
-      numExercises: 5,
-      focusAreas: "Costas, Bíceps, Antebraço",
-      exercises: [
-        {
-          id: 201,
-          name: "Puxada Frontal (Lat Pulldown)",
-          focusArea: "Costas",
-          totalSets: 4,
-          totalReps: 12,
-        },
-        {
-          id: 202,
-          name: "Remada Curvada com Barra",
-          focusArea: "Costas",
-          totalSets: 4,
-          totalReps: 10,
-        },
-        {
-          id: 203,
-          name: "Remada Sentada (Cabo)",
-          focusArea: "Costas",
-          totalSets: 3,
-          totalReps: 12,
-        },
-        {
-          id: 204,
-          name: "Rosca Direta com Barra W",
-          focusArea: "Bíceps",
-          totalSets: 4,
-          totalReps: 10,
-        },
-        {
-          id: 205,
-          name: "Rosca Martelo",
-          focusArea: "Bíceps",
-          totalSets: 3,
-          totalReps: 15,
-        },
-      ],
-    },
+  // --- ESTADOS VISUAIS ---
+  const [isMacro, setIsMacro] = useState(true);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [mealToEdit, setMealToEdit] = useState<any>(null);
 
-    // 3. TREINO C - PERNAS (Legs)
-    {
-      id: 3,
-      title: "Pernas e Glúteos",
-      duration: 70,
-      numExercises: 6,
-      focusAreas: "Quadríceps, Glúteos, Posterior, Panturrilha",
-      exercises: [
-        {
-          id: 301,
-          name: "Agachamento Livre",
-          focusArea: "Quadríceps",
-          totalSets: 5,
-          totalReps: 8,
-        },
-        {
-          id: 302,
-          name: "Leg Press 45°",
-          focusArea: "Quadríceps",
-          totalSets: 4,
-          totalReps: 12,
-        },
-        {
-          id: 303,
-          name: "Stiff com Halteres",
-          focusArea: "Posterior/Glúteos",
-          totalSets: 4,
-          totalReps: 10,
-        },
-        {
-          id: 304,
-          name: "Cadeira Extensora",
-          focusArea: "Quadríceps",
-          totalSets: 3,
-          totalReps: 15,
-        },
-        {
-          id: 305,
-          name: "Cadeira Flexora",
-          focusArea: "Posterior",
-          totalSets: 3,
-          totalReps: 12,
-        },
-        {
-          id: 306,
-          name: "Elevação de Panturrilha Sentado",
-          focusArea: "Panturrilha",
-          totalSets: 4,
-          totalReps: 20,
-        },
-      ],
-    },
-
-    // 4. TREINO D - CORPO TOTAL (Full Body)
-    {
-      id: 4,
-      title: "Full Body",
-      duration: 45,
-      numExercises: 4,
-      focusAreas: "Peito, Costas, Pernas, Ombro",
-      exercises: [
-        {
-          id: 401,
-          name: "Supino com Halteres",
-          focusArea: "Peito",
-          totalSets: 3,
-          totalReps: 12,
-        },
-        {
-          id: 402,
-          name: "Remada Curvada (Máquina)",
-          focusArea: "Costas",
-          totalSets: 3,
-          totalReps: 12,
-        },
-        {
-          id: 403,
-          name: "Agachamento taça (Goblet Squat)",
-          focusArea: "Pernas",
-          totalSets: 3,
-          totalReps: 15,
-        },
-        {
-          id: 404,
-          name: "Desenvolvimento Militar (Barra)",
-          focusArea: "Ombro",
-          totalSets: 3,
-          totalReps: 8,
-        },
-      ],
-    },
-
-    // 5. TREINO E - FOCO EM ISOLAMENTO
-    {
-      id: 5,
-      title: "Braços e Isolamento",
-      duration: 40,
-      numExercises: 4,
-      focusAreas: "Bíceps, Tríceps, Ombro (lateral)",
-      exercises: [
-        {
-          id: 501,
-          name: "Rosca Concentrada",
-          focusArea: "Bíceps",
-          totalSets: 3,
-          totalReps: 10,
-        },
-        {
-          id: 502,
-          name: "Coice (Kickback)",
-          focusArea: "Tríceps",
-          totalSets: 3,
-          totalReps: 15,
-        },
-        {
-          id: 503,
-          name: "Elevação Frontal com Halteres",
-          focusArea: "Ombro",
-          totalSets: 3,
-          totalReps: 12,
-        },
-        {
-          id: 504,
-          name: "Rosca Scott",
-          focusArea: "Bíceps",
-          totalSets: 3,
-          totalReps: 10,
-        },
-      ],
-    },
-  ];
-
-  const macros: { protein: number; carbs: number; fats: number } = {
+  // Metas (Exemplo fixo)
+  const goals = {
+    calories: 2004,
     protein: 150,
     carbs: 225,
     fats: 56,
   };
 
-  let calories: number =
-    macros.protein * 4 + macros.carbs * 4 + macros.fats * 9;
-
-  const [logs, setLogs] = useState(0);
-  const [isMacro, setIsMacro] = useState(true);
-
-  const handleIncreaseLogs = () => {
-    setLogs((prev) => prev + 1);
+  // --- FUNÇÕES AUXILIARES ---
+  const getAlimentoData = (alimentos: any) => {
+    if (Array.isArray(alimentos)) return alimentos[0];
+    return alimentos;
   };
 
-  const handleDecreaseLogs = () => {
-    setLogs((prev) => Math.max(0, prev - 1));
+  // Transforma os dados para o formato visual
+  const getMealDisplayData = (meal: any) => {
+    if (!meal || !meal.refeicao_itens) return [];
+
+    return meal.refeicao_itens.map((item: any) => {
+       const alimento = getAlimentoData(item.alimentos);
+       const factor = item.quantidade / 100; 
+       const cals = alimento ? (alimento.calorias * factor) : 0;
+       
+       return {
+           id: item.id, 
+           foodId: alimento ? alimento.id : 0,
+           name: alimento?.nome || "Item Carregando...",
+           quantity: item.quantidade,
+           unit: item.unidade_medida || "g",
+           calories: cals,
+           protein: alimento ? (alimento.proteinas * factor) : 0,
+           carbs: alimento ? (alimento.carboidratos * factor) : 0,
+           fats: alimento ? (alimento.gorduras * factor) : 0,
+           baseUnit: alimento ? alimento.unidade_base : 'g'
+       };
+    });
   };
-  const router = useRouter();
-  const [isModalVisible] = useState(false);
 
-  const handleTestOnboarding = () => {
-    router.push("/onboarding");
+  // ✨ NOVA FUNÇÃO: Calcula o resumo completo da refeição para enviar na navegação
+  // Isso evita o erro de 'undefined' nos gráficos da próxima tela
+  const getMealSummary = (meal: any) => {
+     const items = getMealDisplayData(meal);
+     // Soma das calorias calculadas
+     const totalCals = items.reduce((acc: number, curr: any) => acc + curr.calories, 0);
+     
+     // Soma dos macros para evitar erro no gráfico
+     const totalProt = items.reduce((acc: number, curr: any) => acc + (curr.protein || 0), 0);
+     const totalCarbs = items.reduce((acc: number, curr: any) => acc + (curr.carbs || 0), 0);
+     const totalFats = items.reduce((acc: number, curr: any) => acc + (curr.fats || 0), 0);
+
+     return {
+        id: meal.id,
+        mealName: meal.nome,
+        // Se a refeição tiver meta, usa a meta para visualização, senão usa o total calculado
+        calories: Math.round(totalCals), 
+        meta_calorias: meal.meta_calorias,
+        
+        // Campos obrigatórios para a tela mealScreen não quebrar:
+        totalProtein: Math.round(totalProt),
+        totalCarbs: Math.round(totalCarbs),
+        totalFats: Math.round(totalFats),
+        
+        foodItems: items
+     };
   };
 
-  const handleNavigateToDetails = (workoutData: (typeof mockWorkouts)[0]) => {
-    const workoutDataString = JSON.stringify(workoutData);
+  // --- CÁLCULO DE TOTAIS DIÁRIOS ---
+  const calculateTotals = (mealsData: any[], completedIds: number[]) => {
+    let totalCals = 0;
+    let totalProt = 0;
+    let totalCarbs = 0;
+    let totalFats = 0;
+    let totalLogs = completedIds.length;
 
+    mealsData.forEach(meal => {
+      if (completedIds.includes(meal.id) && meal.refeicao_itens) {
+        meal.refeicao_itens.forEach((item: any) => {
+          const alimento = getAlimentoData(item.alimentos);
+          if (alimento) {
+            const factor = item.quantidade / 100; 
+            totalCals += (alimento.calorias || 0) * factor;
+            totalProt += (alimento.proteinas || 0) * factor;
+            totalCarbs += (alimento.carboidratos || 0) * factor;
+            totalFats += (alimento.gorduras || 0) * factor;
+          }
+        });
+      }
+    });
+
+    setDailyTotals({
+      calories: Math.round(totalCals),
+      protein: Math.round(totalProt),
+      carbs: Math.round(totalCarbs),
+      fats: Math.round(totalFats),
+      logs: totalLogs
+    });
+  };
+
+  useEffect(() => {
+    calculateTotals(meals, completedMealIds);
+  }, [meals, completedMealIds]);
+
+  // --- BUSCA DE DADOS ---
+  const fetchData = async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) {
+        setLoading(false);
+        return; 
+      }
+
+      const [userData, waterData, workoutsData, mealsData] = await Promise.all([
+        api.me().catch(() => null),                    
+        api.getTodayWaterProgress().catch(() => null), 
+        api.getWorkouts().catch(() => []),             
+        api.getMeals().catch(() => [])                 
+      ]);
+
+      if (userData && userData.nome) {
+        setUserName(userData.nome.split(" ")[0]); 
+      }
+
+      if (waterData) {
+        setCurrentWater(waterData.agua_ml || 0);
+      }
+
+      if (workoutsData) {
+        setUserWorkouts(workoutsData);
+      }
+
+      if (mealsData) {
+        setMeals(mealsData);
+        if (mealsData.length > 0) {
+            findNextMeal(mealsData);
+        } else {
+            setNextMeal(null);
+        }
+      }
+
+    } catch (error) {
+      console.log("Erro ao carregar Home:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
+
+  const findNextMeal = (mealsList: any[]) => {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTimeValue = currentHours * 60 + currentMinutes;
+
+    const sortedMeals = [...mealsList].sort((a, b) => {
+      if (!a.horario || !b.horario) return 0;
+      const [hA, mA] = a.horario.split(':').map(Number);
+      const [hB, mB] = b.horario.split(':').map(Number);
+      return (hA * 60 + mA) - (hB * 60 + mB);
+    });
+
+    const next = sortedMeals.find(meal => {
+        if (!meal.horario) return false;
+        const [h, m] = meal.horario.split(':').map(Number);
+        const mealTimeValue = h * 60 + m;
+        return mealTimeValue > currentTimeValue;
+    });
+
+    setNextMeal(next || sortedMeals[0]);
+  };
+
+  // --- HANDLERS ---
+
+  const handleUpdateWater = async (amount: number) => {
+    try {
+      const newWater = Math.max(0, currentWater + amount);
+      setCurrentWater(newWater);
+      await api.updateWaterProgress(amount);
+    } catch (error) {
+      console.error("Erro ao atualizar água:", error);
+      setCurrentWater((prev) => prev - amount); 
+    }
+  };
+
+  const handleMealComplete = (mealId: number) => {
+    setCompletedMealIds(prev => [...prev, mealId]);
+  };
+
+  const handleMealUncomplete = (mealId: number) => {
+    setCompletedMealIds(prev => prev.filter(id => id !== mealId));
+  };
+  
+  const handleTestOnboarding = () => router.push("/onboarding");
+
+  const handleNavigateToDetails = (workoutData: any) => {
     router.push({
       pathname: "/workout/workoutInfoScreen",
       params: {
-        workoutData: workoutDataString,
+        workoutData: JSON.stringify(workoutData),
       },
     });
   };
 
+  const handleOpenEditModal = (meal: any) => {
+    setMealToEdit(meal);
+    setIsEditModalVisible(true);
+  };
+
+  const handleUpdateMeal = async (id: number, data: any) => {
+    try {
+        await api.updateMeal(id, data);
+        Alert.alert("Sucesso", "Refeição atualizada!");
+        fetchData(); 
+    } catch (error) {
+        Alert.alert("Erro", "Falha ao atualizar.");
+    }
+  };
+
+  const handleDeleteMeal = async (id: number) => {
+    try {
+        await api.deleteMeal(id);
+        Alert.alert("Sucesso", "Refeição excluída.");
+        setCompletedMealIds(prev => prev.filter(mId => mId !== id));
+        fetchData(); 
+    } catch (error) {
+        Alert.alert("Erro", "Falha ao excluir.");
+    }
+  };
+
   const date = getFormattedDate();
+
+  if (loading) {
+      return (
+          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.bg}}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+          </View>
+      )
+  }
 
   return (
     <SafeAreaView
@@ -338,7 +305,6 @@ export default function HomeScreen() {
         paddingHorizontal: Spacing.md,
       }}
     >
-      {/* Background decorativo */}
       <Background />
 
       <KeyboardAvoidingView
@@ -351,200 +317,197 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.scrollContent}>
-            <Button
-              title="Testar Onboarding"
-              onPress={handleTestOnboarding}
-              bgColor="#35e1ffff"
-            />
-
-            <Button
-              title="Testar Login"
-              onPress={() => router.push("/(auth)")}
-              bgColor="#35e1ffff"
-            />
+            
+            <View style={{flexDirection: 'row', gap: 10}}>
+                <View style={{flex: 1}}>
+                     <Button
+                        title="Onboarding"
+                        onPress={handleTestOnboarding}
+                        bgColor="#35e1ffff"
+                    />
+                </View>
+                <View style={{flex: 1}}>
+                    <Button
+                        title="Login"
+                        onPress={() => router.push("/(auth)")}
+                        bgColor="#35e1ffff"
+                    />
+                </View>
+            </View>
 
             <Header
-              title="Olá, Virgulino"
+              title={`Olá, ${userName}`}
               subtitle={date}
               subtitleColor={Colors.text}
               streak
             />
 
-            {/* Progresso do dia */}
             <View style={{ gap: Spacing.md }}>
               <Text style={Texts.subtitle}>Progresso do dia</Text>
               <View style={styles.macroWaterprogressContainer}>
                 <View style={{ display: isMacro ? "flex" : "none" }}>
                   <MacrosProgress
-                    calories={calories}
-                    logs={logs}
-                    caloriesIngested={1200}
-                    protein={macros.protein}
-                    carbs={macros.carbs}
-                    fats={macros.fats}
+                    caloriesGoal={goals.calories}
+                    caloriesIngested={dailyTotals.calories}
+                    logs={dailyTotals.logs}
+                    proteinGoal={goals.protein}
+                    proteinCurrent={dailyTotals.protein}
+                    carbsGoal={goals.carbs}
+                    carbsCurrent={dailyTotals.carbs}
+                    fatsGoal={goals.fats}
+                    fatsCurrent={dailyTotals.fats}
                   />
                 </View>
-
                 <View style={{ display: isMacro ? "none" : "flex" }}>
-                  <WaterProgress currentWater={0} />
+                  <WaterProgress 
+                    currentWater={currentWater} 
+                    onAddWater={handleUpdateWater} 
+                  />
                 </View>
                 <View style={styles.dotsContainer}>
                   <Pressable
                     onPress={() => setIsMacro(true)}
                     hitSlop={15}
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor: isMacro
-                          ? Colors.primary
-                          : Colors.subtext,
-                      },
-                    ]}
-                  ></Pressable>
-
+                    style={[styles.dot, { backgroundColor: isMacro ? Colors.primary : Colors.subtext }]}
+                  />
                   <Pressable
                     onPress={() => setIsMacro(false)}
                     hitSlop={15}
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor: isMacro
-                          ? Colors.subtext
-                          : Colors.primary,
-                      },
-                    ]}
-                  ></Pressable>
+                    style={[styles.dot, { backgroundColor: isMacro ? Colors.subtext : Colors.primary }]}
+                  />
                 </View>
               </View>
             </View>
 
-            {/* Próxima refeição */}
             <View>
               <Text style={Texts.subtitle}>Próxima refeição</Text>
               <View>
-                <Meal
-                  name="Almoço"
-                  increaseLogs={() => handleIncreaseLogs()}
-                  decreaseLogs={() => handleDecreaseLogs()}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/diet/mealScreen",
-                      params: {
-                        data: JSON.stringify({
-                          mealName: "Almoço",
-                          totalProtein: macros.protein,
-                          totalCarbs: macros.carbs,
-                          totalFats: macros.fats,
-                          calories: calories,
-                          foodItems: foodItems,
-                        }),
-                      },
-                    })
-                  }
-                />
+                {nextMeal ? (
+                    <Meal
+                      name={`${nextMeal.nome}`}
+                      metaCalories={nextMeal.meta_calorias || 0}
+                      foodItems={getMealDisplayData(nextMeal)}
+                      
+                      isCompleted={completedMealIds.includes(nextMeal.id)}
+                      increaseLogs={() => handleMealComplete(nextMeal.id)}
+                      decreaseLogs={() => handleMealUncomplete(nextMeal.id)}
+                      
+                      // ✨ CORREÇÃO AQUI: Usamos getMealSummary que inclui totalProtein, etc.
+                      onPress={() =>
+                          router.push({
+                          pathname: "/diet/mealScreen",
+                          params: {
+                              mealId: nextMeal.id,
+                              data: JSON.stringify(getMealSummary(nextMeal)),
+                          },
+                          })
+                      }
+                      
+                      onAddFood={() => 
+                        router.push({
+                          pathname: "/diet/foodSearchScreen",
+                          params: { mealId: nextMeal.id }
+                        })
+                      }
+
+                      onFoodPress={(foodItem) => 
+                         router.push({
+                           pathname: "/diet/foodScreen",
+                           params: { 
+                              data: JSON.stringify({
+                                 ...foodItem,
+                                 mealId: nextMeal.id
+                              }) 
+                           }
+                         })
+                      }
+
+                      onEdit={() => handleOpenEditModal(nextMeal)}
+                    />
+                ) : (
+                    <View style={{padding: 20, backgroundColor: Colors.bgMedium, borderRadius: 10, alignItems: 'center'}}>
+                        <Text style={[Texts.body, {color: Colors.subtext}]}>Nenhuma refeição cadastrada.</Text>
+                        <Pressable onPress={() => router.push("/(tabs)/diet")}>
+                            <Text style={[Texts.bodyBold, {color: Colors.primary, marginTop: 5}]}>Criar refeição</Text>
+                        </Pressable>
+                    </View>
+                )}
               </View>
             </View>
 
-            {/* Meus treunos */}
             <View style={{ gap: Spacing.md }}>
               <Text style={Texts.subtitle}>Meus treinos</Text>
-              <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 12 }}
-                style={{ gap: Spacing.sm, flexDirection: "row" }}
-              >
-                {mockWorkouts.map((workout) => (
-                  <WorkoutCard
-                    key={workout.id}
-                    onPress={() => handleNavigateToDetails(workout)}
-                    focusAreas={workout.focusAreas}
-                    title={workout.title}
-                    duration={workout.duration}
-                    numExercises={workout.numExercises}
-                  />
-                ))}
-              </ScrollView>
+              {userWorkouts.length > 0 ? (
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 12 }}
+                    style={{ gap: Spacing.sm, flexDirection: "row" }}
+                  >
+                    {userWorkouts.map((workout: any) => (
+                      <WorkoutCard
+                        key={workout.id}
+                        onPress={() => handleNavigateToDetails(workout)}
+                        focusAreas={Array.isArray(workout.areas_foco) ? workout.areas_foco.join(", ") : workout.areas_foco || "Geral"}
+                        title={workout.nome}
+                        duration={workout.duracao}
+                        numExercises={workout.treino_exercicios ? workout.treino_exercicios.length : 0}
+                      />
+                    ))}
+                  </ScrollView>
+              ) : (
+                  <View style={{padding: 20, backgroundColor: Colors.bgMedium, borderRadius: 10}}>
+                      <Text style={{color: Colors.subtext}}>Você ainda não criou nenhum treino.</Text>
+                  </View>
+              )}
               <View style={{ paddingHorizontal: 32 }}>
                 <Button
                   title="Explorar exercícios"
                   bgColor={Colors.accent}
-                  onPress={() =>
-                    router.push("/(tabs)/workout/searchExerciseScreen")
-                  }
+                  onPress={() => router.push("/(tabs)/workout/searchExerciseScreen")}
                 />
               </View>
             </View>
 
-            {/* Adicionar pesagem */}
             <View style={{gap: Spacing.md}}>
               <Text style={Texts.subtitle}>Adicionar nova pesagem</Text>
-            <View style={styles.weightInContainer}>
-              <WeightIn />
-            </View>
+              <View style={styles.weightInContainer}>
+                <WeightIn />
+              </View>
             </View>
 
-            {/* Widgets */}
             <View style={styles.widgetsContainer}>
               <View>
-                <Text style={[Texts.subtitle, { color: Colors.primary }]}>
-                Widgets AuxFit
-              </Text>
-              <Text style={Texts.body}>
-                Acompanhe os seus registros de forma rápida e direta na sua tela
-                inicial
-              </Text>
+                <Text style={[Texts.subtitle, { color: Colors.primary }]}>Widgets AuxFit</Text>
+                <Text style={Texts.body}>Acompanhe os seus registros de forma rápida e direta na sua tela inicial</Text>
               </View>
               <View style={{ paddingHorizontal: 32 }}>
-                <Button
-                  title="Adicionar widgets"
-                  icon="add"
-                  onPress={() => null}
-                />
+                <Button title="Adicionar widgets" icon="add" onPress={() => null} />
               </View>
             </View>
+
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <EditMealModal
+        visible={isEditModalVisible}
+        meal={mealToEdit}
+        onClose={() => setIsEditModalVisible(false)}
+        onSave={handleUpdateMeal}
+        onDelete={handleDeleteMeal}
+      />
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    paddingTop: 24,
-    paddingBottom: 100,
-    gap: Spacing.lg,
-  },
-  macroWaterprogressContainer: {
-    backgroundColor: Colors.bgMedium,
-    borderRadius: 20,
-    justifyContent: "space-evenly",
-    paddingBottom: Spacing.sm,
-  },
-  dotsContainer: {
-    flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: Spacing.md,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 10,
-  },
-  exploreExercices: {
-    padding: Spacing.sm,
-    backgroundColor: Colors.bgMedium,
-  },
-  weightInContainer: {
-    backgroundColor: Colors.bgMedium,
-    borderRadius: 10,
-  },
-  widgetsContainer: {
-    backgroundColor: Colors.bgMedium,
-    borderRadius: 10,
-    gap: Spacing.md,
-    padding: Spacing.md
-  },
+  scrollContent: { paddingTop: 24, paddingBottom: 100, gap: Spacing.lg },
+  macroWaterprogressContainer: { backgroundColor: Colors.bgMedium, borderRadius: 20, justifyContent: "space-evenly", paddingBottom: Spacing.sm },
+  dotsContainer: { flex: 1, flexDirection: "row", justifyContent: "center", gap: Spacing.md },
+  dot: { width: 10, height: 10, borderRadius: 10 },
+  exploreExercices: { padding: Spacing.sm, backgroundColor: Colors.bgMedium },
+  weightInContainer: { backgroundColor: Colors.bgMedium, borderRadius: 10 },
+  widgetsContainer: { backgroundColor: Colors.bgMedium, borderRadius: 10, gap: Spacing.md, padding: Spacing.md },
 });

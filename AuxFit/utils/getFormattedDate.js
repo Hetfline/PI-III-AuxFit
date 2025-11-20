@@ -17,7 +17,7 @@ export default function getFormattedDate() {
   
   // 5. Unir as partes no formato desejado: "Sexta-feira, nov. 04"
   // Note que é comum ter a vírgula após o dia da semana.
-  const formattedDate = `${capitalizedWeekday}, ${monthAbbr}. ${day}`;
+  const formattedDate = `${capitalizedWeekday}, ${monthAbbr} ${day}`;
 
   return formattedDate;
 }

@@ -1,6 +1,4 @@
-// * Componente de círculo de progressão para exibir a quantidade de água ingerida. Recebe o valor da quantidade de água ingerida.
-
-import { View, StyleSheet, Text, Pressable } from "react-native";
+import { View, StyleSheet, Text, Pressable, ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import CircularProgress from "react-native-circular-progress-indicator";
@@ -9,41 +7,46 @@ import {
   MaterialCommunityIcons,
   FontAwesome6,
 } from "@expo/vector-icons";
-import Button from "../universal/Button";
+import Button from "../universal/Button"; // Certifique-se que este caminho está correto no seu projeto
 import DropdownSelector from "../universal/DropdownSelector";
 
 interface WaterProgressProps {
   currentWater: number;
+  onAddWater: (amount: number) => Promise<void>; 
 }
+
 let cupVolume: number = 200;
 let bottleVolume: number = 500;
 let bigBottleVolume: number = 1000;
 let maxWater: number = 3500;
 
-export default function WaterProgress({ currentWater }: WaterProgressProps) {
-  const [currentWaterProgress, setCurrentWaterProgress] = useState(currentWater);
+export default function WaterProgress({ currentWater, onAddWater }: WaterProgressProps) {
   const [waterMeasure, setWaterMeasure] = useState(cupVolume);
+  const [loading, setLoading] = useState(false);
 
-  // * Mocks para o componente de dropdown
   const data = [
     { label: "Copo (200ml)", value: cupVolume },
     { label: "Garrafa (500ml)", value: bottleVolume },
     { label: "Garrafa (1L)", value: bigBottleVolume },
   ];
 
-  // Variável para determinar a cor ativa da barra de progresso
   const activeProgressColor =
-    currentWaterProgress > maxWater ? Colors.secondary : Colors.border;
+    currentWater > maxWater ? Colors.secondary : Colors.border;
 
   const progressMaxValue =
-    currentWaterProgress > maxWater ? currentWaterProgress : maxWater;
+    currentWater > maxWater ? currentWater : maxWater;
 
-  const addWater = (volumeToAdd: number) => {
-    setCurrentWaterProgress((prev) => prev + volumeToAdd);
+  const handleAddWater = async (amount: number) => {
+    setLoading(true);
+    await onAddWater(amount);
+    setLoading(false);
   };
 
-  const removeWater = (volumeToRemove: number) => {
-    setCurrentWaterProgress((prev) => Math.max(0, prev - volumeToRemove)); // Garante que não seja negativo
+  const handleRemoveWater = async (amount: number) => {
+    if (currentWater <= 0) return;
+    setLoading(true);
+    await onAddWater(-amount);
+    setLoading(false);
   };
 
   const handleDropdownChange = (value: number) => {
@@ -53,20 +56,13 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
   const renderWaterIcon = (size = 24) => {
     switch (waterMeasure) {
       case bottleVolume:
-        return (
-          // Usando ícone de garrafa, e ajustando o tamanho dinamicamente
-          <FontAwesome6
-            name="bottle-water"
-            size={size} // ✨ Tamanho dinâmico
-            color={Colors.secondary}
-          />
-        );
       case bigBottleVolume:
         return (
           <FontAwesome6
             name="bottle-water"
-            size={size} // ✨ Tamanho dinâmico
+            size={size}
             color={Colors.secondary}
+            style={{ opacity: 0.8 }}
           />
         );
       case cupVolume:
@@ -74,25 +70,27 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
         return (
           <MaterialCommunityIcons
             name="cup-water"
-            size={size} // ✨ Tamanho dinâmico
+            size={size}
             color={Colors.secondary}
+            style={{ opacity: 0.8 }}
           />
         );
     }
   };
 
-  const totalIcons = Math.floor(currentWaterProgress / waterMeasure);
-  const iconsArray = Array.from({ length: totalIcons }, (_, i) => i);
-
-  // Variável para determinar se devemos renderizar um ícone parcial
-  const shouldRenderPartialIcon = currentWaterProgress > 0 && totalIcons === 0;
+  const totalIcons = Math.floor(currentWater / waterMeasure);
+  
+  // Aumentado para permitir muitas linhas (ex: 42 ícones = ~7 linhas)
+  const iconsToRender = Math.min(totalIcons, 42); 
+  const iconsArray = Array.from({ length: iconsToRender }, (_, i) => i);
+  const shouldRenderPartialIcon = currentWater > 0 && totalIcons === 0;
 
   return (
     <View style={styles.container}>
       <View style={styles.progressContainer}>
         <View style={styles.progressCircleContainer}>
           <CircularProgress
-            value={currentWaterProgress}
+            value={currentWater}
             maxValue={progressMaxValue}
             showProgressValue={false}
             radius={65}
@@ -110,17 +108,14 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
               color={Colors.secondary}
             />
             <Text style={[Texts.bodyBold, { color: Colors.text }]}>
-              {currentWaterProgress} ml
+              {currentWater} ml
             </Text>
           </View>
-
-          
         </View>
-    
 
         <View style={styles.waterLeftContainer}>
           <Text style={[Texts.bodyBold, { color: Colors.secondary }]}>
-            {Math.round(progressMaxValue - currentWaterProgress)}{" "}
+            {Math.max(0, Math.round(progressMaxValue - currentWater))}{" "}
             <MaterialIcons
               name="water-drop"
               size={16}
@@ -143,45 +138,53 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
         />
 
         <View style={styles.measuresContainer}>
-          {iconsArray.map((index) => (
-            <Pressable
-              key={index}
-              onPress={() => removeWater(waterMeasure)}
-              hitSlop={15}
-              style={{
-                width: 24,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {renderWaterIcon(24)}
-            </Pressable>
-          ))}
+            {iconsArray.map((index) => (
+                <Pressable
+                key={index}
+                onPress={() => handleRemoveWater(waterMeasure)}
+                hitSlop={10}
+                disabled={loading}
+                style={({pressed}) => ({
+                    width: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    opacity: pressed || loading ? 0.5 : 1,
+                })}
+                >
+                {renderWaterIcon(24)}
+                </Pressable>
+            ))}
 
-          {/* RENDERIZA O ÍCONE PARCIAL (se houver consumo, mas menos que a medida) */}
-          {shouldRenderPartialIcon && (
-            <Pressable
-              key="partial-icon"
-              onPress={() => removeWater(currentWaterProgress)}
-              hitSlop={15}
-              style={{
-                width: 24,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {/* Renderiza o ícone com o tamanho menor (12) */}
-              {renderWaterIcon(18)}
-            </Pressable>
-          )}
+            {shouldRenderPartialIcon && (
+                <Pressable
+                key="partial-icon"
+                onPress={() => handleRemoveWater(currentWater)}
+                hitSlop={10}
+                disabled={loading}
+                style={({pressed}) => ({
+                    width: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    opacity: pressed || loading ? 0.5 : 1,
+                    marginBottom: 6
+                })}
+                >
+                {renderWaterIcon(18)}
+                </Pressable>
+            )}
         </View>
-        <Button
-          title="Adicionar"
-          icon="add"
-          onPress={() => addWater(waterMeasure)}
-          bgColor={Colors.secondary}
-          color={Colors.text}
-        />
+        
+        {loading ? (
+            <ActivityIndicator color={Colors.secondary} style={{ padding: 10 }} />
+        ) : (
+            <Button
+            title="Adicionar"
+            icon="add"
+            onPress={() => handleAddWater(waterMeasure)}
+            bgColor={Colors.secondary}
+            color={Colors.text}
+            />
+        )}
       </View>
     </View>
   );
@@ -189,12 +192,13 @@ export default function WaterProgress({ currentWater }: WaterProgressProps) {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: 260,
+    minHeight: 260, // Altura inicial mínima
     gap: Spacing.md,
     borderRadius: 20,
     padding: Spacing.md,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start", // Permite que os itens cresçam para baixo independentemente
   },
   calories: {
     position: "absolute",
@@ -208,13 +212,14 @@ const styles = StyleSheet.create({
   progressContainer: {
     alignItems: "center",
     gap: Spacing.md,
+    // sticky no topo se o container crescer muito
+    marginTop: Spacing.sm, 
   },
   progressCircleContainer: {
     justifyContent: "center",
     alignItems: "center",
-    height: 130, // radius (65 * 2 = 130)
+    height: 130, 
     width: 130,
-    alignSelf: "flex-start",
   },
   waterLeftContainer: {
     justifyContent: "center",
@@ -222,8 +227,6 @@ const styles = StyleSheet.create({
   },
   waterHistory: {
     justifyContent: "space-between",
-    flexWrap: "wrap",
-    padding: Spacing.sm,
     maxWidth: 180,
     width: 180,
     gap: Spacing.md,
@@ -231,9 +234,9 @@ const styles = StyleSheet.create({
   measuresContainer: {
     flexDirection: "row",
     justifyContent: 'flex-start',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.xs,
-    padding: Spacing.sm,
+    paddingVertical: Spacing.sm,
     flexWrap: "wrap",
     maxWidth: 180,
     width: 180,

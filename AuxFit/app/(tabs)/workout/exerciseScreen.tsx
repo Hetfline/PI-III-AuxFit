@@ -45,6 +45,7 @@ export default function ExerciseScreen() {
               title={(nome as string) || "Exercício"}
               subtitle={subtitle}
               subtitleColor={Colors.accent}
+              maxWidth
             />
 
             <View style={{ gap: Spacing.md }}>

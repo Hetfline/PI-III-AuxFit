@@ -13,6 +13,7 @@ interface HeaderProps {
   subtitleColor?: string;
   backArrow?: boolean;
   streak?: boolean;
+  maxWidth?: boolean;
   onIconPress?: () => void;
 }
 
@@ -22,6 +23,7 @@ export default function Header({
   subtitleColor,
   backArrow,
   streak,
+  maxWidth
 }: HeaderProps) {
   const router = useRouter();
 
@@ -37,11 +39,10 @@ export default function Header({
             onPress={() => router.back()}
           />
         )}
-        <View style={styles.containerTitles}>
+        <View style={[styles.containerTitles, {maxWidth: maxWidth ? "90%" : null}]}>
           <Text style={Texts.subtitle}>{title}</Text>
           {subtitle && (
-            <Text style={[Texts.subtext, { color: subtitleColor, flexShrink: 1,
-        flexWrap: "wrap" }]}>
+            <Text style={[Texts.subtext, { color: subtitleColor }]}>
               {subtitle}
             </Text>
           )}
@@ -77,7 +78,6 @@ const styles = StyleSheet.create({
   containerTitles: {
     justifyContent: "center",
     alignItems: "flex-start",
-    maxWidth: "90%",
   },
   streakContainer: {
     flexDirection: "row",

@@ -1,7 +1,7 @@
 import { authStorage } from "./auth-storage";
 
-// * SEMPRE MUDAR ENDEREÇO DE IP DE QUEM ESTIVER RODANDO
-const API_URL = "http://xxx:3000/api"; 
+// ⚠️ Se seu IP mudar (reiniciar roteador/PC), lembre de atualizar aqui.
+const API_URL = "http://192.168.89.122:3000/api"; 
 
 export const api = {
   // --- AUTENTICAÇÃO ---
@@ -12,7 +12,6 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro no login");
       return data;
@@ -28,12 +27,30 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro no cadastro");
       return data;
     } catch (error) {
       throw error;
+    }
+  },
+
+  // ✨ NOVO: Rota para pegar dados do usuário logado (Nome, etc)
+  me: async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) return null; 
+      const response = await fetch(`${API_URL}/auth/me`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      // Assumindo que o backend retorna { user: { ... } }
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar usuário");
+      return data.user; 
+    } catch (error) {
+      console.log("Erro ao buscar dados do usuário:", error);
+      return null;
     }
   },
 
@@ -47,7 +64,6 @@ export const api = {
         },
         body: JSON.stringify(profileData),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao atualizar perfil");
       return data;
@@ -61,15 +77,10 @@ export const api = {
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/exercicios`, {
         method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao buscar exercícios");
       return data;
@@ -83,15 +94,10 @@ export const api = {
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/treinos`, { 
         method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
-      
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao buscar treinos");
       return data;
@@ -104,16 +110,11 @@ export const api = {
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/treinos`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(workoutData),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao criar treino");
       return data;
@@ -126,16 +127,11 @@ export const api = {
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/treinos/${id}`, {
         method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(workoutData),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao atualizar treino");
       return data;
@@ -144,22 +140,15 @@ export const api = {
     }
   },
 
-  // --- ITENS DE TREINO (Adicionar Exercício ao Treino) ---
-  
-  // Busca os exercícios vinculados a um treino específico
+  // --- ITENS DE TREINO ---
   getWorkoutExercises: async (treinoId) => {
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/treino-exercicios/treino/${treinoId}`, {
         method: "GET",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao buscar itens do treino");
       return data;
@@ -168,22 +157,15 @@ export const api = {
     }
   },
 
-  // Adiciona um exercício ao treino (cria registro na tabela de junção)
   addExerciseToWorkout: async (data) => {
-    // data deve conter: { treino_fk, exercicio_fk, series, repeticoes, carga, descanso_segundos }
     try {
       const token = await authStorage.getToken();
       if (!token) throw new Error("Usuário não autenticado");
-
       const response = await fetch(`${API_URL}/treino-exercicios`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data),
       });
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erro ao adicionar exercício");
       return result;
@@ -192,17 +174,12 @@ export const api = {
     }
   },
 
-  // --- NOVAS FUNÇÕES ADICIONADAS PARA EDIÇÃO ---
-
   updateWorkoutItem: async (itemId, data) => {
     try {
       const token = await authStorage.getToken();
       const response = await fetch(`${API_URL}/treino-exercicios/${itemId}`, {
         method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(data),
       });
       const result = await response.json();
@@ -218,14 +195,232 @@ export const api = {
       const token = await authStorage.getToken();
       const response = await fetch(`${API_URL}/treino-exercicios/${itemId}`, {
         method: "DELETE",
-        headers: { 
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Authorization": `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Erro ao deletar item");
       return true;
     } catch (error) {
       throw error;
     }
-  }
+  },
+
+  // --- DIETA & REFEIÇÕES ---
+  getMeals: async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) throw new Error("Usuário não autenticado");
+      const response = await fetch(`${API_URL}/refeicoes`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar refeições");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getMeal: async (id) => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) throw new Error("Usuário não autenticado");
+      const response = await fetch(`${API_URL}/refeicoes/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar refeição");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createMeal: async (data) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicoes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erro ao criar refeição");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateMeal: async (id, data) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicoes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erro ao atualizar refeição");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteMeal: async (id) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicoes/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Erro ao deletar refeição");
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getFoods: async () => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/alimentos`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar alimentos");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  addFoodToMeal: async (itemData) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicao-itens`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(itemData),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erro ao adicionar alimento");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateMealItem: async (itemId, data) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicao-itens/${itemId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erro ao atualizar item da refeição");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteMealItem: async (itemId) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/refeicao-itens/${itemId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Erro ao deletar item da refeição");
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // --- DESPENSA ---
+  checkPantryItem: async (alimentoId) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/despensa/check/${alimentoId}`, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      return data; 
+    } catch (error) {
+      console.error(error);
+      return { inPantry: false, item: null };
+    }
+  },
+
+  addToPantry: async (alimentoId) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/despensa`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ alimento_fk: alimentoId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  removeFromPantry: async (despensaItemId) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/despensa/${despensaItemId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Erro ao remover da despensa");
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  // --- ÁGUA & PROGRESSO ---
+  getTodayWaterProgress: async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) throw new Error("Usuário não autenticado");
+      const response = await fetch(`${API_URL}/progresso/today`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar progresso de hoje");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateWaterProgress: async (amount) => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) throw new Error("Usuário não autenticado");
+      const response = await fetch(`${API_URL}/progresso/water`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ amount }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao atualizar água");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

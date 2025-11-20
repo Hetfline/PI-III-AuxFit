@@ -1,6 +1,4 @@
-// * Tela de detalhes de alimento específico.
-// TODO modificar a forma que os elementos são renderizados para quando o backend for feito.
-
+import React, { useState, useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -8,8 +6,9 @@ import {
   Platform,
   StyleSheet,
   Text,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-import { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import Background from "@/components/universal/Background";
@@ -20,74 +19,155 @@ import MacrosDonutLegend from "@/components/diet/MacrosDonutLegend";
 import MacrosTable from "@/components/diet/MacrosTable";
 import Favorite from "@/components/universal/FavoriteBtn";
 import InputField from "@/components/universal/InputField";
-import DropdownSelector from "@/components/universal/DropdownSelector";
 import Button from "@/components/universal/Button";
+import { api } from "@/services/api";
 
-// Interface para tipar os dados da refeição
 interface FoodData {
-  id: number;
-  foodName: string;
-  weight: number;
+  id: number; // ID do item na tabela refeicao_itens
+  foodId: number; // ID original do alimento
+  mealId: number;
+  name: string;
+  quantity: number;
+  unit: string;
   calories: number;
   protein: number;
   carbs: number;
   fats: number;
+  favorito?: boolean;
 }
 
 export default function foodScreen() {
-  // * Mocks para o componente de dropdown
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const { data } = params;
+
+  const [foodData, setFoodData] = useState<FoodData | null>(null);
+  const [quantity, setQuantity] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Estado para controlar o ID do item na despensa (se existir)
+  const [pantryId, setPantryId] = useState<number | null>(null);
+
   const dropdownData = [
     { label: "Gramas", value: 1 },
     { label: "Unidade", value: 2 },
     { label: "Ml", value: 3 },
   ];
-
   const [measureUnit, setMeasureUnit] = useState(dropdownData[0]);
-  console.log(measureUnit);
 
-  const router = useRouter();
-  const params = useLocalSearchParams();
+  useEffect(() => {
+    const loadData = async () => {
+      if (data) {
+        try {
+          const parsedData = JSON.parse(data as string);
 
-  const { data } = params;
+          // Verifica se está na despensa ANTES de renderizar para o botão ficar correto
+          const pantryCheck = await api.checkPantryItem(parsedData.foodId);
 
-  const [foodData, setMealData] = useState<FoodData | null>(null);
+          if (pantryCheck.inPantry && pantryCheck.item) {
+            setPantryId(pantryCheck.item.id);
+          }
 
-  const handleDropdownChange = (value: number) => {
-    const selectedItem = dropdownData.find((item) => item.value === value);
-    if (selectedItem) {
-      setMeasureUnit(selectedItem);
+          setFoodData(parsedData);
+          setQuantity(parsedData.quantity.toString());
+
+          if (parsedData.unit === "un") setMeasureUnit(dropdownData[1]);
+          else if (parsedData.unit === "ml") setMeasureUnit(dropdownData[2]);
+          else setMeasureUnit(dropdownData[0]);
+        } catch (e) {
+          console.error("Erro ao carregar dados:", e);
+        }
+      }
+    };
+    loadData();
+  }, [data]);
+
+  const handleUpdate = async () => {
+    if (!foodData || !quantity) return;
+    setLoading(true);
+    try {
+      const newQty = parseFloat(quantity);
+      await api.updateMealItem(foodData.id, {
+        quantidade: newQty,
+        unidade_medida:
+          measureUnit.label === "Unidade"
+            ? "un"
+            : measureUnit.label === "Ml"
+            ? "ml"
+            : "g",
+      });
+      Alert.alert("Sucesso", "Item atualizado!");
+      router.back();
+    } catch (error) {
+      Alert.alert("Erro", "Falha ao atualizar item.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (data) {
-      try {
-        const parsedData = JSON.parse(data as string);
-        setMealData(parsedData);
+  const handleDelete = async () => {
+    if (!foodData) return;
+    Alert.alert(
+      "Remover Item",
+      "Tem certeza que deseja remover este alimento?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Remover",
+          style: "destructive",
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.deleteMealItem(foodData.id);
+              router.back();
+            } catch (error) {
+              Alert.alert("Erro", "Falha ao remover item.");
+              setLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
 
-        // console.log("Nome da comida:", parsedData.mealName);
-        // console.log("Total de Calorias:", parsedData.calories);
-        // console.log("Peso:", parsedData.foodItems);
-      } catch (e) {
-        console.error("Erro ao fazer parse do JSON dos parâmetros:", e);
+  // Função para adicionar/remover da despensa
+  const handleTogglePantry = async (newState: boolean) => {
+    if (!foodData) return;
+
+    try {
+      if (newState) {
+        // Adicionar à despensa
+        const result = await api.addToPantry(foodData.foodId);
+        setPantryId(result.id); // Salva o ID da relação criada
+        Alert.alert("Adicionado", "Alimento adicionado à despensa!");
+      } else {
+        // Remover da despensa
+        if (pantryId) {
+          await api.removeFromPantry(pantryId);
+          setPantryId(null);
+          Alert.alert("Removido", "Removido da despensa.");
+        }
       }
+    } catch (error) {
+      console.error("Erro na despensa:", error);
+      Alert.alert("Erro", "Não foi possível atualizar a despensa.");
     }
-  }, [data]);
+  };
 
   if (!foodData) {
     return (
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: Colors.bg,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={Texts.body}>Carregando dados...</Text>
       </SafeAreaView>
     );
   }
+
+  const factor = (parseFloat(quantity) || 0) / foodData.quantity;
+  const displayCalories = Math.round(foodData.calories * factor);
+  const displayProtein = Math.round(foodData.protein * factor);
+  const displayCarbs = Math.round(foodData.carbs * factor);
+  const displayFats = Math.round(foodData.fats * factor);
 
   return (
     <SafeAreaView
@@ -97,7 +177,6 @@ export default function foodScreen() {
         paddingHorizontal: Spacing.md,
       }}
     >
-      {/* Background com linhas decorativas */}
       <Background />
       <KeyboardAvoidingView
         behavior={"padding"}
@@ -109,44 +188,62 @@ export default function foodScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.scrollContent}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <Header
-              backArrow
-                title={foodData.foodName}
-                subtitle={`${foodData.weight}g`}
+                backArrow
+                title={foodData.name}
+                subtitle={`${displayCalories} kcal`}
                 subtitleColor={Colors.correct}
               />
-              {/* // TODO adicionar funcionalidade de favorito com o backend */}
-              <Favorite />
+              {/* Componente Favorito agora controla a Despensa */}
+              <Favorite
+                initialState={!!pantryId}
+                onToggle={handleTogglePantry}
+              />
             </View>
 
-            {/* Container dos inputs */}
-            <View style={{gap: Spacing.lg}}>
-              <View style={{ flexDirection: "row", alignItems: 'flex-end', gap: Spacing.lg }}>
-                <View style={{justifyContent: 'center', alignItems: 'center', gap: Spacing.xs}}>
-                <Text style={Texts.body}>Quantidade: </Text>
-                <InputField placeholder="Peso"/>
+            <View style={{ gap: Spacing.lg }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-end",
+                  gap: Spacing.lg,
+                }}
+              >
+                <View style={styles.inputContainer}>
+                  <Text style={Texts.body}>Quantidade: </Text>
+                  <InputField
+                    placeholder="Peso"
+                    value={quantity}
+                    onChangeText={setQuantity}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
-              <DropdownSelector data={dropdownData} onValueChange={handleDropdownChange} placeholder="Medida"/>
+
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    onPress={handleUpdate}
+                    title={loading ? "Salvando..." : "Atualizar"}
+                    icon="check"
+                    bgColor={Colors.primary}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    onPress={handleDelete}
+                    title="Remover"
+                    bgColor={Colors.incorrect}
+                  />
+                </View>
               </View>
-              <Button onPress={() => null} title="Adicionar" icon="add"/>
-            </View>
-
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              {/* // TODO adicionar lógica para somatório correto de macros dependendo dos alimentos da refeição */}
-              <MacrosDonutLegend
-                protein={foodData.protein}
-                carbs={foodData.carbs}
-                fats={foodData.fats}
-              />
-
-              <MacroDonutChart
-                protein={foodData.protein}
-                carbs={foodData.carbs}
-                fats={foodData.fats}
-              />
             </View>
 
             <View style={{ gap: Spacing.md }}>
@@ -155,10 +252,25 @@ export default function foodScreen() {
                 <Text style={Texts.subtext}>Soma de todos os nutrientes</Text>
               </View>
               <MacrosTable
-                calories={foodData.calories}
-                protein={foodData.protein}
-                carbs={foodData.carbs}
-                fats={foodData.fats}
+                calories={displayCalories}
+                protein={displayProtein}
+                carbs={displayCarbs}
+                fats={displayFats}
+              />
+            </View>
+
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
+            >
+              <MacrosDonutLegend
+                protein={displayProtein}
+                carbs={displayCarbs}
+                fats={displayFats}
+              />
+              <MacroDonutChart
+                protein={displayProtein}
+                carbs={displayCarbs}
+                fats={displayFats}
               />
             </View>
           </View>
@@ -169,17 +281,22 @@ export default function foodScreen() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   scrollContent: {
     paddingTop: 24,
     paddingBottom: 24,
     gap: Spacing.xl,
   },
-  progressContainer: {
-    gap: Spacing.sm,
-  },
-  progressText: {
+  inputContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.xs,
+    flex: 1,
   },
 });

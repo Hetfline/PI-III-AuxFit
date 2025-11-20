@@ -1,7 +1,7 @@
 // * Componente de dropdown. Permite que sejam passados vários props que definem o seu placeholder, os seus dados, se haverá uma barra de pesquisa ou não, a função para quando o valor for mudado e o seu valor inicial como props.
 
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -18,7 +18,6 @@ interface DropdownSelectorProps {
   search?: boolean;
   onValueChange: (value: number) => void;
   initialValue?: number;
-  // initialValue: number || null;
 }
 
 export default function DropdownSelector({
@@ -28,9 +27,6 @@ export default function DropdownSelector({
   onValueChange,
   initialValue,
 }: DropdownSelectorProps) {
-  // const [value, setValue] = useState(
-  //   initialValue !== null ? initialValue.toString() : null
-  // );
   const [value, setValue] = useState(initialValue);
   const [isFocus, setIsFocus] = useState(false);
 
@@ -97,11 +93,10 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
     borderRadius: 40,
-    marginHorizontal: Spacing.xs,
+    
     marginVertical: 2,
     borderWidth: 0,
-    backgroundColor: Colors.border,
-    padding: 0,
+    backgroundColor: Colors.border
   },
   dropdownItemText: {
     color: Colors.text,

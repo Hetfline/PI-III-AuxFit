@@ -1,58 +1,79 @@
-// * Componente de refeição. Recebe o valor de nome da refeição totais como props.
-// TODO adicionar funcionalidade de renderizar os alimentos com base nos dados puxados do banco
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CheckBtn from "../universal/CheckBtn";
+import AddBtn from "../universal/AddBtn";
+import ProgressBar from "../universal/ProgressBar";
 
-// interface FoodItem {
-//   id: number;
-//   name: string;
-//   quantity: string;
-//   calories: string
-// }
+export interface FoodDisplayItem {
+  id: number;
+  name: string;
+  quantity: number;
+  unit: string;
+  calories: number;
+  protein?: number;
+  carbs?: number;
+  fats?: number;
+}
 
 interface MealProps {
   name: string;
+  metaCalories?: number; // Nova prop para a meta definida pelo usuário
+  foodItems: FoodDisplayItem[];
   increaseLogs: () => void;
   decreaseLogs: () => void;
   onPress: () => void;
+  onAddFood: () => void;
+  onFoodPress?: (item: FoodDisplayItem) => void;
+  onEdit?: () => void; // Nova prop para abrir o modal de edição
+  isCompleted: boolean;
 }
-
-// * Dados mockados para renderizar os componentes
-const foodItems = [
-  { id: 1, name: "Alimento 1", quantity: "150g", calories: 357 },
-  { id: 2, name: "Alimento 2", quantity: "100g", calories: 120 },
-  { id: 3, name: "Alimento 3", quantity: "50g", calories: 50 },
-];
-
-const totalFoodCalories = foodItems.reduce(
-  (sum, item) => sum + item.calories,
-  0
-);
 
 export default function Meal({
   name,
+  metaCalories = 0,
+  foodItems = [],
   increaseLogs,
   decreaseLogs,
   onPress,
+  onAddFood,
+  onFoodPress,
+  onEdit,
+  isCompleted = false,
 }: MealProps) {
+  
+  // Total calculado pela soma dos alimentos (o que tem dentro da marmita)
+  const sumFoodCalories = foodItems.reduce(
+    (sum, item) => sum + item.calories,
+    0
+  );
+
+  // O total visual para a barra de progresso é a Meta (se existir) ou a Soma (fallback)
+  const totalForProgress = metaCalories > 0 ? metaCalories : (sumFoodCalories > 0 ? sumFoodCalories : 1);
+
   const [currentCalories, setCurrentCalories] = useState(0);
-   const [isMealCompleted, setIsMealCompleted] = useState(false);
-  const [isFocus, setIsFocus] = useState(false); // state para lidar com o estado do componente (aberto e fechado)
-  const [isBtnChecked, setIsBtnChecked] = useState(false);
+  const [isMealCompleted, setIsMealCompleted] = useState(isCompleted);
+  const [isFocus, setIsFocus] = useState(false);
+
+  // Sincroniza quando a prop isCompleted muda
+  useEffect(() => {
+    setIsMealCompleted(isCompleted);
+    if (isCompleted) {
+      // Se está completo, "enche" a barra até o total de alimentos
+      setCurrentCalories(sumFoodCalories);
+    } else {
+      setCurrentCalories(0);
+    }
+  }, [isCompleted, sumFoodCalories]);
 
   const handleCheckBtnPress = () => {
     if (!isMealCompleted) {
-      setIsMealCompleted((prev) => !prev);
-      setIsBtnChecked((prev) => !prev);
-      setCurrentCalories(totalFoodCalories);
+      setIsMealCompleted(true);
+      setCurrentCalories(sumFoodCalories);
       increaseLogs();
     } else {
-      setIsMealCompleted((prev) => !prev);
-      setIsBtnChecked((prev) => !prev);
+      setIsMealCompleted(false);
       setCurrentCalories(0);
       decreaseLogs();
     }
@@ -63,36 +84,19 @@ export default function Meal({
   };
 
   const renderIcon = () => {
-    switch (name) {
-      case "Café da manhã":
-        return (
-          <MaterialIcons name="local-cafe" size={36} color={Colors.warning} />
-        );
-      case "Almoço":
-        return (
-          <MaterialIcons name="restaurant" size={36} color={Colors.correct} />
-        );
-      case "Lanche":
-        return (
-          <MaterialCommunityIcons
-            name="food-apple"
-            size={36}
-            color={Colors.incorrect}
-          />
-        );
-      case "Jantar":
-        return (
-          <MaterialIcons name="soup-kitchen" size={36} color={Colors.warning} />
-        );
-      case "Ceia":
-        return (
-          <MaterialIcons name="nightlight" size={36} color={Colors.secondary} />
-        );
-      default:
-        return (
-          <MaterialIcons name="fastfood" size={36} color={Colors.warning} />
-        );
-    }
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes("café") || lowerName.includes("cafe")) 
+      return <MaterialIcons name="local-cafe" size={36} color={Colors.warning} />;
+    if (lowerName.includes("almoço") || lowerName.includes("almoco")) 
+      return <MaterialIcons name="restaurant" size={36} color={Colors.correct} />;
+    if (lowerName.includes("lanche")) 
+      return <MaterialCommunityIcons name="food-apple" size={36} color={Colors.incorrect} />;
+    if (lowerName.includes("jantar")) 
+      return <MaterialIcons name="soup-kitchen" size={36} color={Colors.warning} />;
+    if (lowerName.includes("ceia")) 
+      return <MaterialIcons name="nightlight" size={36} color={Colors.secondary} />;
+    
+    return <MaterialIcons name="fastfood" size={36} color={Colors.warning} />;
   };
 
   return (
@@ -102,41 +106,34 @@ export default function Meal({
 
         <Pressable style={styles.progressContainer} onPress={onPress}>
           <View style={styles.progressText}>
-            <Text style={Texts.bodyBold}>{name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Text style={Texts.bodyBold}>{name}</Text>
+                {/* Ícone de Lápis para Editar (só aparece se a função for passada) */}
+                {onEdit && (
+                    <Pressable onPress={onEdit} hitSlop={15}>
+                        <MaterialCommunityIcons name="pencil" size={16} color={Colors.primary} />
+                    </Pressable>
+                )}
+            </View>
+            
+            {/* Texto de calorias: Soma Atual / Meta (ou Soma Total se não houver meta) */}
             <Text style={[Texts.subtext, {color: Colors.text}]}>
-              {currentCalories} / {totalFoodCalories} kcal
+                {Math.round(isMealCompleted ? sumFoodCalories : 0)} / {Math.round(metaCalories > 0 ? metaCalories : sumFoodCalories)} kcal
             </Text>
           </View>
 
-          {/* Barra de progresso */}
-          <View
-            style={[
-              styles.progressBarContainer,
-              {
-                backgroundColor: isMealCompleted
-                  ? Colors.warning
-                  : Colors.border,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.progressBar,
-                {
-                  width: `0%`,
-                  backgroundColor: Colors.warning,
-                },
-              ]}
-            >
-              <Text style={{ color: Colors.warning }}>a</Text>
-            </View>
-          </View>
+          <ProgressBar 
+            progress={currentCalories} 
+            total={totalForProgress} 
+            fillColor={Colors.warning} 
+            progressTextColor={Colors.bg}
+          />
         </Pressable>
 
         <CheckBtn
           size={32}
           onPress={handleCheckBtnPress}
-          isChecked={isBtnChecked}
+          isChecked={isMealCompleted}
         />
       </View>
 
@@ -167,36 +164,51 @@ export default function Meal({
         </View>
       </Pressable>
 
-      {isFocus &&
-        foodItems.map((item) => (
-          <Pressable
-            key={item.id} // * nunca se pode esquecer de colocar a chave de cada item individual quando se faz um map()
-            style={styles.food}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={[Texts.subtext, { color: Colors.text }]}>
-                {item.name}
-              </Text>
-              <Text style={[Texts.subtext, { color: Colors.correct }]}>
-                {item.quantity}
-              </Text>
-            </View>
-
-            <Text
-              style={[
-                Texts.subtextBold,
-                { color: Colors.text, textAlign: "right" },
-              ]}
+      {isFocus && (
+        <>
+          {foodItems.map((item) => (
+            <Pressable
+              key={item.id}
+              style={styles.food}
+              onPress={() => onFoodPress && onFoodPress(item)}
             >
-              {item.calories} kcal
+              <View style={{ flex: 1 }}>
+                <Text style={[Texts.subtext, { color: Colors.text }]}>
+                  {item.name}
+                </Text>
+                <Text style={[Texts.subtext, { color: Colors.correct }]}>
+                  {item.quantity}g
+                </Text>
+              </View>
+
+              <Text
+                style={[
+                  Texts.subtextBold,
+                  { color: Colors.text, textAlign: "right" },
+                ]}
+              >
+                {Math.round(item.calories)} kcal
+              </Text>
+              
+              <MaterialIcons
+                name="arrow-right"
+                size={24}
+                color={Colors.primary}
+              />
+            </Pressable>
+          ))}
+
+          {foodItems.length === 0 && (
+            <Text style={[Texts.subtext, { textAlign: 'center', padding: 10, color: Colors.subtext }]}>
+                Nenhum alimento adicionado.
             </Text>
-            <MaterialIcons
-              name="arrow-right"
-              size={24}
-              color={Colors.primary}
-            />
-          </Pressable>
-        ))}
+          )}
+
+          <View style={{ alignItems: 'flex-end', marginTop: Spacing.sm, width: '100%' }}>
+             <AddBtn onPress={onAddFood} size={24} />
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -218,25 +230,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: Spacing.sm,
+    width: '100%',
   },
   progressContainer: {
-    flexGrow: 1,
+    flex: 1,
+    flexShrink: 1,
     gap: Spacing.xs,
-    height: 40,
+    marginHorizontal: Spacing.xs,
   },
   progressText: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: 'baseline'
-  },
-  progressBarContainer: {
-    borderRadius: 100,
-    flexDirection: "row",
-    height: 8,
-  },
-  progressBar: {
-    height: 8,
-    borderRadius: 100,
+    alignItems: 'baseline',
+    marginBottom: 2,
   },
   foodQuantityContainer: {
     flexDirection: "row",

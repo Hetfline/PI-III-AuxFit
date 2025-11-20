@@ -22,7 +22,7 @@ export default function MacroDonutChart({
     { value: fats, label: "Gorduras", color: Colors.warning },
   ];
 
-  const totalCalories = protein * 4 + carbs * 4 + fats * 9;
+  const totalCalories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
   return (
     <View style={styles.container}>

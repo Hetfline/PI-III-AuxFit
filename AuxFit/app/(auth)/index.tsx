@@ -84,7 +84,8 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={"padding"} style={{ flex: 1 }}
+      behavior={"padding"}
+      style={styles.container}
     >
       <Background />
       <ScrollView

@@ -1,35 +1,40 @@
-// * Componente de círculo de progressão para exibir a distribuição de macronutrientes. Recebe os valores de macros (proteínas, carboidratos e gorduras),  quantidade de registros, calorias totais e calorias ingeridas como props.
-
 import { View, StyleSheet, Text } from "react-native";
-import { Colors, Spacing, Texts, Shadows } from "@/constants/Styles";
+import { Colors, Spacing, Texts } from "@/constants/Styles";
 import CircularProgress from "react-native-circular-progress-indicator";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface MacrosProgressProps {
-  calories: number;
   logs: number;
+  caloriesGoal: number;
   caloriesIngested: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-  
+  // Macros (Meta vs Atual)
+  proteinGoal: number;
+  proteinCurrent: number;
+  carbsGoal: number;
+  carbsCurrent: number;
+  fatsGoal: number;
+  fatsCurrent: number;
 }
 
 export default function MacrosProgress({
-  calories,
   logs,
+  caloriesGoal,
   caloriesIngested,
-  protein,
-  carbs,
-  fats,
+  proteinGoal,
+  proteinCurrent,
+  carbsGoal,
+  carbsCurrent,
+  fatsGoal,
+  fatsCurrent,
 }: MacrosProgressProps) {
-  const chartData = [
-    { value: calories, label: "Calorias", color: Colors.accent },
-  ];
+  
+  // Função auxiliar para calcular porcentagem sem divisão por zero
+  const getPercent = (current: number, goal: number) => {
+    if (goal <= 0) return 0;
+    return Math.min((current / goal) * 100, 100);
+  };
 
-  let currentProtein: number = 75;
-  let currentCarbs: number = 200;
-  let currentFats: number = 16;
+  const remainingCalories = Math.max(0, caloriesGoal - caloriesIngested);
 
   return (
     <View style={styles.container}>
@@ -44,17 +49,14 @@ export default function MacrosProgress({
         <View style={styles.progressContainer}>
           <CircularProgress
             value={caloriesIngested}
-            maxValue={calories}
+            maxValue={caloriesGoal}
             showProgressValue={false}
             radius={65}
-            // clockwise={false}
-            // rotation={269} // caso for deixa o semi-círculo, o valor aqui fica 269
             activeStrokeWidth={12}
             inActiveStrokeWidth={12}
             activeStrokeColor={Colors.accent}
             activeStrokeSecondaryColor={Colors.warning}
             inActiveStrokeColor={Colors.border}
-            progressValueColor={Colors.text}
           />
           <View style={styles.calories}>
             <MaterialCommunityIcons
@@ -63,14 +65,17 @@ export default function MacrosProgress({
               color={Colors.accent}
             />
             <Text style={[Texts.bodyBold, { color: Colors.text }]}>
-              {calories} kcal
+              {Math.round(caloriesIngested)} kcal
+            </Text>
+            <Text style={[Texts.subtext, { color: Colors.subtext, fontSize: 10 }]}>
+               de {caloriesGoal}
             </Text>
           </View>
         </View>
 
         <View style={styles.infoContainer}>
           <Text style={[Texts.bodyBold, { color: Colors.accent }]}>
-            {Math.round(calories - caloriesIngested)}{" "}
+            {Math.round(remainingCalories)}{" "}
             <MaterialCommunityIcons
               name="fire"
               size={16}
@@ -88,7 +93,7 @@ export default function MacrosProgress({
         {/* Barra de Proteínas */}
         <View style={styles.macros}>
           <Text style={[Texts.subtext, { color: Colors.text }]}>
-            {currentProtein} / {protein}
+            {Math.round(proteinCurrent)} / {proteinGoal}g
           </Text>
 
           <View style={styles.macroProgressBar}>
@@ -96,22 +101,19 @@ export default function MacrosProgress({
               style={[
                 styles.macroProgress,
                 {
-                  width: `${(currentProtein * 100) / protein}%`,
+                  width: `${getPercent(proteinCurrent, proteinGoal)}%`,
                   backgroundColor: Colors.correct,
                 },
               ]}
-            >
-              <Text style={{ color: "transparent" }}>a</Text>
-            </View>
+            />
           </View>
           <Text style={[Texts.subtext, { color: Colors.text }]}>Proteínas</Text>
         </View>
 
         {/* Barra de Carboidratos */}
-
         <View style={styles.macros}>
           <Text style={[Texts.subtext, { color: Colors.text }]}>
-            {currentCarbs} / {carbs}
+            {Math.round(carbsCurrent)} / {carbsGoal}g
           </Text>
 
           <View style={styles.macroProgressBar}>
@@ -119,13 +121,11 @@ export default function MacrosProgress({
               style={[
                 styles.macroProgress,
                 {
-                  width: `${(currentCarbs * 100) / carbs}%`,
+                  width: `${getPercent(carbsCurrent, carbsGoal)}%`,
                   backgroundColor: Colors.secondary,
                 },
               ]}
-            >
-              <Text style={{ color: "transparent" }}>a</Text>
-            </View>
+            />
           </View>
           <Text style={[Texts.subtext, { color: Colors.text }]}>
             Carboidratos
@@ -133,10 +133,9 @@ export default function MacrosProgress({
         </View>
 
         {/* Barra de Gorduras */}
-
         <View style={styles.macros}>
           <Text style={[Texts.subtext, { color: Colors.text }]}>
-            {currentFats} / {fats}
+            {Math.round(fatsCurrent)} / {fatsGoal}g
           </Text>
 
           <View style={styles.macroProgressBar}>
@@ -144,13 +143,11 @@ export default function MacrosProgress({
               style={[
                 styles.macroProgress,
                 {
-                  width: `${(currentFats * 100) / fats}%`,
+                  width: `${getPercent(fatsCurrent, fatsGoal)}%`,
                   backgroundColor: Colors.warning,
                 },
               ]}
-            >
-              <Text style={{ color: "transparent" }}>a</Text>
-            </View>
+            />
           </View>
           <Text style={[Texts.subtext, { color: Colors.text }]}>Gorduras</Text>
         </View>
@@ -178,12 +175,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   infoContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   calories: {
     position: "absolute",
-    top: 0, // caso for deixar o semi-círculo, tem que deixar aqui com o valor 30
+    top: 0, 
     left: 0,
     right: 0,
     bottom: 0,
@@ -207,10 +205,10 @@ const styles = StyleSheet.create({
     height: 8,
     width: 80,
     backgroundColor: Colors.border,
+    overflow: 'hidden', // Importante para a barra interna não vazar
   },
   macroProgress: {
     height: 8,
-    maxWidth: 100,
     borderRadius: 100,
   },
 });

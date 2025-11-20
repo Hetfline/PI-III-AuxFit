@@ -1,25 +1,43 @@
-// * Componente de favorito. Ele consiste de uma simples função que muda o valor do useState para que a aparência do botão mude
-// TODO adicionar função futuramente para mudar o estado no banco também
+// * Componente de favorito (Geladeira).
+// Gerencia o estado visual de item na geladeira/despensa.
 
-import { StyleSheet, Text, View, Pressable } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 import { useState } from "react";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Colors, Spacing, Texts } from "@/constants/Styles";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Colors, Spacing } from "@/constants/Styles";
 
-export default function Favorite() {
-  const [isFavorite, setIsFavorite] = useState(false);
+interface FavoriteBtnProps {
+  initialState?: boolean;
+  onToggle?: (newState: boolean) => void;
+}
+
+export default function Favorite({ initialState = false, onToggle }: FavoriteBtnProps) {
+  const [isFavorite, setIsFavorite] = useState(initialState);
+
+  const handlePress = () => {
+    const newState = !isFavorite;
+    setIsFavorite(newState);
+    if (onToggle) {
+      onToggle(newState);
+    }
+  };
 
   return (
     <Pressable
-      onPress={() => setIsFavorite((prev) => !prev)}
+      onPress={handlePress}
       style={styles.container}
+      hitSlop={10}
     >
       {isFavorite ? (
-        <MaterialIcons name="favorite" size={32} color={Colors.incorrect} />
+        <MaterialCommunityIcons 
+          name="fridge" 
+          size={30} 
+          color={Colors.accent} 
+        />
       ) : (
-        <MaterialIcons
-          name="favorite-border"
-          size={32}
+        <MaterialCommunityIcons
+          name="fridge-outline"
+          size={30}
           color={Colors.subtext}
         />
       )}
@@ -31,7 +49,6 @@ const styles = StyleSheet.create({
   container: {
     width: Spacing.lg,
     height: Spacing.lg,
-    // backgroundColor: Colors.primary,
     justifyContent: "center",
     alignItems: "center",
   },

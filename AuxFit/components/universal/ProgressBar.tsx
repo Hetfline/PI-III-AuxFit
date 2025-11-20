@@ -1,12 +1,11 @@
 import { View, StyleSheet, Text } from "react-native";
-import { Colors, Spacing, Texts } from "@/constants/Styles";
-import { useState } from "react";
+import { Colors, Texts } from "@/constants/Styles";
 
 interface ProgressBarProps {
   fillColor: string;
   progressTextColor: string;
-  progress: number; // deve ter o valor de 0.0 a 1.0
-  total: number;
+  progress: number; // Valor atual (ex: 500 kcal)
+  total: number;    // Valor total (ex: 2000 kcal)
 }
 
 export default function ProgressBar({
@@ -15,9 +14,9 @@ export default function ProgressBar({
   progress,
   total,
 }: ProgressBarProps) {
-  const [fillProgress, setFillProgress] = useState(progress);
-
-  const percentage = Math.min((progress / total) * 100, 100);
+  // Evita divisão por zero
+  const safeTotal = total > 0 ? total : 1;
+  const percentage = Math.min((progress / safeTotal) * 100, 100);
 
   return (
     <View style={styles.progressBar}>
@@ -28,10 +27,15 @@ export default function ProgressBar({
             { width: `${percentage}%`, backgroundColor: fillColor },
           ]}
         >
-          {/* Garante que o texto dentro de fill não corte */}
-          {progress > 35 && (
-            <Text style={[Texts.bodyBold, { color: progressTextColor }]}>
-              {progress}
+          {/* Exibe o texto dentro da barra apenas se houver espaço suficiente (>35%) */}
+          {percentage > 35 && (
+            <Text
+              style={[
+                Texts.bodyBold,
+                { color: progressTextColor, fontSize: 10, lineHeight: 12 },
+              ]}
+            >
+              {Math.round(percentage)} %
             </Text>
           )}
         </View>
@@ -43,19 +47,16 @@ export default function ProgressBar({
 const styles = StyleSheet.create({
   progressBar: {
     width: "100%",
-    height: 20,
-    backgroundColor: Colors.bgLight,
+    height: 14, // Altura ajustada para caber no card sem ocupar muito espaço
+    backgroundColor: Colors.bgLight, // Cor de fundo da barra vazia
     borderRadius: 15,
     overflow: "hidden",
+    marginTop: 4, // Espaçamento superior
   },
   progressFill: {
     height: "100%",
     justifyContent: "center",
     borderRadius: 15,
     alignItems: "center",
-  },
-  progressText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
 });

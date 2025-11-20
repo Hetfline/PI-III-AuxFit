@@ -39,9 +39,15 @@ export default function MacrosDonutLegend({
         <View
           style={[styles.legendLabel, { backgroundColor: Colors.correct }]}
         ></View>
-        <Text style={[Texts.subtext, { color: Colors.text }]}>
-          Proteínas: {protein}%
-        </Text>
+        {protein ? (
+          <Text style={[Texts.subtext, { color: Colors.text }]}>
+            Proteínas: {protein}%
+          </Text>
+        ) : (
+          <Text style={[Texts.subtext, { color: Colors.text }]}>
+            Proteínas: 0
+          </Text>
+        )}
       </View>
 
       {/* Legenda dos Carboidratos */}
@@ -49,9 +55,15 @@ export default function MacrosDonutLegend({
         <View
           style={[styles.legendLabel, { backgroundColor: Colors.secondary }]}
         ></View>
-        <Text style={[Texts.subtext, { color: Colors.text }]}>
-          Carboidratos: {carbs}%
-        </Text>
+        {carbs ? (
+          <Text style={[Texts.subtext, { color: Colors.text }]}>
+            Carboidratos: {carbs}%
+          </Text>
+        ) : (
+          <Text style={[Texts.subtext, { color: Colors.text }]}>
+            Carboidratos: 0
+          </Text>
+        )}
       </View>
 
       {/* Legenda das Gorduras */}
@@ -59,9 +71,13 @@ export default function MacrosDonutLegend({
         <View
           style={[styles.legendLabel, { backgroundColor: Colors.warning }]}
         ></View>
-        <Text style={[Texts.subtext, { color: Colors.text }]}>
+        {fats ? <Text style={[Texts.subtext, { color: Colors.text }]}>
           Gorduras: {fats}%
+        </Text>:
+        <Text style={[Texts.subtext, { color: Colors.text }]}>
+          Gorduras: 0
         </Text>
+        }
       </View>
     </View>
   );
