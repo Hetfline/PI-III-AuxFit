@@ -14,6 +14,18 @@ const formatText = (text: string | undefined) => {
   return text.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 };
 
+// Função auxiliar para converter os IDs do app para os valores exatos do Banco
+const mapExperienceToDB = (value: string | undefined) => {
+    if (!value) return 'Iniciante'; // Default seguro
+    
+    const normalized = value.toLowerCase();
+    if (normalized.includes('iniciante')) return 'Iniciante';
+    if (normalized.includes('intermediar') || normalized.includes('intermediário')) return 'Intermediário';
+    if (normalized.includes('avancado') || normalized.includes('avançado')) return 'Avançado';
+    
+    return 'Iniciante'; // Fallback
+};
+
 export default function SummaryScreen() {
   const router = useRouter();
   const { onboardingData: data } = useOnboarding();
@@ -22,16 +34,34 @@ export default function SummaryScreen() {
   const handleFinish = async () => {
     setLoading(true);
     try {
+      // 1. Mapeamento correto para o Schema do Banco de Dados
+      // IMPORTANTE: As chaves aqui devem ser IGUAIS às colunas do banco 'perfil_treino'
       const trainingProfile = {
-        nivel_experiencia: data.nivel_experiencia,
-        frequencia_treino: data.dias_treino,
-        objetivo_treino: data.objetivo,
-        problemas_saude: data.lesoes?.join(", "),
-        duracao_treino: parseInt(data.duracao_treino || "60"),
+        // Mapeia "intermediario" -> "Intermediário" (para o CHECK constraint)
+        nivel_experiencia: mapExperienceToDB(data.nivel_experiencia),
         
+        // Mapeia dias_treino -> dias_por_semana (integer)
+        dias_por_semana: parseInt(data.dias_treino || "3"), 
+        
+        // Mapeia duracao_treino -> tempo_disponivel_minutos (integer)
+        // Remove caracteres não numéricos (ex: "60 min" -> 60)
+        tempo_disponivel_minutos: parseInt(data.duracao_treino?.replace(/\D/g, '') || "60"), 
+        
+        // Mapeia lesoes -> limitacoes_lesoes (ARRAY)
+        limitacoes_lesoes: data.lesoes || [], 
+        
+        // Mapeia preferencia_treino -> estilo_treino (text)
+        estilo_treino: data.preferencia_treino?.toLowerCase() || 'tradicional',
+        
+        // Mapeia foco_muscular -> grupos_musculares_foco (ARRAY)
+        grupos_musculares_foco: data.foco_muscular || [],
+
+        // Mapeia equipamentos -> equipamentos_disponiveis (ARRAY)
+        equipamentos_disponiveis: data.equipamentos || [],
       };
 
-      // Chama a API criada
+      console.log("Enviando perfil de treino corrigido:", trainingProfile);
+
       await api.saveTrainingProfile(trainingProfile);
 
       Alert.alert("Tudo pronto!", "Seu perfil de treino foi criado com sucesso.", [
@@ -39,8 +69,8 @@ export default function SummaryScreen() {
       ]);
 
     } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível salvar seu perfil. Tente novamente.");
+      console.error("Erro ao salvar perfil:", error);
+      Alert.alert("Erro", "Não foi possível salvar seu perfil. Verifique sua conexão.");
     } finally {
       setLoading(false);
     }
@@ -84,12 +114,12 @@ export default function SummaryScreen() {
             />
             <SummaryItem 
               label="Frequência" 
-              value={formatText(data.dias_treino)?.replace("Dias", "dias / sem")} 
+              value={`${data.dias_treino || 3} dias / sem`} 
               icon="calendar-today" 
             />
             <SummaryItem 
               label="Duração" 
-              value={formatText(data.duracao_treino)?.replace("Min", "minutos")} 
+              value={`${data.duracao_treino || 60} minutos`} 
               icon="timer" 
             />
             <SummaryItem 
@@ -99,7 +129,7 @@ export default function SummaryScreen() {
             />
             <SummaryItem 
               label="Foco Muscular" 
-              value={data.foco_muscular?.length ? `${data.foco_muscular.length} grupos selecionados` : "Geral"} 
+              value={data.foco_muscular?.length ? `${data.foco_muscular.length} grupos` : "Geral"} 
               icon="accessibility" 
             />
             <SummaryItem 
@@ -116,6 +146,7 @@ export default function SummaryScreen() {
                 onPress={handleFinish} 
                 bgColor={Colors.primary} 
                 color={Colors.bg}
+                
             />
             {!loading && (
               <Button 
@@ -123,7 +154,6 @@ export default function SummaryScreen() {
                   onPress={() => router.back()} 
                   bgColor="transparent" 
                   color={Colors.subtext}
-                  
               />
             )}
         </View>

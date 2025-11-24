@@ -53,7 +53,7 @@ export default function StyleScreen() {
 
     updateOnboardingData("preferencia_treino", selectedId);
 
-    router.push("/onboarding/workout/injuriesScreen");
+    router.push("/onboarding/workout/summaryScreen");
   };
 
   return (
