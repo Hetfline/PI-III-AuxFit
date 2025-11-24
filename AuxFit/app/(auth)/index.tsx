@@ -9,6 +9,7 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
@@ -83,100 +84,124 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={"padding"} style={{ flex: 1 }}
-    >
+    <View style={styles.container}>
       <Background />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
       >
-        <Text style={[Texts.title, styles.title]}>
-          {isLogin ? "LOGIN" : "CADASTRO"}
-        </Text>
-
-        <View style={styles.formContainer}>
-          {!isLogin && (
-            <InputField
-              icon="person"
-              placeholder="Nome"
-              value={name}
-              onChangeText={setName}
-              autoCapitalize="words"
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/icons/logo/logoOnboarding.png")}
+              style={styles.logo}
+              resizeMode="contain"
             />
-          )}
+          </View>
 
-          <InputField
-            icon="email"
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+          <Text style={[Texts.title, styles.title]}>
+            {isLogin ? "LOGIN" : "CADASTRO"}
+          </Text>
 
-          <InputField
-            icon="lock"
-            placeholder="Senha"
-            password
-            value={password}
-            onChangeText={setPassword}
-            autoCapitalize="none"
-          />
+          <View style={styles.formContainer}>
+            {!isLogin && (
+              <InputField
+                icon="person"
+                placeholder="Nome"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+              />
+            )}
 
-          {!isLogin && (
             <InputField
-              icon="lock"
-              placeholder="Confirmar senha"
-              password
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              icon="email"
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
               autoCapitalize="none"
             />
-          )}
-        </View>
 
-        <View style={styles.buttonContainer}>
-          {loading ? (
-            <ActivityIndicator size="large" color={Colors.primary} />
-          ) : (
-            <Button
-              title={isLogin ? "Entrar" : "Cadastrar"}
-              onPress={handleSubmit}
-              bgColor={Colors.primary}
-              color={Colors.bg}
+            <InputField
+              icon="lock"
+              placeholder="Senha"
+              password
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
             />
-          )}
-        </View>
 
-        <View style={styles.linksContainer}>
-          {isLogin ? (
-            <View style={styles.linkRow}>
-              <Text style={[Texts.body, { color: Colors.text }]}>
-                Não tem uma conta?{" "}
-              </Text>
-              <Pressable onPress={toggleMode}>
-                <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
-                  Cadastre-se
+            {!isLogin && (
+              <InputField
+                icon="lock"
+                placeholder="Confirmar senha"
+                password
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                autoCapitalize="none"
+              />
+            )}
+          </View>
+
+          <View style={styles.buttonContainer}>
+            {loading ? (
+              <ActivityIndicator size="large" color={Colors.primary} />
+            ) : (
+              <Button
+                title={isLogin ? "Entrar" : "Cadastrar"}
+                onPress={handleSubmit}
+                bgColor={Colors.primary}
+                color={Colors.bg}
+              />
+            )}
+          </View>
+
+          <View style={styles.linksContainer}>
+            {isLogin ? (
+              <>
+                <View style={styles.linkRow}>
+                  <Text style={[Texts.body, { color: Colors.text }]}>
+                    Não tem uma conta?{" "}
+                  </Text>
+                  <Pressable onPress={toggleMode}>
+                    <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
+                      Cadastre-se
+                    </Text>
+                  </Pressable>
+                </View>
+                <View style={styles.linkRow}>
+                  <Text style={[Texts.body, { color: Colors.text }]}>
+                    Com preguiça?{" "}
+                  </Text>
+                  <Pressable onPress={() => console.log("Seguir sem conta")}>
+                    <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
+                      Seguir sem conta
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
+            ) : (
+              <View style={styles.linkRow}>
+                <Text style={[Texts.body, { color: Colors.text }]}>
+                  Já tem uma conta?{" "}
                 </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <View style={styles.linkRow}>
-              <Text style={[Texts.body, { color: Colors.text }]}>
-                Já tem uma conta?{" "}
-              </Text>
-              <Pressable onPress={toggleMode}>
-                <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
-                  Conecte-se
-                </Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+                <Pressable onPress={toggleMode}>
+                  <Text style={[Texts.bodyBold, { color: Colors.primary }]}>
+                    Conecte-se
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -184,6 +209,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -193,7 +221,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   logo: {
     width: 200,

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Background from '@/components/universal/Background';
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import { WeightChart } from '@/components/profile/WeightChart';
+import DietTab from '@/components/profile/DietTab/dietTab';
 import { Colors, Spacing, Texts } from '@/constants/Styles';
 
 export default function ProfileScreen() {
@@ -36,7 +37,7 @@ export default function ProfileScreen() {
       case 'dieta':
         return (
           <View style={styles.tabContent}>
-            <Text style={Texts.subtitle}>Conteúdo de Dieta</Text>
+            <DietTab />
           </View>
         );
       
