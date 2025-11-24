@@ -21,7 +21,7 @@ interface Message {
   text: string;
   sender: "user" | "bot";
 }
-const N8N_URL = "http://192.168.89.122:5678/webhook/chatbot";
+const N8N_URL = "http://192.168.89.122:5678/webhook-test/gerar-treino";
 
 async function sendMessageToBot(message: string, sessionId: string) {
   try {
@@ -126,16 +126,14 @@ export default function ChatScreen() {
         item.sender === "user" ? styles.userMsg : styles.botMsg,
       ]}
     >
+      {/* Container pra quando o bot mandar a mensagem */}
       {item.sender === "bot" ? (
         <Markdown
-          // 💡 Adicionado wordBreak e flexWrap para o Markdown
           style={{
             body: {
               color: Colors.text,
               fontSize: Texts.body.fontSize,
               fontFamily: Texts.body.fontFamily,
-              // flexWrap: 'wrap' não é diretamente suportado no style 'body' do MarkdownDisplay
-              // mas a quebra de palavra já é geralmente gerenciada pelo Text subjacente
             },
             strong: {
               fontWeight: "bold",
@@ -144,13 +142,10 @@ export default function ChatScreen() {
             paragraph: {
               marginTop: 0,
               marginBottom: 8,
-              flexShrink: 1, // 💡 Importante para o texto não vazar
+              flexShrink: 1,
             },
-            text: { // 💡 Estilo adicional para garantir a quebra de texto em strings longas
+            text: {
               flexWrap: 'wrap',
-              // Em Android, 'wordBreak: break-word' não é nativo, mas 'flexWrap' com 'flexShrink'
-              // no container pai (messageBubble) geralmente é suficiente.
-              // Para iOS, 'wordBreak' pode ter efeito, mas o padrão já é bom.
             }
           }}
         >
@@ -158,7 +153,6 @@ export default function ChatScreen() {
         </Markdown>
       ) : (
         <Text style={[Texts.body, styles.userText, styles.messageTextContent]}> 
-          {/* 💡 Adicionado styles.messageTextContent aqui também */}
           {item.text}
         </Text>
       )}

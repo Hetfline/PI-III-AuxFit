@@ -20,7 +20,7 @@ export default function WeightScreen() {
   const [selectedDecimal, setSelectedDecimal] = useState(0);
 
   const handleBack = () => {
-    router.back();
+    router.replace("/onboarding/genderScreen");
   };
 
   const handleNext = () => {

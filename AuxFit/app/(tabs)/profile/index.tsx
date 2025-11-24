@@ -1,52 +1,127 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Background from '@/components/universal/Background';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import { WeightChart } from '@/components/profile/WeightChart';
-import { Colors, Spacing, Texts } from '@/constants/Styles';
+import React, { useState, useCallback } from "react";
+import { View, StyleSheet, ScrollView, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect, useRouter } from "expo-router";
+
+import Background from "@/components/universal/Background";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileDietTab from "@/components/profile/ProfileDietTab";
+import ProfileGeneralTab from "@/components/profile/ProfileGeneralTab";
+import ProfileTabSelector from "@/components/profile/ProfileTabSelector";
+import ProfileWorkoutTab from "@/components/profile/ProfileWorkoutTab";
+
+import { Colors, Spacing } from "@/constants/Styles";
+import { api } from "@/services/api";
+import { authStorage } from "@/services/auth-storage";
 
 export default function ProfileScreen() {
-  const [activeTab, setActiveTab] = useState<'geral' | 'dieta' | 'treino'>('geral');
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"geral" | "dieta" | "treino">("geral");
 
-  // Dados mockados - depois virão do contexto/backend
-  const userData = {
-    name: 'Nome de usuário',
-    photo: undefined,
-    date: 'Segunda-feira, set. 15',
-    streak: 3,
-    caloriesConsumed: 2100,
-    caloriesGoal: 3000,
-    waterConsumed: 2500,
-    waterGoal: 3500,
-    initialWeight: 98.0,
-    currentWeight: 98.0,
-    goalWeight: 95.0,
+  // Estados dos dados globais do perfil
+  const [userData, setUserData] = useState({
+    name: "",
+    date: "",
+    caloriesConsumed: 0,
+    caloriesGoal: 0,
+    waterConsumed: 0,
+    waterGoal: 2500, // Meta padrão de água, ou buscar do perfil alimentar
+  });
+
+  // Função para carregar dados (Usuário, Água, Calorias)
+  const loadProfileData = async () => {
+    try {
+      // 1. Dados do Usuário
+      const user = await api.me();
+      
+      // 2. Progresso de Hoje (Água)
+      const progress = await api.getTodayWaterProgress();
+      
+      // 3. Calorias (Somar refeições do dia)
+      const meals = await api.getMeals();
+      
+      let consumed = 0;
+      let goal = 0;
+
+      // Cálculo simples de calorias consumidas e meta total baseada na soma das metas das refeições
+      meals.forEach((meal: any) => {
+        goal += Number(meal.meta_calorias || 0);
+        
+        if (meal.refeicao_itens) {
+           meal.refeicao_itens.forEach((item: any) => {
+              // Verifica se alimento existe e tem calorias
+              if (item.alimentos) {
+                 const cals = item.alimentos.calorias || 0;
+                 const qtd = item.quantidade || 0;
+                 
+                 // CORREÇÃO: Normaliza para base 100g (fator = quantidade / 100)
+                 // Se a unidade for 'un', assume 1un = 100 da base ou ajuste conforme lógica do app
+                 // Para manter consistência com a tela de Dieta:
+                 const factor = qtd / 100;
+                 
+                 consumed += cals * factor; 
+              }
+           });
+        }
+      });
+
+      // Formatar data atual
+      const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'short', day: 'numeric' };
+      const formattedDate = new Date().toLocaleDateString('pt-BR', dateOptions);
+
+      setUserData({
+        name: user?.nome || "Usuário",
+        date: formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1),
+        caloriesConsumed: consumed,
+        caloriesGoal: goal > 0 ? goal : 2000, // Default se não tiver meta
+        waterConsumed: progress?.agua_ml || 0,
+        waterGoal: 2500, // Poderia buscar do PerfilAlimentarController se implementado get
+      });
+
+    } catch (error) {
+      console.log("Erro ao carregar perfil", error);
+    }
+  };
+
+  // Recarregar sempre que a tela ganhar foco
+  useFocusEffect(
+    useCallback(() => {
+      loadProfileData();
+    }, [])
+  );
+
+  const handleLogout = async () => {
+    try {
+      await authStorage.removeToken();
+      router.replace("/(auth)");
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível sair.");
+    }
   };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'geral':
+      case "geral":
         return (
-          <View style={styles.tabContent}>
-            <WeightChart />
+          <View style={styles.tabContentWrapper}>
+            <ProfileGeneralTab />
           </View>
         );
-      
-      case 'dieta':
+
+      case "dieta":
         return (
-          <View style={styles.tabContent}>
-            <Text style={Texts.subtitle}>Conteúdo de Dieta</Text>
+          <View style={styles.tabContentWrapper}>
+            <ProfileDietTab />
           </View>
         );
-      
-      case 'treino':
+
+      case "treino":
         return (
-          <View style={styles.tabContent}>
-            <Text style={Texts.subtitle}>Conteúdo de Treino</Text>
+          <View style={styles.tabContentWrapper}>
+            <ProfileWorkoutTab />
           </View>
         );
-      
+
       default:
         return null;
     }
@@ -62,49 +137,26 @@ export default function ProfileScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header com foto, nome, streak e barras */}
+          {/* Header com Avatar e Barras de Progresso e Logout */}
           <ProfileHeader
             userName={userData.name}
-            userPhoto={userData.photo}
             date={userData.date}
-            streak={userData.streak}
             caloriesConsumed={userData.caloriesConsumed}
             caloriesGoal={userData.caloriesGoal}
             waterConsumed={userData.waterConsumed}
             waterGoal={userData.waterGoal}
+            onLogout={handleLogout}
           />
 
-          {/* Tabs */}
-          <View style={styles.tabsContainer}>
-            <Pressable
-              style={[styles.tab, activeTab === 'geral' && styles.tabActive]}
-              onPress={() => setActiveTab('geral')}
-            >
-              <Text style={[styles.tabText, activeTab === 'geral' && styles.tabTextActive]}>
-                Geral
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[styles.tab, activeTab === 'dieta' && styles.tabActive]}
-              onPress={() => setActiveTab('dieta')}
-            >
-              <Text style={[styles.tabText, activeTab === 'dieta' && styles.tabTextActive]}>
-                Dieta
-              </Text>
-            </Pressable>
-
-            <Pressable
-              style={[styles.tab, activeTab === 'treino' && styles.tabActive]}
-              onPress={() => setActiveTab('treino')}
-            >
-              <Text style={[styles.tabText, activeTab === 'treino' && styles.tabTextActive]}>
-                Treino
-              </Text>
-            </Pressable>
+          {/* Abas de Navegação com TabSelector */}
+          <View>
+            <ProfileTabSelector
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
           </View>
 
-          {/* Conteúdo da tab ativa */}
+          {/* Renderização do Conteúdo da Aba Ativa */}
           {renderTabContent()}
         </ScrollView>
       </View>
@@ -116,47 +168,21 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.bg,
+    paddingHorizontal: Spacing.sm,
   },
   container: {
     flex: 1,
-    position: 'relative',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100, // Espaço para bottom tab bar
-    gap: Spacing.lg,
+    paddingBottom: 100,
+    gap: Spacing.md,
   },
-  tabsContainer: {
-    top: -45,
-    flexDirection: 'row',
+
+  tabContentWrapper: {
+    marginHorizontal: Spacing.sm,
     marginTop: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#999999',
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: Colors.primary,
-  },
-  tabText: {
-    ...Texts.body,
-    fontSize: 18,
-    color: '#999999',
-  },
-  tabTextActive: {
-    ...Texts.bodyBold,
-    fontSize: 18,
-    color: Colors.primary,
-  },
-  tabContent: {
-    marginTop: Spacing.md,
-    top: -90,
   },
 });

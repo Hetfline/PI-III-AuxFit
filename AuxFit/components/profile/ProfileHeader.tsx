@@ -1,76 +1,74 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, Spacing, Texts } from '@/constants/Styles';
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Colors, Spacing, Texts } from "@/constants/Styles";
 
 interface ProfileHeaderProps {
   userName: string;
-  userPhoto?: string;
   date: string;
-  streak: number;
   caloriesConsumed: number;
   caloriesGoal: number;
   waterConsumed: number;
   waterGoal: number;
+  onLogout: () => void;
 }
 
 export default function ProfileHeader({
   userName,
-  userPhoto,
   date,
-  streak,
   caloriesConsumed,
   caloriesGoal,
   waterConsumed,
   waterGoal,
+  onLogout,
 }: ProfileHeaderProps) {
-  
-  const caloriesPercent = (caloriesConsumed / caloriesGoal) * 100;
-  const waterPercent = (waterConsumed / waterGoal) * 100;
+  // Cálculo das porcentagens (limitadas a 100%)
+  const caloriesPercent = caloriesGoal > 0 ? Math.min((caloriesConsumed / caloriesGoal) * 100, 100) : 0;
+  const waterPercent = waterGoal > 0 ? Math.min((waterConsumed / waterGoal) * 100, 100) : 0;
 
   return (
     <View style={styles.container}>
-      
-      {/* Header com foto e informações */}
       <View style={styles.header}>
-        {/* Foto do usuário */}
-        <Image
-          source={require('../../assets/icons/logo/image.png')}
-          style={styles.avatar}
-        />
-        
         {/* Informações do usuário */}
         <View style={styles.userInfo}>
-          {/* Nome + Streak */}
-          <View style={styles.nameRow}>
-            <Text style={styles.userName}>{userName}</Text>
-            <View style={styles.streakContainer}>
-              <MaterialIcons name="local-fire-department" size={18} color="#FF6B35" />
-              <Text style={styles.streakText}>{streak}</Text>
+          {/* Nome + Logout */}
+          <View style={styles.topRow}>
+            <View style={styles.nameRow}>
+              <Text style={styles.userName}>{userName}</Text>
             </View>
+            
+            <TouchableOpacity onPress={onLogout} style={styles.logoutButton}>
+                <MaterialIcons name="logout" size={24} color={Colors.incorrect} />
+            </TouchableOpacity>
           </View>
-          
+
           {/* Data */}
           <Text style={styles.date}>{date}</Text>
-          
+
           {/* Barras de Progresso */}
           <View style={styles.barsContainer}>
             
             {/* Barra de Calorias */}
             <View style={styles.progressRow}>
               <View style={styles.barBackground}>
-                <View 
+                <View
                   style={[
-                    styles.barFill, 
-                    { 
-                      width: `${Math.min(caloriesPercent, 100)}%`, 
-                      backgroundColor: '#FF6B35' 
-                    }
-                  ]} 
+                    styles.barFill,
+                    {
+                      width: `${caloriesPercent}%`,
+                      backgroundColor: Colors.accent, 
+                    },
+                  ]}
                 />
                 <View style={styles.barContent}>
-                  <MaterialIcons name="local-fire-department" size={12} color="#000" />
-                  <Text style={styles.barValue}>{caloriesConsumed}</Text>
+                  <MaterialIcons
+                    name="local-fire-department"
+                    size={12}
+                    color="#000"
+                  />
+                  <Text style={styles.barValue}>
+                    {Math.round(caloriesConsumed)}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.barGoal}>{caloriesGoal} kcal / d</Text>
@@ -79,14 +77,14 @@ export default function ProfileHeader({
             {/* Barra de Água */}
             <View style={styles.progressRow}>
               <View style={styles.barBackground}>
-                <View 
+                <View
                   style={[
-                    styles.barFill, 
-                    { 
-                      width: `${Math.min(waterPercent, 100)}%`, 
-                      backgroundColor: '#42A5F5' 
-                    }
-                  ]} 
+                    styles.barFill,
+                    {
+                      width: `${waterPercent}%`,
+                      backgroundColor: Colors.secondary,
+                    },
+                  ]}
                 />
                 <View style={styles.barContent}>
                   <MaterialIcons name="water-drop" size={12} color="#000" />
@@ -95,11 +93,9 @@ export default function ProfileHeader({
               </View>
               <Text style={styles.barGoalWater}>{waterGoal} ml / d</Text>
             </View>
-
           </View>
         </View>
       </View>
-      
     </View>
   );
 }
@@ -107,100 +103,82 @@ export default function ProfileHeader({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.md,
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5, // Para Android
+    alignItems: "center",
   },
   userInfo: {
     flex: 1,
     gap: 4,
   },
+  topRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
+  },
+  logoutButton: {
+    padding: 4,
   },
   userName: {
     ...Texts.title,
-    fontSize: 22,
     color: Colors.text,
-  },
-  streakContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  streakText: {
-    ...Texts.title,
-    fontSize: 16,
-    color: '#FF6B35',
   },
   date: {
     ...Texts.subtext,
-    fontSize: 14,
-    color: '#FFF',
   },
   barsContainer: {
-    top: Spacing.sm,
+    marginTop: Spacing.sm,
     gap: 8,
-    marginTop: 2,
   },
   progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 16,
   },
   barBackground: {
     width: 120,
     height: 14,
-    backgroundColor: '#4D4D4D',
+    backgroundColor: Colors.bgLight,
     borderRadius: 20,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   barFill: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     bottom: 0,
     borderRadius: 20,
   },
   barContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     paddingLeft: 4,
     zIndex: 1,
-    height: '100%',
+    height: "100%",
   },
   barValue: {
     ...Texts.bodyBold,
     fontSize: 10,
-    color: '#000',
+    color: "#000",
   },
   barGoal: {
     ...Texts.subtext,
     fontSize: 11,
-    color: '#FF6933',
+    color: Colors.accent,
   },
-    barGoalWater: {
+  barGoalWater: {
     ...Texts.subtext,
     fontSize: 11,
-    color: '#2196F3',
+    color: Colors.secondary,
   },
 });

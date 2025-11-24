@@ -21,7 +21,7 @@ export default function ActivityScreen() {
   const [showToast, setShowToast] = useState(false);
 
   const handleBack = () => {
-    router.back();
+    router.replace("/onboarding/genderScreen");
   };
 
   const handleNext = () => {

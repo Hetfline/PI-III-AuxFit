@@ -26,7 +26,7 @@ export default function GoalScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleBack = () => {
-    router.back();
+    router.replace("/onboarding/genderScreen");
   };
 
   const handleFinish = async () => {
@@ -57,7 +57,7 @@ export default function GoalScreen() {
       await api.completeProfile(finalData, token);
 
       // Sucesso
-      router.replace("/(tabs)/diet");
+      router.replace("/onboarding/questionTypeScreen");
       
     } catch (error) {
       console.error(error);

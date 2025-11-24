@@ -25,7 +25,8 @@ interface Workout {
   nome: string;
   duracao: number;
   ativo: boolean;
-  areas_foco: string[];
+  // CORREÇÃO 1: Aceita array ou string, dependendo de como o banco retorna
+  areas_foco: string[] | string;
 }
 
 interface WorkoutItem {
@@ -150,9 +151,17 @@ export default function workoutInfoScreen() {
     );
   }
 
-  const focusAreasString = workout.areas_foco && workout.areas_foco.length > 0 
-    ? workout.areas_foco.join(", ") 
-    : "Geral";
+  // CORREÇÃO 2: Lógica defensiva para formatar areas_foco
+  let focusAreasString = "Geral";
+  if (workout.areas_foco) {
+    if (Array.isArray(workout.areas_foco)) {
+        // Se for array, usa join
+        focusAreasString = workout.areas_foco.join(", ");
+    } else {
+        // Se for string, usa direto
+        focusAreasString = String(workout.areas_foco);
+    }
+  }
 
   return (
     <SafeAreaView
@@ -192,7 +201,7 @@ export default function workoutInfoScreen() {
               
               <Button
                 title="Iniciar treino"
-                onPress={handleStartWorkout} // <--- AQUI ESTÁ A MUDANÇA
+                onPress={handleStartWorkout}
               />
             </View>
 

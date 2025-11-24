@@ -21,7 +21,7 @@ export default function AgeQuestion() {
   const [selectedYear, setSelectedYear] = useState(2000);
 
   const handleBack = () => {
-    router.back();
+    router.replace("/onboarding/genderScreen");
   };
 
   const handleNext = () => {

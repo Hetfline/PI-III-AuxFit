@@ -5,7 +5,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   ScrollView,
-  Pressable,
   ActivityIndicator,
   FlatList,
   Alert,
@@ -17,10 +16,10 @@ import Background from "@/components/universal/Background";
 import TabSelector from "@/components/universal/TabSelector";
 import ExerciseCard from "@/components/workout/ExerciceCard";
 import WorkoutCard from "@/components/workout/WorkoutCard";
-import FocusArea from "@/components/workout/FocusArea";
 import FilterBtn from "@/components/universal/FilterBtn";
 import FilterModal from "@/components/universal/FilterModal";
 import InputField from "@/components/universal/InputField";
+import FocusArea from "@/components/workout/FocusArea";
 import Button from "@/components/universal/Button";
 import FilteredItem from "@/components/workout/FilteredItem";
 import ManageWorkoutModal from "@/components/workout/ManageWorkoutModal";
@@ -41,10 +40,9 @@ interface Exercise {
 interface Workout {
   id: number;
   nome: string;
-  areas_foco: string[]; // Array de strings
+  areas_foco: string; // Agora é string vindo do banco
   duracao: number;
   ativo: boolean;
-  // O backend agora retorna essa relação para contagem de exercícios
   treino_exercicios?: { id: number }[];
 }
 
@@ -69,17 +67,10 @@ export default function WorkoutScreen() {
   // Estados Treinos
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loadingWorkouts, setLoadingWorkouts] = useState(true);
-  const [selectedPlanId, setSelectedPlanId] = useState(1);
 
   // Estado Modal de Gestão
   const [isManageModalVisible, setIsManageModalVisible] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
-
-  const planos = [
-    { id: 1, name: "Plano A" },
-    { id: 2, name: "Plano B" },
-    { id: 3, name: "Plano C" },
-  ];
 
   // --- CARREGAMENTO DE DADOS ---
 
@@ -129,26 +120,28 @@ export default function WorkoutScreen() {
     setIsManageModalVisible(true);
   };
 
-  // Agora aceita areas_foco do modal
   const handleSaveWorkout = async (data: {
     nome: string;
     duracao: number;
     areas_foco: string[];
   }) => {
     try {
+      // CONVERSÃO 1: Array -> String para salvar no Banco
+      const areasFocoString = data.areas_foco.join(", ");
+
       if (editingWorkout) {
         await api.updateWorkout(editingWorkout.id, {
           nome: data.nome,
           duracao: data.duracao,
           ativo: editingWorkout.ativo,
-          areas_foco: data.areas_foco, // Salva as áreas selecionadas manualmente
+          areas_foco: areasFocoString,
         });
         Alert.alert("Sucesso", "Treino atualizado!");
       } else {
         await api.createWorkout({
           nome: data.nome,
           duracao: data.duracao,
-          areas_foco: data.areas_foco, // Salva as áreas selecionadas manualmente
+          areas_foco: areasFocoString,
           ativo: true,
         });
         Alert.alert("Sucesso", "Treino criado!");
@@ -209,6 +202,15 @@ export default function WorkoutScreen() {
       );
     });
 
+  const modalInitialData = editingWorkout
+    ? {
+        ...editingWorkout,
+        areas_foco: editingWorkout.areas_foco 
+            ? editingWorkout.areas_foco.split(",").map(s => s.trim()).filter(Boolean)
+            : [],
+      }
+    : null;
+
   // --- RENDERIZADORES ---
 
   const renderSeparator = () => <View style={{ height: 12 }} />;
@@ -216,44 +218,7 @@ export default function WorkoutScreen() {
   const renderTreinoHeader = () => (
     <View style={styles.headerContainer}>
       <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: Spacing.sm }}
-        style={styles.planCardContainer}
-      >
-        {planos.map((plano) => {
-          const isSelected = plano.id === selectedPlanId;
-          return (
-            <Pressable
-              key={plano.id}
-              onPress={() => setSelectedPlanId(plano.id)}
-              style={[
-                styles.planCard,
-                {
-                  backgroundColor: isSelected ? Colors.accent : Colors.bgLight,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  Texts.bodyBold,
-                  { color: isSelected ? Colors.bg : Colors.text },
-                ]}
-              >
-                {plano.name}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      <Button
-        title="Adicionar plano"
-        icon="add"
-        onPress={() => null}
-        radius={10}
-      />
+      
       <View style={{ marginTop: Spacing.md }}>
         <Text style={Texts.subtitle}>Meus treinos</Text>
       </View>
@@ -272,16 +237,9 @@ export default function WorkoutScreen() {
   );
 
   const renderTreinoItem = ({ item }: { item: Workout }) => {
-    // Áreas de foco vindas do banco (array)
-    const focusString =
-      item.areas_foco && item.areas_foco.length > 0
-        ? item.areas_foco.join(", ")
-        : "Sem foco definido";
-
-    // Contagem correta baseada na relação trazida pelo backend (array de IDs)
-    const numExercises = item.treino_exercicios
-      ? item.treino_exercicios.length
-      : 0;
+    // Exibição direta da string (já vem formatada do banco)
+    const focusString = item.areas_foco || "Sem foco definido";
+    const numExercises = item.treino_exercicios ? item.treino_exercicios.length : 0;
 
     return (
       <WorkoutCard
@@ -306,7 +264,7 @@ export default function WorkoutScreen() {
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
-        <FilterBtn onPress={() => setIsFilterModalVisible((prev) => !prev)} />
+        <FilterBtn onPress={() => setIsFilterModalVisible(true)} />
       </View>
       <View style={{ flexDirection: "row", gap: Spacing.md, flexWrap: "wrap" }}>
         {selectedFocusAreas.map((area) => (
@@ -424,13 +382,13 @@ export default function WorkoutScreen() {
             visible={isManageModalVisible}
             onClose={() => setIsManageModalVisible(false)}
             onSave={handleSaveWorkout}
-            initialData={editingWorkout}
+            initialData={modalInitialData} 
           />
 
           <FilterModal
             filterTitle="Filtrar exercícios"
             isFilterVisible={isFilterModalVisible}
-            onClose={() => setIsFilterModalVisible((prev) => !prev)}
+            onClose={() => setIsFilterModalVisible(false)}
           >
             <View>
               <Text style={Texts.bodyBold}>
@@ -461,15 +419,4 @@ export default function WorkoutScreen() {
 const styles = StyleSheet.create({
   flatListContent: { paddingVertical: 24 },
   headerContainer: { gap: Spacing.md, marginBottom: 12 },
-  planCard: {
-    borderRadius: 10,
-    padding: Spacing.sm,
-    backgroundColor: Colors.bgLight,
-    alignItems: "center",
-  },
-  planCardContainer: {
-    flexDirection: "row",
-    overflow: "scroll",
-    gap: Spacing.sm,
-  },
 });

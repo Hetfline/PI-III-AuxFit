@@ -21,12 +21,12 @@ import WorkoutCard from "@/components/workout/WorkoutCard";
 import Header from "@/components/universal/Header";
 import getFormattedDate from "@/utils/getFormattedDate";
 import Meal from "@/components/diet/Meal"; 
-import WeightIn from "@/components/universal/WeightIn";
 import EditMealModal from "@/components/diet/EditMealModal";
 
 // Importações da API e Storage
 import { api } from "@/services/api";
 import { authStorage } from "@/services/auth-storage";
+import { calculateMacros, Macros } from "@/utils/nutritionCalculator";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -41,6 +41,15 @@ export default function HomeScreen() {
 
   // --- ESTADOS DE DIETA E MACROS ---
   const [completedMealIds, setCompletedMealIds] = useState<number[]>([]);
+  
+  // Metas calculadas dinamicamente (estado inicial padrão)
+  const [macroGoals, setMacroGoals] = useState<Macros>({
+    calories: 2000,
+    protein: 150,
+    carbs: 200,
+    fats: 65,
+  });
+
   const [dailyTotals, setDailyTotals] = useState({
     calories: 0,
     protein: 0,
@@ -53,14 +62,6 @@ export default function HomeScreen() {
   const [isMacro, setIsMacro] = useState(true);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [mealToEdit, setMealToEdit] = useState<any>(null);
-
-  // Metas (Exemplo fixo)
-  const goals = {
-    calories: 2004,
-    protein: 150,
-    carbs: 225,
-    fats: 56,
-  };
 
   // --- FUNÇÕES AUXILIARES ---
   const getAlimentoData = (alimentos: any) => {
@@ -92,14 +93,10 @@ export default function HomeScreen() {
     });
   };
 
-  // ✨ NOVA FUNÇÃO: Calcula o resumo completo da refeição para enviar na navegação
-  // Isso evita o erro de 'undefined' nos gráficos da próxima tela
   const getMealSummary = (meal: any) => {
      const items = getMealDisplayData(meal);
-     // Soma das calorias calculadas
      const totalCals = items.reduce((acc: number, curr: any) => acc + curr.calories, 0);
      
-     // Soma dos macros para evitar erro no gráfico
      const totalProt = items.reduce((acc: number, curr: any) => acc + (curr.protein || 0), 0);
      const totalCarbs = items.reduce((acc: number, curr: any) => acc + (curr.carbs || 0), 0);
      const totalFats = items.reduce((acc: number, curr: any) => acc + (curr.fats || 0), 0);
@@ -107,15 +104,11 @@ export default function HomeScreen() {
      return {
         id: meal.id,
         mealName: meal.nome,
-        // Se a refeição tiver meta, usa a meta para visualização, senão usa o total calculado
         calories: Math.round(totalCals), 
         meta_calorias: meal.meta_calorias,
-        
-        // Campos obrigatórios para a tela mealScreen não quebrar:
         totalProtein: Math.round(totalProt),
         totalCarbs: Math.round(totalCarbs),
         totalFats: Math.round(totalFats),
-        
         foodItems: items
      };
   };
@@ -166,14 +159,32 @@ export default function HomeScreen() {
       }
 
       const [userData, waterData, workoutsData, mealsData] = await Promise.all([
-        api.me().catch(() => null),                    
+        api.me().catch(() => null),                     
         api.getTodayWaterProgress().catch(() => null), 
         api.getWorkouts().catch(() => []),             
         api.getMeals().catch(() => [])                 
       ]);
 
-      if (userData && userData.nome) {
-        setUserName(userData.nome.split(" ")[0]); 
+      if (userData) {
+        setUserName(userData.nome?.split(" ")[0] || "Usuário"); 
+
+        // --- CALCULAR MACROS RECOMENDADOS ---
+        // Usa o peso de hoje se disponível, senão o peso inicial
+        const currentWeight = (waterData?.peso && Number(waterData.peso) > 0)
+            ? Number(waterData.peso)
+            : Number(userData.peso_inicial);
+
+        const profileData = {
+            sexo: userData.sexo || 'M',
+            data_nascimento: userData.data_nascimento || new Date().toISOString(),
+            altura: Number(userData.altura) || 170,
+            peso: currentWeight || 70,
+            nivel_atividade: userData.nivel_atividade || 'moderado',
+            objetivo: userData.objetivo || 'manter'
+        };
+
+        const calculatedGoals = calculateMacros(profileData);
+        setMacroGoals(calculatedGoals);
       }
 
       if (waterData) {
@@ -250,8 +261,6 @@ export default function HomeScreen() {
     setCompletedMealIds(prev => prev.filter(id => id !== mealId));
   };
   
-  const handleTestOnboarding = () => router.push("/onboarding");
-
   const handleNavigateToDetails = (workoutData: any) => {
     router.push({
       pathname: "/workout/workoutInfoScreen",
@@ -317,29 +326,15 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.scrollContent}>
-            
-            <View style={{flexDirection: 'row', gap: 10}}>
-                <View style={{flex: 1}}>
-                     <Button
-                        title="Onboarding"
-                        onPress={handleTestOnboarding}
-                        bgColor="#35e1ffff"
-                    />
-                </View>
-                <View style={{flex: 1}}>
-                    <Button
-                        title="Login"
-                        onPress={() => router.push("/(auth)")}
-                        bgColor="#35e1ffff"
-                    />
-                </View>
-            </View>
 
+            <View>
+              <Button onPress={() => router.push("/onboarding/diet/restrictionsScreen")} title="Dieta"/>
+            </View>
+            
             <Header
               title={`Olá, ${userName}`}
               subtitle={date}
               subtitleColor={Colors.text}
-              streak
             />
 
             <View style={{ gap: Spacing.md }}>
@@ -347,14 +342,15 @@ export default function HomeScreen() {
               <View style={styles.macroWaterprogressContainer}>
                 <View style={{ display: isMacro ? "flex" : "none" }}>
                   <MacrosProgress
-                    caloriesGoal={goals.calories}
+                    // Props dinâmicas com os valores calculados
+                    caloriesGoal={macroGoals.calories}
                     caloriesIngested={dailyTotals.calories}
                     logs={dailyTotals.logs}
-                    proteinGoal={goals.protein}
+                    proteinGoal={macroGoals.protein}
                     proteinCurrent={dailyTotals.protein}
-                    carbsGoal={goals.carbs}
+                    carbsGoal={macroGoals.carbs}
                     carbsCurrent={dailyTotals.carbs}
-                    fatsGoal={goals.fats}
+                    fatsGoal={macroGoals.fats}
                     fatsCurrent={dailyTotals.fats}
                   />
                 </View>
@@ -392,7 +388,6 @@ export default function HomeScreen() {
                       increaseLogs={() => handleMealComplete(nextMeal.id)}
                       decreaseLogs={() => handleMealUncomplete(nextMeal.id)}
                       
-                      // ✨ CORREÇÃO AQUI: Usamos getMealSummary que inclui totalProtein, etc.
                       onPress={() =>
                           router.push({
                           pathname: "/diet/mealScreen",
@@ -415,8 +410,8 @@ export default function HomeScreen() {
                            pathname: "/diet/foodScreen",
                            params: { 
                               data: JSON.stringify({
-                                 ...foodItem,
-                                 mealId: nextMeal.id
+                                  ...foodItem,
+                                  mealId: nextMeal.id
                               }) 
                            }
                          })
@@ -466,13 +461,6 @@ export default function HomeScreen() {
                   bgColor={Colors.accent}
                   onPress={() => router.push("/(tabs)/workout/searchExerciseScreen")}
                 />
-              </View>
-            </View>
-
-            <View style={{gap: Spacing.md}}>
-              <Text style={Texts.subtitle}>Adicionar nova pesagem</Text>
-              <View style={styles.weightInContainer}>
-                <WeightIn />
               </View>
             </View>
 

@@ -22,8 +22,8 @@ export default function AddBtn({ onPress, backgroundColor, size }: AddBtnProps) 
 
 const styles = StyleSheet.create({
   container: {
-    width: Spacing.lg,
-    height: Spacing.lg,
+    width: 48,
+    height: 48,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",

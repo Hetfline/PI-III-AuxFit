@@ -53,7 +53,6 @@ export default function LoginScreen() {
 
         const payload = { email, password, nome: name };
 
-        // O backend modificado já retorna o 'session' no cadastro também!
         response = await api.register(payload);
 
         // 1. Salva o token de forma segura (Auto-login)

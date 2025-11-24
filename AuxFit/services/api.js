@@ -35,7 +35,6 @@ export const api = {
     }
   },
 
-  // ✨ NOVO: Rota para pegar dados do usuário logado (Nome, etc)
   me: async () => {
     try {
       const token = await authStorage.getToken();
@@ -45,7 +44,6 @@ export const api = {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
       const data = await response.json();
-      // Assumindo que o backend retorna { user: { ... } }
       if (!response.ok) throw new Error(data.error || "Erro ao buscar usuário");
       return data.user; 
     } catch (error) {
@@ -72,6 +70,23 @@ export const api = {
     }
   },
 
+  // --- PERFIL DE TREINO ---
+  saveTrainingProfile: async (data) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/perfil-treino`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erro ao salvar perfil de treino");
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // --- EXERCÍCIOS ---
   getExercises: async () => {
     try {
@@ -89,7 +104,7 @@ export const api = {
     }
   },
 
-  // --- TREINOS (CRUD) ---
+  // --- TREINOS ---
   getWorkouts: async () => {
     try {
       const token = await authStorage.getToken();
@@ -140,7 +155,6 @@ export const api = {
     }
   },
 
-  // --- ITENS DE TREINO ---
   getWorkoutExercises: async (treinoId) => {
     try {
       const token = await authStorage.getToken();
@@ -345,6 +359,22 @@ export const api = {
   },
 
   // --- DESPENSA ---
+  // NOVO: Buscar lista da despensa
+  getPantry: async () => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/despensa`, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar despensa");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   checkPantryItem: async (alimentoId) => {
     try {
       const token = await authStorage.getToken();
@@ -391,6 +421,22 @@ export const api = {
   },
   
   // --- ÁGUA & PROGRESSO ---
+  // NOVO: Buscar histórico completo (Gráficos)
+  getProgressHistory: async () => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/progresso`, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar histórico");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   getTodayWaterProgress: async () => {
     try {
       const token = await authStorage.getToken();
@@ -418,6 +464,46 @@ export const api = {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao atualizar água");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // NOVO: Salvar Peso
+  saveWeight: async (id, weight) => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) throw new Error("Usuário não autenticado");
+      
+      // Usa a rota genérica de update do ProgressoController
+      const response = await fetch(`${API_URL}/progresso/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ peso: weight }),
+      });
+      
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao salvar peso");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  finishWorkout: async (workoutData) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/historico-treinos/finalizar`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(workoutData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao finalizar treino");
       return data;
     } catch (error) {
       throw error;
