@@ -6,7 +6,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
@@ -19,7 +19,7 @@ import Timer from "@/components/workout/Timer";
 import { api } from "@/services/api";
 
 interface WorkoutItem {
-  id: number; 
+  id: number;
   series: number;
   repeticoes: number;
   carga: number;
@@ -45,13 +45,15 @@ export default function OngoingWorkoutScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const [workoutHeader, setWorkoutHeader] = useState<WorkoutHeader | null>(null);
+  const [workoutHeader, setWorkoutHeader] = useState<WorkoutHeader | null>(
+    null
+  );
   const [workoutItems, setWorkoutItems] = useState<WorkoutItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false); // Estado para loading do botão
-  
+
   const [timeInSeconds, setTimeInSeconds] = useState(0);
-  
+
   const [exerciseMetrics, setExerciseMetrics] = useState<
     Record<number, ExerciseMetrics>
   >({});
@@ -65,7 +67,7 @@ export default function OngoingWorkoutScreen() {
         try {
           const header = JSON.parse(workoutDataString);
           setWorkoutHeader(header);
-          
+
           // Busca os exercícios detalhados do treino
           const items = await api.getWorkoutExercises(header.id);
           setWorkoutItems(items);
@@ -82,16 +84,15 @@ export default function OngoingWorkoutScreen() {
   }, [params.workoutData]);
 
   // Callback chamado quando o usuário marca/desmarca séries no componente filho
-  const handleSetCompletion = useCallback((
-    exerciseId: number,
-    count: number,
-    volume: number
-  ) => {
-    setExerciseMetrics((prev) => ({
-      ...prev,
-      [exerciseId]: { completedSets: count, volume: volume },
-    }));
-  }, []);
+  const handleSetCompletion = useCallback(
+    (exerciseId: number, count: number, volume: number) => {
+      setExerciseMetrics((prev) => ({
+        ...prev,
+        [exerciseId]: { completedSets: count, volume: volume },
+      }));
+    },
+    []
+  );
 
   // Callback para adicionar série visualmente (opcional)
   const handleSetAdd = useCallback((workoutItemId: number) => {
@@ -107,107 +108,124 @@ export default function OngoingWorkoutScreen() {
 
   // Cálculos totais para o resumo
   const totalCompletedSets = Object.values(exerciseMetrics).reduce(
-    (sum, metrics) => sum + metrics.completedSets, 0
+    (sum, metrics) => sum + metrics.completedSets,
+    0
   );
-  
+
   const totalVolume = Object.values(exerciseMetrics).reduce(
-    (sum, metrics) => sum + metrics.volume, 0
+    (sum, metrics) => sum + metrics.volume,
+    0
   );
 
   // --- INTEGRAÇÃO COM O BACKEND ---
   const handleFinishWorkout = async () => {
     if (!workoutHeader) return;
 
-    // 1. Montar o Payload para o Backend (HistoricoController)
-    const exercisesPayload = workoutItems.map(item => {
-        const metrics = exerciseMetrics[item.id] || { completedSets: 0, volume: 0 };
-        
-        return {
-            exercicio_fk: item.exercicios.id,
-            series_feitas: metrics.completedSets,
-            // Se não temos reps exatas por set, usamos a meta como referência
-            repeticoes_feitas: item.repeticoes, 
-            carga_maxima: item.carga,
-            // Futuramente, pode-se enviar array de sets detalhados aqui
-            sets: [] 
-        };
+    const exercisesPayload = workoutItems.map((item) => {
+      const metrics = exerciseMetrics[item.id] || {
+        completedSets: 0,
+        volume: 0,
+      };
+
+      return {
+        exercicio_fk: item.exercicios.id,
+        series_feitas: metrics.completedSets,
+
+        repeticoes_feitas: item.repeticoes,
+        carga_maxima: item.carga,
+
+        sets: [],
+      };
     });
 
     const finishData = {
-        treino_base_fk: workoutHeader.id,
-        nome_treino: workoutHeader.nome,
-        duracao_segundos: timeInSeconds,
-        volume_total: totalVolume,
-        exercicios: exercisesPayload
+      treino_base_fk: workoutHeader.id,
+      nome_treino: workoutHeader.nome,
+      duracao_segundos: timeInSeconds,
+      volume_total: totalVolume,
+      exercicios: exercisesPayload,
     };
 
     try {
-        setIsSaving(true);
-        
-        // 2. Enviar para a API
-        await api.finishWorkout(finishData);
+      setIsSaving(true);
 
-        // 3. Preparar dados visuais para a tela de feedback (Recibo)
-        let focusAreasString = "Geral";
-        if (workoutHeader.areas_foco) {
-            if (Array.isArray(workoutHeader.areas_foco)) {
-                focusAreasString = workoutHeader.areas_foco.join(", ");
-            } else {
-                focusAreasString = String(workoutHeader.areas_foco);
-            }
+      await api.finishWorkout(finishData);
+
+      let focusAreasString = "Geral";
+      if (workoutHeader.areas_foco) {
+        if (Array.isArray(workoutHeader.areas_foco)) {
+          focusAreasString = workoutHeader.areas_foco.join(", ");
+        } else {
+          focusAreasString = String(workoutHeader.areas_foco);
         }
+      }
 
-        const feedbackData = {
-            title: workoutHeader.nome,
-            focusAreas: focusAreasString,
-            workoutTime: timeInSeconds,
-            totalVolume: totalVolume.toString(),
-            totalSetsDone: totalCompletedSets.toString(),
-        };
+      const feedbackData = {
+        title: workoutHeader.nome,
+        focusAreas: focusAreasString,
+        workoutTime: timeInSeconds,
+        totalVolume: totalVolume.toString(),
+        totalSetsDone: totalCompletedSets.toString(),
+      };
 
-        // 4. Navegar apenas após salvar com sucesso
-        router.push({
-            pathname: "/workout/workoutFeedbackScreen",
-            params: {
-                feedback: JSON.stringify(feedbackData),
-            },
-        });
-
+      router.push({
+        pathname: "/workout/workoutFeedbackScreen",
+        params: {
+          feedback: JSON.stringify(feedbackData),
+        },
+      });
     } catch (error) {
-        console.error(error);
-        Alert.alert("Erro", "Não foi possível salvar o treino. Tente novamente.");
+      console.error(error);
+      Alert.alert("Erro", "Não foi possível salvar o treino. Tente novamente.");
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
 
   if (loading || !workoutHeader) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.bg }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: Colors.bg,
+        }}
+      >
         <ActivityIndicator size="large" color={Colors.primary} />
-        <Text style={[Texts.body, { marginTop: 10, color: Colors.subtext }]}>Preparando seu treino...</Text>
+        <Text style={[Texts.body, { marginTop: 10, color: Colors.subtext }]}>
+          Preparando seu treino...
+        </Text>
       </View>
     );
   }
 
-  // Tratamento seguro para areas_foco no cabeçalho
   let focusString = "Geral";
   if (workoutHeader.areas_foco) {
-      if (Array.isArray(workoutHeader.areas_foco)) {
-          if (workoutHeader.areas_foco.length > 0) {
-              focusString = workoutHeader.areas_foco.join(", ");
-          }
-      } else {
-          focusString = String(workoutHeader.areas_foco);
+    if (Array.isArray(workoutHeader.areas_foco)) {
+      if (workoutHeader.areas_foco.length > 0) {
+        focusString = workoutHeader.areas_foco.join(", ");
       }
+    } else {
+      focusString = String(workoutHeader.areas_foco);
+    }
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg, paddingHorizontal: Spacing.md }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: Colors.bg,
+        paddingHorizontal: Spacing.md,
+      }}
+    >
       <Background />
 
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.container}>
             <Header
               title={workoutHeader.nome}
@@ -229,7 +247,7 @@ export default function OngoingWorkoutScreen() {
                 {workoutItems.map((item) => (
                   <ExerciseSets
                     key={item.id}
-                    exerciseId={item.id} 
+                    exerciseId={item.id}
                     name={item.exercicios.nome_exercicio}
                     imageUrl={item.exercicios.imagem_url}
                     totalSets={item.series}
@@ -240,13 +258,12 @@ export default function OngoingWorkoutScreen() {
                   />
                 ))}
               </View>
-              
+
               {/* Botão com LoadingState */}
               <Button
                 title={isSaving ? "Salvando..." : "Finalizar treino"}
                 onPress={handleFinishWorkout}
                 bgColor={Colors.primary}
-                
               />
             </View>
           </View>

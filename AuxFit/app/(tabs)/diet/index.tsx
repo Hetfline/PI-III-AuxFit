@@ -24,7 +24,7 @@ import AddBtn from "@/components/universal/AddBtn";
 import CreateMealModal from "@/components/diet/CreateMealModal";
 import EditMealModal from "@/components/diet/EditMealModal";
 import { api } from "@/services/api";
-// Importação da calculadora de nutrição
+// * Importação da calculadora de nutrição
 import { calculateMacros, Macros } from "@/utils/nutritionCalculator";
 
 interface Alimento {
@@ -106,36 +106,35 @@ export default function DietScreen() {
         api.me().catch(() => null),
       ]);
 
-      // 1. Configura Refeições
+      // Configura Refeições
       setMeals(mealsData);
 
-      // 2. Configura Água e Peso Atual
+      // Configura Água e Peso Atual
       let currentWeight = 0;
       if (waterData) {
         setWaterConsumed(waterData.agua_ml || 0);
         currentWeight = Number(waterData.peso) || 0;
       }
 
-      // 3. Calcula Metas de Macros com base no Perfil
+      // Calcula Metas de Macros com base no Perfil
       if (userData) {
         // Se não tiver peso no registro de hoje, usa o peso inicial do perfil
         if (currentWeight === 0) {
-            currentWeight = Number(userData.peso_inicial) || 70;
+          currentWeight = Number(userData.peso_inicial) || 70;
         }
 
         const profileData = {
-            sexo: userData.sexo || 'M',
-            data_nascimento: userData.data_nascimento || new Date().toISOString(),
-            altura: Number(userData.altura) || 170,
-            peso: currentWeight,
-            nivel_atividade: userData.nivel_atividade || 'moderado',
-            objetivo: userData.objetivo || 'manter'
+          sexo: userData.sexo || "M",
+          data_nascimento: userData.data_nascimento || new Date().toISOString(),
+          altura: Number(userData.altura) || 170,
+          peso: currentWeight,
+          nivel_atividade: userData.nivel_atividade || "moderado",
+          objetivo: userData.objetivo || "manter",
         };
 
         const calculated = calculateMacros(profileData);
         setGoals(calculated);
       }
-
     } catch (error) {
       console.error("Erro ao carregar dados da dieta", error);
     } finally {
@@ -305,7 +304,6 @@ export default function DietScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.scrollContent}>
-            
             {/* Painel de Macros e Água */}
             <View style={{ gap: Spacing.md }}>
               <Text style={Texts.subtitle}>Progresso do dia</Text>
@@ -440,14 +438,14 @@ export default function DietScreen() {
                 }}
               >
                 <MacrosDonutLegend
-                  protein={goals.protein}
-                  carbs={goals.carbs}
-                  fats={goals.fats}
+                  protein={dailyTotals.protein}
+                  carbs={dailyTotals.carbs}
+                  fats={dailyTotals.fats}
                 />
                 <MacroDonutChart
-                  protein={goals.protein}
-                  carbs={goals.carbs}
-                  fats={goals.fats}
+                  protein={dailyTotals.protein}
+                  carbs={dailyTotals.carbs}
+                  fats={dailyTotals.fats}
                 />
               </View>
             </View>
@@ -461,14 +459,12 @@ export default function DietScreen() {
                 </Text>
               </View>
               <MacrosTable
-                calories={goals.calories}
-                protein={goals.protein}
-                carbs={goals.carbs}
-                fats={goals.fats}
+                calories={dailyTotals.calories}
+                protein={dailyTotals.protein}
+                carbs={dailyTotals.carbs}
+                fats={dailyTotals.fats}
               />
             </View>
-
-            
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

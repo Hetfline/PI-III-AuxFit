@@ -24,7 +24,6 @@ export default function HeightScreen() {
   };
 
   const handleNext = () => {
-    // Junta 165 e 5 virando 165.5
     const fullHeight = parseFloat(`${selectedHeight}.${selectedDecimal}`);
     updateOnboardingData("altura", fullHeight);
     router.push("/onboarding/weightScreen");
@@ -73,7 +72,7 @@ export default function HeightScreen() {
     </SafeAreaView>
   );
 }
-// ... Mesmos styles das outras telas
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.bg },
   container: { flex: 1, position: "relative" },

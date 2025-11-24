@@ -15,14 +15,20 @@ import { useLocalSearchParams } from "expo-router";
 import { Video, ResizeMode } from "expo-av";
 
 export default function ExerciseScreen() {
-  // Pegar os parâmetros passados na navegação
   const params = useLocalSearchParams();
 
   const { nome, grupoGeral, grupoEspecifico, descricao, execucao, video } =
     params;
 
-  // Montar subtítulo dinâmico
   const subtitle = [grupoGeral, grupoEspecifico].filter(Boolean).join(", ");
+
+  //*  Formatar a descrição da execução: separar por '||', numerar e quebrar linhas
+  const formattedExecution = (execucao as string)
+    ? (execucao as string)
+        .split("||")
+        .map((step, index) => `${index + 1}. ${step.trim()}`)
+        .join("\n\n")
+    : "";
 
   return (
     <SafeAreaView
@@ -74,7 +80,7 @@ export default function ExerciseScreen() {
               <ExerciseInfo about description={descricao as string} />
 
               {/* Execução */}
-              <ExerciseInfo steps={execucao as string} />
+              <ExerciseInfo steps={formattedExecution} />
             </View>
           </View>
         </ScrollView>

@@ -16,7 +16,7 @@ export default function PantryScreen() {
   const loadPantry = async () => {
     try {
       setLoading(true);
-      const data = await api.getPantry(); // Busca da API atualizada
+      const data = await api.getPantry();
       setItems(data || []);
     } catch (error) {
       console.log("Erro ao carregar despensa", error);

@@ -40,7 +40,7 @@ interface Exercise {
 interface Workout {
   id: number;
   nome: string;
-  areas_foco: string; // Agora é string vindo do banco
+  areas_foco: string;
   duracao: number;
   ativo: boolean;
   treino_exercicios?: { id: number }[];
@@ -205,9 +205,12 @@ export default function WorkoutScreen() {
   const modalInitialData = editingWorkout
     ? {
         ...editingWorkout,
-        areas_foco: editingWorkout.areas_foco 
-            ? editingWorkout.areas_foco.split(",").map(s => s.trim()).filter(Boolean)
-            : [],
+        areas_foco: editingWorkout.areas_foco
+          ? editingWorkout.areas_foco
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [],
       }
     : null;
 
@@ -218,7 +221,7 @@ export default function WorkoutScreen() {
   const renderTreinoHeader = () => (
     <View style={styles.headerContainer}>
       <TabSelector activeTab={activeTab} onTabChange={setActiveTab} />
-      
+
       <View style={{ marginTop: Spacing.md }}>
         <Text style={Texts.subtitle}>Meus treinos</Text>
       </View>
@@ -237,9 +240,10 @@ export default function WorkoutScreen() {
   );
 
   const renderTreinoItem = ({ item }: { item: Workout }) => {
-    // Exibição direta da string (já vem formatada do banco)
     const focusString = item.areas_foco || "Sem foco definido";
-    const numExercises = item.treino_exercicios ? item.treino_exercicios.length : 0;
+    const numExercises = item.treino_exercicios
+      ? item.treino_exercicios.length
+      : 0;
 
     return (
       <WorkoutCard
@@ -382,7 +386,7 @@ export default function WorkoutScreen() {
             visible={isManageModalVisible}
             onClose={() => setIsManageModalVisible(false)}
             onSave={handleSaveWorkout}
-            initialData={modalInitialData} 
+            initialData={modalInitialData}
           />
 
           <FilterModal

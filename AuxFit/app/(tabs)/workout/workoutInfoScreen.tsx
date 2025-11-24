@@ -25,7 +25,6 @@ interface Workout {
   nome: string;
   duracao: number;
   ativo: boolean;
-  // CORREÇÃO 1: Aceita array ou string, dependendo de como o banco retorna
   areas_foco: string[] | string;
 }
 
@@ -115,7 +114,7 @@ export default function workoutInfoScreen() {
             descanso_segundos: data.descanso
         });
         Alert.alert("Sucesso", "Exercício atualizado!");
-        fetchExercises(); // Recarrega lista
+        fetchExercises();
     } catch (error) {
         Alert.alert("Erro", "Falha ao atualizar.");
     }
@@ -134,7 +133,7 @@ export default function workoutInfoScreen() {
   const handleStartWorkout = () => {
     if (!workout) return;
     
-    // Navega para a tela de execução passando os dados do treino
+
     router.push({
       pathname: "/workout/ongoingWorkoutScreen",
       params: {
@@ -228,7 +227,7 @@ export default function workoutInfoScreen() {
                         imageUrl={item.exercicios.imagem_url}
                         totalSets={item.series} 
                         totalReps={item.repeticoes}
-                        onPress={() => handleItemPress(item)} // Abre modal de edição
+                        onPress={() => handleItemPress(item)}
                     />
                     ))}
                     {workoutItems.length === 0 && (

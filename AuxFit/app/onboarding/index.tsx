@@ -22,7 +22,7 @@ export default function OnboardingIntro() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         
-        {/* Background com linhas decorativas */}
+      
         <Background />
 
         {/* Conteúdo principal */}

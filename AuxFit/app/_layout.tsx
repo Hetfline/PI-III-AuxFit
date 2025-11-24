@@ -10,7 +10,7 @@ export {
 } from "expo-router";
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)/diet",
+  initialRouteName: "(tabs)/home",
 };
 
 SplashScreen.preventAutoHideAsync();

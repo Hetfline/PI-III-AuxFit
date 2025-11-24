@@ -17,31 +17,26 @@ export default function workoutFeedbackScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  // 1. Normalizar o parâmetro 'feedback' para garantir que seja uma única string (ou undefined)
   const rawFeedbackData = params.feedback;
   const feedbackString = Array.isArray(rawFeedbackData)
     ? rawFeedbackData[0]
     : rawFeedbackData;
 
-  let feedback: any = {}; // Inicializa como objeto vazio para evitar erros de leitura
+  let feedback: any = {};
 
-  // 2. Desserializar o JSON
   if (feedbackString) {
     try {
-      // Converte a string JSON de volta para o objeto de feedback
       feedback = JSON.parse(feedbackString);
     } catch (e) {
       console.error("Erro ao fazer parse dos dados de feedback:", e);
     }
   }
 
-  // 3. Desestruturar os dados (incluindo o novo totalVolume)
   const {
     title,
     focusAreas,
     workoutTime: rawWorkoutTime,
     totalSetsDone,
-    // ✅ NOVO DADO
     totalVolume,
   } = feedback;
 
@@ -54,7 +49,6 @@ export default function workoutFeedbackScreen() {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    // Função auxiliar para padding
     const pad = (num: number): string => num.toString().padStart(2, "0");
 
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
@@ -68,28 +62,28 @@ export default function workoutFeedbackScreen() {
         paddingHorizontal: Spacing.md,
       }}
     >
-      {/* Background decorativo */}
       <Background />
 
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         <ScrollView
-          // Garante que o ScrollView ocupe o espaço mínimo e máximo
-          contentContainerStyle={{ flexGrow: 1 }} 
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Este container usa 'space-between' e 'flex: 1' para empurrar o botão para baixo */}
           <View style={styles.viewParaConsertarEssaMerda}>
-            
-            {/* ⬆️ PARTE DE CIMA (Parabéns e Métricas) ⬆️ */}
-            {/* O container principal usa justifyContent: 'center' para centralizar VERTICALMENTE o conteúdo */}
-            <View style={styles.container}> 
+            {/*  PARTE DE CIMA (Parabéns e Métricas)  */}
+            <View style={styles.container}>
               <View style={{ alignItems: "center", gap: Spacing.sm }}>
                 <Text style={[Texts.title]}>Parabéns</Text>
                 <View>
                   <Text style={[Texts.subtitle, { textAlign: "center" }]}>
                     Treino concluído!
                   </Text>
-                  <Text style={[Texts.body, { color: Colors.accent }]}>
+                  <Text
+                    style={[
+                      Texts.body,
+                      { color: Colors.accent, textAlign: "center" },
+                    ]}
+                  >
                     {focusAreas}
                   </Text>
                 </View>
@@ -100,11 +94,11 @@ export default function workoutFeedbackScreen() {
                   Métricas
                 </Text>
                 <View style={styles.metricsContainer}>
-                  {/* 🏋️ VOLUME TOTAL */}
+                  {/* VOLUME TOTAL */}
                   <View style={styles.metrics}>
                     <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
-                      {/* ✅ Exibe o volume total calculado */}
-                      {volumeDone.toLocaleString('pt-BR')} kg
+                      {/* Exibe o volume total calculado */}
+                      {volumeDone.toLocaleString("pt-BR")} kg
                     </Text>
                     <Text style={Texts.body}>Volume</Text>
                   </View>
@@ -117,10 +111,9 @@ export default function workoutFeedbackScreen() {
                     <Text style={Texts.body}>Duração</Text>
                   </View>
 
-                  {/* 🔢 SÉRIES CONCLUÍDAS */}
+                  {/* SÉRIES CONCLUÍDAS */}
                   <View style={styles.metrics}>
                     <Text style={[Texts.bodyBold, { color: Colors.correct }]}>
-                      {/* ✅ Exibe o número de séries concluídas */}
                       {setsDone}
                     </Text>
                     <Text style={Texts.body}>Séries</Text>
@@ -129,11 +122,11 @@ export default function workoutFeedbackScreen() {
               </View>
             </View>
 
-            {/* ⬇️ PARTE DE BAIXO (Botão Concluir) ⬇️ */}
+            {/*  PARTE DE BAIXO (Botão Concluir)  */}
             <View>
-              <Button 
-                title="Concluir" 
-                onPress={() => router.push('/(tabs)/workout')}
+              <Button
+                title="Concluir"
+                onPress={() => router.push("/(tabs)/workout")}
               />
             </View>
           </View>
@@ -149,9 +142,9 @@ const styles = StyleSheet.create({
     gap: Spacing.xl,
     alignItems: "center",
     justifyContent: "center",
-    width: '100%'
+    width: "100%",
   },
-  
+
   viewParaConsertarEssaMerda: {
     justifyContent: "space-between",
     flex: 1,

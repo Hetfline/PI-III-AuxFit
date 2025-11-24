@@ -60,15 +60,14 @@ export default function DietTypeScreen() {
       return;
     }
     
-    // Salva booleanos ou string no contexto conforme seu backend espera
+  
     const isVegetarian = selectedId === 'vegetariano';
     const isVegan = selectedId === 'vegano';
     
-    updateOnboardingData('tipo_dieta', selectedId); // Salva o ID genérico
+    updateOnboardingData('tipo_dieta', selectedId);
     updateOnboardingData('vegetariano', isVegetarian);
     updateOnboardingData('vegano', isVegan);
     
-    // Próxima tela: Frequência de Refeições
     router.push("/onboarding/diet/mealsFrequencyScreen");
   };
 

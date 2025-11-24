@@ -17,7 +17,6 @@ export default function GenderScreen() {
   const [selectedGender, setSelectedGender] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   
-  // Definição da variável que faltava
   const totalQuestions = 6; 
 
   const handleBack = () => {
@@ -30,7 +29,6 @@ export default function GenderScreen() {
       return;
     }
 
-    // LÓGICA DE MAPEAMENTO: UI -> Backend
     let genderForBackend = 'Outro';
     if (selectedGender === 'masculino') genderForBackend = 'M';
     if (selectedGender === 'feminino') genderForBackend = 'F';

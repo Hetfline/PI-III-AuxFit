@@ -25,19 +25,19 @@ export default function ProfileScreen() {
     caloriesConsumed: 0,
     caloriesGoal: 0,
     waterConsumed: 0,
-    waterGoal: 2500, // Meta padrão de água, ou buscar do perfil alimentar
+    waterGoal: 2500,
   });
 
   // Função para carregar dados (Usuário, Água, Calorias)
   const loadProfileData = async () => {
     try {
-      // 1. Dados do Usuário
+      // Dados do Usuário
       const user = await api.me();
       
-      // 2. Progresso de Hoje (Água)
+      // Progresso de Hoje (Água)
       const progress = await api.getTodayWaterProgress();
       
-      // 3. Calorias (Somar refeições do dia)
+      // Calorias (Somar refeições do dia)
       const meals = await api.getMeals();
       
       let consumed = 0;
@@ -73,9 +73,9 @@ export default function ProfileScreen() {
         name: user?.nome || "Usuário",
         date: formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1),
         caloriesConsumed: consumed,
-        caloriesGoal: goal > 0 ? goal : 2000, // Default se não tiver meta
+        caloriesGoal: goal > 0 ? goal : 2000, // Padrão se não tiver meta
         waterConsumed: progress?.agua_ml || 0,
-        waterGoal: 2500, // Poderia buscar do PerfilAlimentarController se implementado get
+        waterGoal: 2500,
       });
 
     } catch (error) {

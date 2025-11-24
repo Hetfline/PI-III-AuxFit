@@ -47,7 +47,7 @@ interface MealData {
   totalFats: number;
   calories: number;
   foodItems: FoodItem[];
-  meta_calorias?: number; // 1. Adicionado campo opcional para a meta
+  meta_calorias?: number;
 }
 
 export default function mealScreen() {

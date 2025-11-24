@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Background from "@/components/universal/Background";
@@ -8,12 +8,93 @@ import Toast from "@/components/universal/Toast";
 import QuestionTypeSelect from "@/components/onboarding/QuestionTypeSelect";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { useOnboarding } from "@/context/OnboardingContext";
+import { api } from "@/services/api";
 
 export default function QuestionTypeScreen() {
   const router = useRouter();
-  const { updateOnboardingData } = useOnboarding();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+
+  // Estados para controle da IA e Perfis
+  const [hasWorkoutProfile, setHasWorkoutProfile] = useState(false);
+  const [hasDietProfile, setHasDietProfile] = useState(false);
+  const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // * Checar se já existem perfis ao carregar a tela
+  useEffect(() => {
+    checkProfiles();
+  }, []);
+
+  const checkProfiles = async () => {
+    try {
+      setIsLoadingProfiles(true);
+      // Busca usuário para pegar o ID
+      const user = await api.me();
+      if (user) setUserId(user.id);
+
+      // Busca perfis em paralelo
+      const [workoutProfile, dietProfile] = await Promise.all([
+        api.getTrainingProfile(),
+        api.getDietProfile(),
+      ]);
+
+      setHasWorkoutProfile(!!workoutProfile);
+      setHasDietProfile(!!dietProfile);
+    } catch (error) {
+      console.log("Erro ao checar perfis:", error);
+    } finally {
+      setIsLoadingProfiles(false);
+    }
+  };
+
+  // * Função para chamar os Webhooks
+  const handleGenerateAI = async () => {
+    if (!userId) {
+      Alert.alert("Erro", "Usuário não identificado.");
+      return;
+    }
+
+    if (!hasWorkoutProfile && !hasDietProfile) {
+      Alert.alert(
+        "Aviso",
+        "Você precisa preencher o formulário de treino ou dieta antes de gerar."
+      );
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      const promises = [];
+
+      // Chama webhook de treino se tiver perfil
+      if (hasWorkoutProfile) {
+        promises.push(api.generateAIPlan("gerar-treino", userId));
+      }
+
+      // Chama webhook de dieta se tiver perfil
+      if (hasDietProfile) {
+        promises.push(api.generateAIPlan("gerar-dieta", userId));
+      }
+
+      await Promise.all(promises);
+
+      Alert.alert(
+        "Sucesso!",
+        "Sua solicitação foi enviada para a IA. Em instantes seu plano estará pronto.",
+        [{ text: "Ir para Home", onPress: () => router.push("/(tabs)/home") }]
+      );
+    } catch (error) {
+      console.error("Erro detalhado:", error);
+      Alert.alert(
+        "Erro",
+        "Falha ao comunicar com a IA. Verifique se o servidor de webhook está rodando e acessível."
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleBack = () => {
     router.back();
@@ -26,19 +107,19 @@ export default function QuestionTypeScreen() {
     }
 
     if (selectedPath === "workout") {
-      
-      router.push("/onboarding/workout/experienceScreen"); 
+      router.push("/onboarding/workout/experienceScreen");
     } else if (selectedPath === "diet") {
       
-      Alert.alert("Em breve", "O questionário detalhado de dieta será implementado em breve! Vamos para a Home.", [
-        { text: "OK", onPress: () => close }
-      ]);
+      router.push("/onboarding/diet/restrictionsScreen");
     }
   };
 
   const handleSkip = () => {
     router.push("/(tabs)/home");
   };
+
+  // Verifica se tem algum perfil
+  const hasAnyProfile = hasWorkoutProfile || hasDietProfile;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -68,29 +149,58 @@ export default function QuestionTypeScreen() {
               onSelect={setSelectedPath}
             />
           </View>
+
+          {/* BOTÃO DE GERAR COM IA (Aparece apenas se tiver perfis) */}
+          {!isLoadingProfiles && hasAnyProfile && (
+            <View style={styles.aiSection}>
+              <Button
+                title={isGenerating ? "Gerando..." : "✨ Gerar Plano com IA"}
+                onPress={handleGenerateAI}
+                bgColor={Colors.accent}
+              />
+            </View>
+          )}
         </View>
 
         <View style={styles.footer}>
           <View style={styles.navigationButtons}>
             <View style={styles.backButtonWrapper}>
-              <Button title="Voltar" onPress={handleBack} bgColor={Colors.text} />
+              <Button
+                title="Voltar"
+                onPress={handleBack}
+                bgColor={Colors.text}
+              />
             </View>
 
             <View style={styles.nextButtonWrapper}>
-              <Button
-                title="Próxima"
-                onPress={handleNext}
-                bgColor={Colors.primary}
-              />
+              {/* LÓGICA DE EXIBIÇÃO DOS BOTÕES DO RODAPÉ */}
+              {!isLoadingProfiles && hasAnyProfile ? (
+                
+                <Button
+                  title="Começar"
+                  onPress={handleSkip}
+                  bgColor={Colors.primary}
+                />
+              ) : (
+                
+                <Button
+                  title="Próxima"
+                  onPress={handleNext}
+                  bgColor={Colors.primary}
+                />
+              )}
             </View>
           </View>
 
-          <Button
-            title="Pular personalização"
-            onPress={handleSkip}
-            bgColor="transparent"
-            color={Colors.subtext}
-          />
+          {/* Botão de pular só aparece se NÃO tiver perfil, pois se tiver perfil o botão principal já leva pra home */}
+          {!hasAnyProfile && (
+            <Button
+              title="Pular personalização"
+              onPress={handleSkip}
+              bgColor="transparent"
+              color={Colors.subtext}
+            />
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -100,23 +210,18 @@ export default function QuestionTypeScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.bg },
   container: { flex: 1 },
-  content: { flex: 1, justifyContent: 'center' },
-  
+  content: { flex: 1, justifyContent: "center" },
+
   topSection: {
     alignItems: "center",
     gap: 16,
     paddingHorizontal: Spacing.lg,
-    marginBottom: 50,
+    marginBottom: 30,
   },
-  logo: { 
-    width: 50, 
-    height: 62.7,
-    marginBottom: 20 
-  },
-  question: { 
-    ...Texts.title, 
-    fontSize: 24, 
-    textAlign: "center" 
+  question: {
+    ...Texts.title,
+    fontSize: 24,
+    textAlign: "center",
   },
   subtitle: {
     ...Texts.body,
@@ -126,6 +231,23 @@ const styles = StyleSheet.create({
 
   cardsSection: {
     paddingHorizontal: Spacing.lg,
+  },
+
+  aiSection: {
+    marginTop: 30,
+    marginHorizontal: Spacing.lg,
+    padding: Spacing.md,
+    backgroundColor: "rgba(53, 225, 255, 0.1)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    gap: 12,
+  },
+  aiText: {
+    ...Texts.subtext,
+    color: Colors.accent,
+    textAlign: "center",
+    fontSize: 12,
   },
 
   footer: {

@@ -20,7 +20,7 @@ import MacrosProgress from "@/components/diet/MacrosProgress";
 import WorkoutCard from "@/components/workout/WorkoutCard";
 import Header from "@/components/universal/Header";
 import getFormattedDate from "@/utils/getFormattedDate";
-import Meal from "@/components/diet/Meal"; 
+import Meal from "@/components/diet/Meal";
 import EditMealModal from "@/components/diet/EditMealModal";
 
 // Importações da API e Storage
@@ -41,7 +41,7 @@ export default function HomeScreen() {
 
   // --- ESTADOS DE DIETA E MACROS ---
   const [completedMealIds, setCompletedMealIds] = useState<number[]>([]);
-  
+
   // Metas calculadas dinamicamente (estado inicial padrão)
   const [macroGoals, setMacroGoals] = useState<Macros>({
     calories: 2000,
@@ -55,7 +55,7 @@ export default function HomeScreen() {
     protein: 0,
     carbs: 0,
     fats: 0,
-    logs: 0 
+    logs: 0,
   });
 
   // --- ESTADOS VISUAIS ---
@@ -74,43 +74,55 @@ export default function HomeScreen() {
     if (!meal || !meal.refeicao_itens) return [];
 
     return meal.refeicao_itens.map((item: any) => {
-       const alimento = getAlimentoData(item.alimentos);
-       const factor = item.quantidade / 100; 
-       const cals = alimento ? (alimento.calorias * factor) : 0;
-       
-       return {
-           id: item.id, 
-           foodId: alimento ? alimento.id : 0,
-           name: alimento?.nome || "Item Carregando...",
-           quantity: item.quantidade,
-           unit: item.unidade_medida || "g",
-           calories: cals,
-           protein: alimento ? (alimento.proteinas * factor) : 0,
-           carbs: alimento ? (alimento.carboidratos * factor) : 0,
-           fats: alimento ? (alimento.gorduras * factor) : 0,
-           baseUnit: alimento ? alimento.unidade_base : 'g'
-       };
+      const alimento = getAlimentoData(item.alimentos);
+      const factor = item.quantidade / 100;
+      const cals = alimento ? alimento.calorias * factor : 0;
+
+      return {
+        id: item.id,
+        foodId: alimento ? alimento.id : 0,
+        name: alimento?.nome || "Item Carregando...",
+        quantity: item.quantidade,
+        unit: item.unidade_medida || "g",
+        calories: cals,
+        protein: alimento ? alimento.proteinas * factor : 0,
+        carbs: alimento ? alimento.carboidratos * factor : 0,
+        fats: alimento ? alimento.gorduras * factor : 0,
+        baseUnit: alimento ? alimento.unidade_base : "g",
+      };
     });
   };
 
   const getMealSummary = (meal: any) => {
-     const items = getMealDisplayData(meal);
-     const totalCals = items.reduce((acc: number, curr: any) => acc + curr.calories, 0);
-     
-     const totalProt = items.reduce((acc: number, curr: any) => acc + (curr.protein || 0), 0);
-     const totalCarbs = items.reduce((acc: number, curr: any) => acc + (curr.carbs || 0), 0);
-     const totalFats = items.reduce((acc: number, curr: any) => acc + (curr.fats || 0), 0);
+    const items = getMealDisplayData(meal);
+    const totalCals = items.reduce(
+      (acc: number, curr: any) => acc + curr.calories,
+      0
+    );
 
-     return {
-        id: meal.id,
-        mealName: meal.nome,
-        calories: Math.round(totalCals), 
-        meta_calorias: meal.meta_calorias,
-        totalProtein: Math.round(totalProt),
-        totalCarbs: Math.round(totalCarbs),
-        totalFats: Math.round(totalFats),
-        foodItems: items
-     };
+    const totalProt = items.reduce(
+      (acc: number, curr: any) => acc + (curr.protein || 0),
+      0
+    );
+    const totalCarbs = items.reduce(
+      (acc: number, curr: any) => acc + (curr.carbs || 0),
+      0
+    );
+    const totalFats = items.reduce(
+      (acc: number, curr: any) => acc + (curr.fats || 0),
+      0
+    );
+
+    return {
+      id: meal.id,
+      mealName: meal.nome,
+      calories: Math.round(totalCals),
+      meta_calorias: meal.meta_calorias,
+      totalProtein: Math.round(totalProt),
+      totalCarbs: Math.round(totalCarbs),
+      totalFats: Math.round(totalFats),
+      foodItems: items,
+    };
   };
 
   // --- CÁLCULO DE TOTAIS DIÁRIOS ---
@@ -121,12 +133,12 @@ export default function HomeScreen() {
     let totalFats = 0;
     let totalLogs = completedIds.length;
 
-    mealsData.forEach(meal => {
+    mealsData.forEach((meal) => {
       if (completedIds.includes(meal.id) && meal.refeicao_itens) {
         meal.refeicao_itens.forEach((item: any) => {
           const alimento = getAlimentoData(item.alimentos);
           if (alimento) {
-            const factor = item.quantidade / 100; 
+            const factor = item.quantidade / 100;
             totalCals += (alimento.calorias || 0) * factor;
             totalProt += (alimento.proteinas || 0) * factor;
             totalCarbs += (alimento.carboidratos || 0) * factor;
@@ -141,7 +153,7 @@ export default function HomeScreen() {
       protein: Math.round(totalProt),
       carbs: Math.round(totalCarbs),
       fats: Math.round(totalFats),
-      logs: totalLogs
+      logs: totalLogs,
     });
   };
 
@@ -155,32 +167,33 @@ export default function HomeScreen() {
       const token = await authStorage.getToken();
       if (!token) {
         setLoading(false);
-        return; 
+        return;
       }
 
       const [userData, waterData, workoutsData, mealsData] = await Promise.all([
-        api.me().catch(() => null),                     
-        api.getTodayWaterProgress().catch(() => null), 
-        api.getWorkouts().catch(() => []),             
-        api.getMeals().catch(() => [])                 
+        api.me().catch(() => null),
+        api.getTodayWaterProgress().catch(() => null),
+        api.getWorkouts().catch(() => []),
+        api.getMeals().catch(() => []),
       ]);
 
       if (userData) {
-        setUserName(userData.nome?.split(" ")[0] || "Usuário"); 
+        setUserName(userData.nome?.split(" ")[0] || "Usuário");
 
         // --- CALCULAR MACROS RECOMENDADOS ---
         // Usa o peso de hoje se disponível, senão o peso inicial
-        const currentWeight = (waterData?.peso && Number(waterData.peso) > 0)
+        const currentWeight =
+          waterData?.peso && Number(waterData.peso) > 0
             ? Number(waterData.peso)
             : Number(userData.peso_inicial);
 
         const profileData = {
-            sexo: userData.sexo || 'M',
-            data_nascimento: userData.data_nascimento || new Date().toISOString(),
-            altura: Number(userData.altura) || 170,
-            peso: currentWeight || 70,
-            nivel_atividade: userData.nivel_atividade || 'moderado',
-            objetivo: userData.objetivo || 'manter'
+          sexo: userData.sexo || "M",
+          data_nascimento: userData.data_nascimento || new Date().toISOString(),
+          altura: Number(userData.altura) || 170,
+          peso: currentWeight || 70,
+          nivel_atividade: userData.nivel_atividade || "moderado",
+          objetivo: userData.objetivo || "manter",
         };
 
         const calculatedGoals = calculateMacros(profileData);
@@ -198,12 +211,11 @@ export default function HomeScreen() {
       if (mealsData) {
         setMeals(mealsData);
         if (mealsData.length > 0) {
-            findNextMeal(mealsData);
+          findNextMeal(mealsData);
         } else {
-            setNextMeal(null);
+          setNextMeal(null);
         }
       }
-
     } catch (error) {
       console.log("Erro ao carregar Home:", error);
     } finally {
@@ -225,16 +237,16 @@ export default function HomeScreen() {
 
     const sortedMeals = [...mealsList].sort((a, b) => {
       if (!a.horario || !b.horario) return 0;
-      const [hA, mA] = a.horario.split(':').map(Number);
-      const [hB, mB] = b.horario.split(':').map(Number);
-      return (hA * 60 + mA) - (hB * 60 + mB);
+      const [hA, mA] = a.horario.split(":").map(Number);
+      const [hB, mB] = b.horario.split(":").map(Number);
+      return hA * 60 + mA - (hB * 60 + mB);
     });
 
-    const next = sortedMeals.find(meal => {
-        if (!meal.horario) return false;
-        const [h, m] = meal.horario.split(':').map(Number);
-        const mealTimeValue = h * 60 + m;
-        return mealTimeValue > currentTimeValue;
+    const next = sortedMeals.find((meal) => {
+      if (!meal.horario) return false;
+      const [h, m] = meal.horario.split(":").map(Number);
+      const mealTimeValue = h * 60 + m;
+      return mealTimeValue > currentTimeValue;
     });
 
     setNextMeal(next || sortedMeals[0]);
@@ -249,18 +261,18 @@ export default function HomeScreen() {
       await api.updateWaterProgress(amount);
     } catch (error) {
       console.error("Erro ao atualizar água:", error);
-      setCurrentWater((prev) => prev - amount); 
+      setCurrentWater((prev) => prev - amount);
     }
   };
 
   const handleMealComplete = (mealId: number) => {
-    setCompletedMealIds(prev => [...prev, mealId]);
+    setCompletedMealIds((prev) => [...prev, mealId]);
   };
 
   const handleMealUncomplete = (mealId: number) => {
-    setCompletedMealIds(prev => prev.filter(id => id !== mealId));
+    setCompletedMealIds((prev) => prev.filter((id) => id !== mealId));
   };
-  
+
   const handleNavigateToDetails = (workoutData: any) => {
     router.push({
       pathname: "/workout/workoutInfoScreen",
@@ -277,33 +289,40 @@ export default function HomeScreen() {
 
   const handleUpdateMeal = async (id: number, data: any) => {
     try {
-        await api.updateMeal(id, data);
-        Alert.alert("Sucesso", "Refeição atualizada!");
-        fetchData(); 
+      await api.updateMeal(id, data);
+      Alert.alert("Sucesso", "Refeição atualizada!");
+      fetchData();
     } catch (error) {
-        Alert.alert("Erro", "Falha ao atualizar.");
+      Alert.alert("Erro", "Falha ao atualizar.");
     }
   };
 
   const handleDeleteMeal = async (id: number) => {
     try {
-        await api.deleteMeal(id);
-        Alert.alert("Sucesso", "Refeição excluída.");
-        setCompletedMealIds(prev => prev.filter(mId => mId !== id));
-        fetchData(); 
+      await api.deleteMeal(id);
+      Alert.alert("Sucesso", "Refeição excluída.");
+      setCompletedMealIds((prev) => prev.filter((mId) => mId !== id));
+      fetchData();
     } catch (error) {
-        Alert.alert("Erro", "Falha ao excluir.");
+      Alert.alert("Erro", "Falha ao excluir.");
     }
   };
 
   const date = getFormattedDate();
 
   if (loading) {
-      return (
-          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.bg}}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-          </View>
-      )
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: Colors.bg,
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
   }
 
   return (
@@ -326,11 +345,26 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.scrollContent}>
-
-            <View>
-              <Button onPress={() => router.push("/onboarding/diet/restrictionsScreen")} title="Dieta"/>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: Spacing.md,
+                justifyContent: "center",
+              }}
+            >
+              <Button
+                onPress={() => router.push("/onboarding")}
+                title="Onboarding"
+                bgColor={Colors.accent}
+              />
+              <Button
+                onPress={() => router.push("/onboarding/questionTypeScreen")}
+                title="Caminho"
+                bgColor={Colors.secondary}
+              />
             </View>
-            
+            <Button onPress={() => router.push("/(auth)")} title="Login" />
+
             <Header
               title={`Olá, ${userName}`}
               subtitle={date}
@@ -355,21 +389,35 @@ export default function HomeScreen() {
                   />
                 </View>
                 <View style={{ display: isMacro ? "none" : "flex" }}>
-                  <WaterProgress 
-                    currentWater={currentWater} 
-                    onAddWater={handleUpdateWater} 
+                  <WaterProgress
+                    currentWater={currentWater}
+                    onAddWater={handleUpdateWater}
                   />
                 </View>
                 <View style={styles.dotsContainer}>
                   <Pressable
                     onPress={() => setIsMacro(true)}
                     hitSlop={15}
-                    style={[styles.dot, { backgroundColor: isMacro ? Colors.primary : Colors.subtext }]}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor: isMacro
+                          ? Colors.primary
+                          : Colors.subtext,
+                      },
+                    ]}
                   />
                   <Pressable
                     onPress={() => setIsMacro(false)}
                     hitSlop={15}
-                    style={[styles.dot, { backgroundColor: isMacro ? Colors.subtext : Colors.primary }]}
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor: isMacro
+                          ? Colors.subtext
+                          : Colors.primary,
+                      },
+                    ]}
                   />
                 </View>
               </View>
@@ -379,53 +427,64 @@ export default function HomeScreen() {
               <Text style={Texts.subtitle}>Próxima refeição</Text>
               <View>
                 {nextMeal ? (
-                    <Meal
-                      name={`${nextMeal.nome}`}
-                      metaCalories={nextMeal.meta_calorias || 0}
-                      foodItems={getMealDisplayData(nextMeal)}
-                      
-                      isCompleted={completedMealIds.includes(nextMeal.id)}
-                      increaseLogs={() => handleMealComplete(nextMeal.id)}
-                      decreaseLogs={() => handleMealUncomplete(nextMeal.id)}
-                      
-                      onPress={() =>
-                          router.push({
-                          pathname: "/diet/mealScreen",
-                          params: {
-                              mealId: nextMeal.id,
-                              data: JSON.stringify(getMealSummary(nextMeal)),
-                          },
-                          })
-                      }
-                      
-                      onAddFood={() => 
-                        router.push({
-                          pathname: "/diet/foodSearchScreen",
-                          params: { mealId: nextMeal.id }
-                        })
-                      }
-
-                      onFoodPress={(foodItem) => 
-                         router.push({
-                           pathname: "/diet/foodScreen",
-                           params: { 
-                              data: JSON.stringify({
-                                  ...foodItem,
-                                  mealId: nextMeal.id
-                              }) 
-                           }
-                         })
-                      }
-
-                      onEdit={() => handleOpenEditModal(nextMeal)}
-                    />
+                  <Meal
+                    name={`${nextMeal.nome}`}
+                    metaCalories={nextMeal.meta_calorias || 0}
+                    foodItems={getMealDisplayData(nextMeal)}
+                    isCompleted={completedMealIds.includes(nextMeal.id)}
+                    increaseLogs={() => handleMealComplete(nextMeal.id)}
+                    decreaseLogs={() => handleMealUncomplete(nextMeal.id)}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/diet/mealScreen",
+                        params: {
+                          mealId: nextMeal.id,
+                          data: JSON.stringify(getMealSummary(nextMeal)),
+                        },
+                      })
+                    }
+                    onAddFood={() =>
+                      router.push({
+                        pathname: "/diet/foodSearchScreen",
+                        params: { mealId: nextMeal.id },
+                      })
+                    }
+                    onFoodPress={(foodItem) =>
+                      router.push({
+                        pathname: "/diet/foodScreen",
+                        params: {
+                          data: JSON.stringify({
+                            ...foodItem,
+                            mealId: nextMeal.id,
+                          }),
+                        },
+                      })
+                    }
+                    onEdit={() => handleOpenEditModal(nextMeal)}
+                  />
                 ) : (
-                    <View style={{padding: 20, backgroundColor: Colors.bgMedium, borderRadius: 10, alignItems: 'center'}}>
-                        <Text style={[Texts.body, {color: Colors.subtext}]}>Nenhuma refeição cadastrada.</Text>
-                        <Pressable onPress={() => router.push("/(tabs)/diet")}>
-                            <Text style={[Texts.bodyBold, {color: Colors.primary, marginTop: 5}]}>Criar refeição</Text>
-                        </Pressable>
-                    </View>
+                  <View
+                    style={{
+                      padding: 20,
+                      backgroundColor: Colors.bgMedium,
+                      borderRadius: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={[Texts.body, { color: Colors.subtext }]}>
+                      Nenhuma refeição cadastrada.
+                    </Text>
+                    <Pressable onPress={() => router.push("/(tabs)/diet")}>
+                      <Text
+                        style={[
+                          Texts.bodyBold,
+                          { color: Colors.primary, marginTop: 5 },
+                        ]}
+                      >
+                        Criar refeição
+                      </Text>
+                    </Pressable>
+                  </View>
                 )}
               </View>
             </View>
@@ -433,47 +492,73 @@ export default function HomeScreen() {
             <View style={{ gap: Spacing.md }}>
               <Text style={Texts.subtitle}>Meus treinos</Text>
               {userWorkouts.length > 0 ? (
-                  <ScrollView
-                    horizontal={true}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: 12 }}
-                    style={{ gap: Spacing.sm, flexDirection: "row" }}
-                  >
-                    {userWorkouts.map((workout: any) => (
-                      <WorkoutCard
-                        key={workout.id}
-                        onPress={() => handleNavigateToDetails(workout)}
-                        focusAreas={Array.isArray(workout.areas_foco) ? workout.areas_foco.join(", ") : workout.areas_foco || "Geral"}
-                        title={workout.nome}
-                        duration={workout.duracao}
-                        numExercises={workout.treino_exercicios ? workout.treino_exercicios.length : 0}
-                      />
-                    ))}
-                  </ScrollView>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 12 }}
+                  style={{ gap: Spacing.sm, flexDirection: "row" }}
+                >
+                  {userWorkouts.map((workout: any) => (
+                    <WorkoutCard
+                      key={workout.id}
+                      onPress={() => handleNavigateToDetails(workout)}
+                      focusAreas={
+                        Array.isArray(workout.areas_foco)
+                          ? workout.areas_foco.join(", ")
+                          : workout.areas_foco || "Geral"
+                      }
+                      title={workout.nome}
+                      duration={workout.duracao}
+                      numExercises={
+                        workout.treino_exercicios
+                          ? workout.treino_exercicios.length
+                          : 0
+                      }
+                    />
+                  ))}
+                </ScrollView>
               ) : (
-                  <View style={{padding: 20, backgroundColor: Colors.bgMedium, borderRadius: 10}}>
-                      <Text style={{color: Colors.subtext}}>Você ainda não criou nenhum treino.</Text>
-                  </View>
+                <View
+                  style={{
+                    padding: 20,
+                    backgroundColor: Colors.bgMedium,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text style={{ color: Colors.subtext }}>
+                    Você ainda não criou nenhum treino.
+                  </Text>
+                </View>
               )}
               <View style={{ paddingHorizontal: 32 }}>
                 <Button
                   title="Explorar exercícios"
                   bgColor={Colors.accent}
-                  onPress={() => router.push("/(tabs)/workout/searchExerciseScreen")}
+                  onPress={() =>
+                    router.push("/(tabs)/workout/searchExerciseScreen")
+                  }
                 />
               </View>
             </View>
 
             <View style={styles.widgetsContainer}>
               <View>
-                <Text style={[Texts.subtitle, { color: Colors.primary }]}>Widgets AuxFit</Text>
-                <Text style={Texts.body}>Acompanhe os seus registros de forma rápida e direta na sua tela inicial</Text>
+                <Text style={[Texts.subtitle, { color: Colors.primary }]}>
+                  Widgets AuxFit
+                </Text>
+                <Text style={Texts.body}>
+                  Acompanhe os seus registros de forma rápida e direta na sua
+                  tela inicial
+                </Text>
               </View>
               <View style={{ paddingHorizontal: 32 }}>
-                <Button title="Adicionar widgets" icon="add" onPress={() => null} />
+                <Button
+                  title="Adicionar widgets"
+                  icon="add"
+                  onPress={() => null}
+                />
               </View>
             </View>
-
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -485,17 +570,31 @@ export default function HomeScreen() {
         onSave={handleUpdateMeal}
         onDelete={handleDeleteMeal}
       />
-
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: { paddingTop: 24, paddingBottom: 100, gap: Spacing.lg },
-  macroWaterprogressContainer: { backgroundColor: Colors.bgMedium, borderRadius: 20, justifyContent: "space-evenly", paddingBottom: Spacing.sm },
-  dotsContainer: { flex: 1, flexDirection: "row", justifyContent: "center", gap: Spacing.md },
+  macroWaterprogressContainer: {
+    backgroundColor: Colors.bgMedium,
+    borderRadius: 20,
+    justifyContent: "space-evenly",
+    paddingBottom: Spacing.sm,
+  },
+  dotsContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: Spacing.md,
+  },
   dot: { width: 10, height: 10, borderRadius: 10 },
   exploreExercices: { padding: Spacing.sm, backgroundColor: Colors.bgMedium },
   weightInContainer: { backgroundColor: Colors.bgMedium, borderRadius: 10 },
-  widgetsContainer: { backgroundColor: Colors.bgMedium, borderRadius: 10, gap: Spacing.md, padding: Spacing.md },
+  widgetsContainer: {
+    backgroundColor: Colors.bgMedium,
+    borderRadius: 10,
+    gap: Spacing.md,
+    padding: Spacing.md,
+  },
 });

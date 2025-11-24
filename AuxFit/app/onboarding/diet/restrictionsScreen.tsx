@@ -49,10 +49,10 @@ export default function RestrictionsScreen() {
   };
 
   const handleNext = () => {
-    // Salva no contexto
+  
     updateOnboardingData('restricoes_alimentares', selectedIds);
     
-    // Próxima tela: Tipo de Alimentação
+  
     router.push("/onboarding/diet/dietTypeScreen");
   };
 
@@ -75,7 +75,7 @@ export default function RestrictionsScreen() {
                 options={RESTRICTION_OPTIONS}
                 selectedIds={selectedIds}
                 onSelect={handleSelect}
-                variant="tag" // Estilo "Tag" para caber mais opções
+                variant="tag"
                 multiSelect={true}
             />
           </ScrollView>

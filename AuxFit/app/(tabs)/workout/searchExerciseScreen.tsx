@@ -18,7 +18,7 @@ import FilterBtn from "@/components/universal/FilterBtn";
 import FilterModal from "@/components/universal/FilterModal";
 import InputField from "@/components/universal/InputField";
 import FilteredItem from "@/components/workout/FilteredItem";
-import AddExerciseModal from "@/components/workout/AddExerciseModal"; 
+import AddExerciseModal from "@/components/workout/AddExerciseModal";
 import { api } from "@/services/api";
 
 interface Exercise {
@@ -40,20 +40,20 @@ interface FocusAreaItem {
 export default function SearchExerciseScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
-  // 💡 Recebe ID do treino se vier da tela de detalhes
+
   const workoutIdToAdd = params.workoutId ? Number(params.workoutId) : null;
 
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Estados para o Modal de Adição
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-  const [selectedExerciseToAdd, setSelectedExerciseToAdd] = useState<Exercise | null>(null);
+  const [selectedExerciseToAdd, setSelectedExerciseToAdd] =
+    useState<Exercise | null>(null);
 
   useEffect(() => {
     fetchExercises();
@@ -87,46 +87,49 @@ export default function SearchExerciseScreen() {
     );
   };
 
-  // --- LÓGICA DE SELEÇÃO (CORRIGIDA) ---
+  // --- LÓGICA DE SELEÇÃO  ---
   const handleExercisePress = (exercise: Exercise) => {
     if (workoutIdToAdd) {
-        // MODO ADIÇÃO: Abre modal de config se tivermos um ID de treino
-        setSelectedExerciseToAdd(exercise);
-        setIsAddModalVisible(true);
+      setSelectedExerciseToAdd(exercise);
+      setIsAddModalVisible(true);
     } else {
-        // MODO VISUALIZAÇÃO: Vai para detalhes se não tiver ID de treino
-        router.push({
-            pathname: "/(tabs)/workout/exerciseScreen",
-            params: { 
-              nome: exercise.nome_exercicio,
-              grupoGeral: exercise.grupo_muscular_geral,
-              grupoEspecifico: exercise.grupo_muscular_especifico || "",
-              descricao: exercise.descricao || "",
-              execucao: exercise.execucao_passos || "",
-              video: exercise.video_url || ""
-            }
-          });
+      router.push({
+        pathname: "/(tabs)/workout/exerciseScreen",
+        params: {
+          nome: exercise.nome_exercicio,
+          grupoGeral: exercise.grupo_muscular_geral,
+          grupoEspecifico: exercise.grupo_muscular_especifico || "",
+          descricao: exercise.descricao || "",
+          execucao: exercise.execucao_passos || "",
+          video: exercise.video_url || "",
+        },
+      });
     }
   };
 
-  const confirmAddExercise = async (config: { series: number; repeticoes: number; carga: number; descanso: number }) => {
+  const confirmAddExercise = async (config: {
+    series: number;
+    repeticoes: number;
+    carga: number;
+    descanso: number;
+  }) => {
     if (!selectedExerciseToAdd || !workoutIdToAdd) return;
 
     try {
-        await api.addExerciseToWorkout({
-            treino_fk: workoutIdToAdd,
-            exercicio_fk: selectedExerciseToAdd.id,
-            series: config.series,
-            repeticoes: config.repeticoes,
-            carga: config.carga,
-            descanso_segundos: config.descanso
-        });
-        
-        Alert.alert("Sucesso", "Exercício adicionado ao treino!");
-        router.back(); // Volta para a tela do treino
+      await api.addExerciseToWorkout({
+        treino_fk: workoutIdToAdd,
+        exercicio_fk: selectedExerciseToAdd.id,
+        series: config.series,
+        repeticoes: config.repeticoes,
+        carga: config.carga,
+        descanso_segundos: config.descanso,
+      });
+
+      Alert.alert("Sucesso", "Exercício adicionado ao treino!");
+      router.back();
     } catch (error) {
-        console.error(error);
-        Alert.alert("Erro", "Falha ao adicionar exercício.");
+      console.error(error);
+      Alert.alert("Erro", "Falha ao adicionar exercício.");
     }
   };
 
@@ -136,13 +139,13 @@ export default function SearchExerciseScreen() {
     new Set(exercises.map((e) => e.grupo_muscular_geral))
   ).filter(Boolean);
 
-  const availableFocusAreas: FocusAreaItem[] = uniqueGroups.map(group => {
+  const availableFocusAreas: FocusAreaItem[] = uniqueGroups.map((group) => {
     const exerciseWithImage = exercises.find(
-      e => e.grupo_muscular_geral === group && e.imagem_url
+      (e) => e.grupo_muscular_geral === group && e.imagem_url
     );
     return {
       name: group,
-      image: exerciseWithImage?.imagem_url || null
+      image: exerciseWithImage?.imagem_url || null,
     };
   });
 
@@ -156,8 +159,12 @@ export default function SearchExerciseScreen() {
     (exercise) => {
       if (!searchTerm) return true;
       const lowerCaseSearch = searchTerm.toLowerCase();
-      const nameMatches = exercise.nome_exercicio.toLowerCase().includes(lowerCaseSearch);
-      const focusAreaMatches = exercise.grupo_muscular_geral.toLowerCase().includes(lowerCaseSearch);
+      const nameMatches = exercise.nome_exercicio
+        .toLowerCase()
+        .includes(lowerCaseSearch);
+      const focusAreaMatches = exercise.grupo_muscular_geral
+        .toLowerCase()
+        .includes(lowerCaseSearch);
       return nameMatches || focusAreaMatches;
     }
   );
@@ -174,16 +181,20 @@ export default function SearchExerciseScreen() {
         />
         <FilterBtn onPress={() => setIsFilterModalVisible((prev) => !prev)} />
       </View>
-      
+
       <View style={{ flexDirection: "row", gap: Spacing.md, flexWrap: "wrap" }}>
         {selectedFocusAreas.map((area) => (
-          <FilteredItem key={area} name={area} onRemove={handleRemoveFilteredItem} />
+          <FilteredItem
+            key={area}
+            name={area}
+            onRemove={handleRemoveFilteredItem}
+          />
         ))}
       </View>
 
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={Texts.subtitle}>
-            {workoutIdToAdd ? "Selecione para Adicionar" : "Exercícios"}
+          {workoutIdToAdd ? "Selecione para Adicionar" : "Exercícios"}
         </Text>
         <Text style={[Texts.subtext, { color: Colors.accent }]}>
           {finalFilteredExercises.length} exercícios
@@ -194,27 +205,43 @@ export default function SearchExerciseScreen() {
 
   const renderItem = ({ item }: { item: Exercise }) => (
     <ExerciseCard
-      name={item.nome_exercicio} 
+      name={item.nome_exercicio}
       focusArea={item.grupo_muscular_geral}
       imageUrl={item.imagem_url}
-      // AQUI ESTAVA O ERRO: Você tinha um router.push direto aqui!
-      onPress={() => handleExercisePress(item)} 
+      onPress={() => handleExercisePress(item)}
     />
   );
 
   const renderEmpty = () => {
     if (loading) {
-      return <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />;
+      return (
+        <ActivityIndicator
+          size="large"
+          color={Colors.primary}
+          style={{ marginTop: 20 }}
+        />
+      );
     }
     return (
-      <Text style={[Texts.body, { textAlign: 'center', marginTop: 20, color: Colors.subtext }]}>
+      <Text
+        style={[
+          Texts.body,
+          { textAlign: "center", marginTop: 20, color: Colors.subtext },
+        ]}
+      >
         Nenhum exercício encontrado.
       </Text>
     );
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.bg, paddingHorizontal: Spacing.md }}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: Colors.bg,
+        paddingHorizontal: Spacing.md,
+      }}
+    >
       <Background />
       <KeyboardAvoidingView behavior={"padding"} style={{ flex: 1 }}>
         <FlatList
@@ -236,10 +263,13 @@ export default function SearchExerciseScreen() {
         >
           <View>
             <Text style={Texts.bodyBold}>
-              Áreas de foco <Text style={[Texts.subtext, { color: Colors.accent }]}>{selectedFocusAreas.length > 0 ? `(${listaItens})` : null}</Text>
+              Áreas de foco{" "}
+              <Text style={[Texts.subtext, { color: Colors.accent }]}>
+                {selectedFocusAreas.length > 0 ? `(${listaItens})` : null}
+              </Text>
             </Text>
           </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
             {availableFocusAreas.map((item) => (
               <FocusArea
                 key={item.name}
@@ -254,14 +284,13 @@ export default function SearchExerciseScreen() {
 
         {/* Modal de Adição */}
         {selectedExerciseToAdd && (
-            <AddExerciseModal 
-                visible={isAddModalVisible}
-                exerciseName={selectedExerciseToAdd.nome_exercicio}
-                onClose={() => setIsAddModalVisible(false)}
-                onSave={confirmAddExercise}
-            />
+          <AddExerciseModal
+            visible={isAddModalVisible}
+            exerciseName={selectedExerciseToAdd.nome_exercicio}
+            onClose={() => setIsAddModalVisible(false)}
+            onSave={confirmAddExercise}
+          />
         )}
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -270,6 +299,6 @@ export default function SearchExerciseScreen() {
 const styles = StyleSheet.create({
   headerContainer: {
     gap: Spacing.md,
-    marginBottom: 12, 
+    marginBottom: 12,
   },
 });

@@ -21,7 +21,7 @@ interface Message {
   text: string;
   sender: "user" | "bot";
 }
-const N8N_URL = "http://192.168.89.122:5678/webhook-test/gerar-treino";
+const N8N_URL = "http://192.168.89.122:5678/webhook-test/chatbot";
 
 async function sendMessageToBot(message: string, sessionId: string) {
   try {
@@ -54,7 +54,7 @@ export default function ChatScreen() {
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const flatListRef = React.useRef<FlatList<Message>>(null);
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function ChatScreen() {
     setIsLoading(true);
 
     setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
+      flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
 
     try {
@@ -90,17 +90,16 @@ export default function ChatScreen() {
           sender: "bot",
         },
       ]);
-      
+
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
-
     } catch (error) {
       Alert.alert(
         "Erro de Conexão",
         "Não foi possível conectar ao assistente. Verifique se o n8n está rodando e se o IP está correto."
       );
-      
+
       setMessages((prev) => [
         ...prev,
         {
@@ -109,11 +108,10 @@ export default function ChatScreen() {
           sender: "bot",
         },
       ]);
-      
+
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
-
     } finally {
       setIsLoading(false);
     }
@@ -145,14 +143,14 @@ export default function ChatScreen() {
               flexShrink: 1,
             },
             text: {
-              flexWrap: 'wrap',
-            }
+              flexWrap: "wrap",
+            },
           }}
         >
           {item.text}
         </Markdown>
       ) : (
-        <Text style={[Texts.body, styles.userText, styles.messageTextContent]}> 
+        <Text style={[Texts.body, styles.userText, styles.messageTextContent]}>
           {item.text}
         </Text>
       )}
@@ -181,12 +179,16 @@ export default function ChatScreen() {
           contentContainerStyle={styles.flatListContent}
           showsVerticalScrollIndicator={false}
           inverted={false}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: true })
+          }
         />
-        
+
         <View style={styles.inputContainer}>
           <InputField
-            placeholder={isLoading ? "Aguardando resposta..." : "Digite sua mensagem..."}
+            placeholder={
+              isLoading ? "Aguardando resposta..." : "Digite sua mensagem..."
+            }
             placeholderTextColor={Colors.subtext}
             value={inputText}
             onChangeText={setInputText}
@@ -214,8 +216,8 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: 'row',
-    gap: Spacing.sm
+    flexDirection: "row",
+    gap: Spacing.sm,
   },
   flatListContent: {
     paddingBottom: Spacing.md,
@@ -230,8 +232,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 1,
     elevation: 2,
-    // 💡 Adicionado flexShrink para a bolha
-    flexShrink: 1, 
+    flexShrink: 1,
   },
   userMsg: {
     alignSelf: "flex-end",
@@ -246,14 +247,11 @@ const styles = StyleSheet.create({
   userText: {
     color: Colors.bg,
   },
-  botText: { // Este estilo não está sendo usado diretamente no Markdown, mas mantido.
+  botText: {
     color: Colors.text,
   },
-  // 💡 Novo estilo para garantir a quebra de palavras dentro do Text
   messageTextContent: {
-    flexShrink: 1, // Permite que o texto encolha e quebre
-    // wordBreak: 'break-word', // Mais relevante para web, mas pode ser adicionado
-    // overflow: 'hidden', // Geralmente não necessário com flexShrink 
+    flexShrink: 1,
   },
   inputContainer: {
     flexDirection: "row",

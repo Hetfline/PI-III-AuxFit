@@ -62,7 +62,7 @@ export default function WeightScreen() {
     </SafeAreaView>
   );
 }
-// ... Mesmos styles
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.bg },
   container: { flex: 1, position: "relative" },

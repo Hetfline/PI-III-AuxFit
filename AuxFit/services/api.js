@@ -1,7 +1,12 @@
 import { authStorage } from "./auth-storage";
 
-// ⚠️ Se seu IP mudar (reiniciar roteador/PC), lembre de atualizar aqui.
-const API_URL = "http://192.168.89.122:3000/api"; 
+// *  Endereço IP Mateus!
+// TODO tem que trocar essa bagaça aqui depois
+const MEU_IP = "192.168.89.122"; 
+
+const API_URL = `http://${MEU_IP}:3000/api`; 
+
+const WEBHOOK_URL = `http://${MEU_IP}:5678/webhook-test`; 
 
 export const api = {
   // --- AUTENTICAÇÃO ---
@@ -44,10 +49,10 @@ export const api = {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Erro ao buscar usuário");
+      if (!response.ok) throw new Error(data.error || "Erro ao buscar utilizador");
       return data.user; 
     } catch (error) {
-      console.log("Erro ao buscar dados do usuário:", error);
+      console.log("Erro ao buscar dados do utilizador:", error);
       return null;
     }
   },
@@ -70,7 +75,69 @@ export const api = {
     }
   },
 
-  // --- PERFIL DE TREINO ---
+  // --- PERFIS (Checagem para IA) ---
+  getTrainingProfile: async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) return null;
+      const response = await fetch(`${API_URL}/perfil-treino`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      if (response.status === 404) return null; 
+      const data = await response.json();
+      return data || null;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  getDietProfile: async () => {
+    try {
+      const token = await authStorage.getToken();
+      if (!token) return null;
+      const response = await fetch(`${API_URL}/perfil-alimentar`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+      });
+      if (response.status === 404) return null;
+      const data = await response.json();
+      return data || null;
+    } catch (error) {
+      return null;
+    }
+  },
+
+  // --- WEBHOOKS IA (Modo Teste) ---
+  generateAIPlan: async (type, userId) => {
+    // type: 'gerar-dieta' ou 'gerar-treino'
+    const fullUrl = `${WEBHOOK_URL}/${type}`;
+    
+    try {
+      console.log(`🚀 Chamando Webhook de Teste: ${fullUrl}`);
+      
+      const response = await fetch(fullUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      
+      console.log(`📡 Status Webhook: ${response.status}`);
+
+      if (!response.ok) {
+         const errorText = await response.text();
+         console.error(`❌ Erro n8n:`, errorText);
+         throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`💥 FALHA CONEXÃO WEBHOOK:`, error.message);
+      throw error;
+    }
+  },
+
+  // --- PERFIL DE TREINO (Manual) ---
   saveTrainingProfile: async (data) => {
     try {
       const token = await authStorage.getToken();
@@ -91,7 +158,7 @@ export const api = {
   getExercises: async () => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/exercicios`, {
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -104,11 +171,11 @@ export const api = {
     }
   },
 
-  // --- TREINOS ---
+  // --- TREINOS (CRUD) ---
   getWorkouts: async () => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/treinos`, { 
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -124,7 +191,7 @@ export const api = {
   createWorkout: async (workoutData) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/treinos`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -141,7 +208,7 @@ export const api = {
   updateWorkout: async (id, workoutData) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/treinos/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -155,10 +222,11 @@ export const api = {
     }
   },
 
+  // --- ITENS DE TREINO (Exercícios dentro do treino) ---
   getWorkoutExercises: async (treinoId) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/treino-exercicios/treino/${treinoId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -174,7 +242,7 @@ export const api = {
   addExerciseToWorkout: async (data) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/treino-exercicios`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -218,11 +286,31 @@ export const api = {
     }
   },
 
+  // --- HISTÓRICO DE TREINOS (Finalizar Treino) ---
+  finishWorkout: async (workoutData) => {
+    try {
+      const token = await authStorage.getToken();
+      const response = await fetch(`${API_URL}/historico-treinos/finalizar`, {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(workoutData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao finalizar treino");
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // --- DIETA & REFEIÇÕES ---
   getMeals: async () => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/refeicoes`, {
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -238,7 +326,7 @@ export const api = {
   getMeal: async (id) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/refeicoes/${id}`, {
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -359,7 +447,6 @@ export const api = {
   },
 
   // --- DESPENSA ---
-  // NOVO: Buscar lista da despensa
   getPantry: async () => {
     try {
       const token = await authStorage.getToken();
@@ -420,8 +507,7 @@ export const api = {
     }
   },
   
-  // --- ÁGUA & PROGRESSO ---
-  // NOVO: Buscar histórico completo (Gráficos)
+  // --- ÁGUA & PROGRESSO & PESO ---
   getProgressHistory: async () => {
     try {
       const token = await authStorage.getToken();
@@ -440,7 +526,7 @@ export const api = {
   getTodayWaterProgress: async () => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/progresso/today`, {
         method: "GET",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -456,7 +542,7 @@ export const api = {
   updateWaterProgress: async (amount) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/progresso/water`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -470,40 +556,17 @@ export const api = {
     }
   },
 
-  // NOVO: Salvar Peso
   saveWeight: async (id, weight) => {
     try {
       const token = await authStorage.getToken();
-      if (!token) throw new Error("Usuário não autenticado");
-      
-      // Usa a rota genérica de update do ProgressoController
+      if (!token) throw new Error("Utilizador não autenticado");
       const response = await fetch(`${API_URL}/progresso/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ peso: weight }),
       });
-      
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Erro ao salvar peso");
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  finishWorkout: async (workoutData) => {
-    try {
-      const token = await authStorage.getToken();
-      const response = await fetch(`${API_URL}/historico-treinos/finalizar`, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(workoutData),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Erro ao finalizar treino");
       return data;
     } catch (error) {
       throw error;

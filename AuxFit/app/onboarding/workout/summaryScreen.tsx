@@ -9,7 +9,6 @@ import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { useOnboarding } from "@/context/OnboardingContext";
 import { api } from "@/services/api";
 
-// Helper para formatar os IDs em texto legível
 const formatText = (text: string | undefined) => {
   if (!text) return "Não informado";
   return text.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
@@ -17,21 +16,19 @@ const formatText = (text: string | undefined) => {
 
 export default function SummaryScreen() {
   const router = useRouter();
-  const { onboardingData: data } = useOnboarding(); // Pega todos os dados acumulados
+  const { onboardingData: data } = useOnboarding();
   const [loading, setLoading] = useState(false);
 
   const handleFinish = async () => {
     setLoading(true);
     try {
-      // Prepara o payload conforme esperado pelo seu Backend (tabela perfil_treino)
       const trainingProfile = {
         nivel_experiencia: data.nivel_experiencia,
-        frequencia_treino: data.dias_treino, // Mapeando 'dias_treino' para 'frequencia_treino'
+        frequencia_treino: data.dias_treino,
         objetivo_treino: data.objetivo,
-        problemas_saude: data.lesoes?.join(", "), // Converte array em string
-        duracao_treino: parseInt(data.duracao_treino || "60"), // Tenta converter para numero
-        // equipamentos e foco_muscular podem precisar de colunas novas no banco ou ir num campo JSON/Array
-        // Por enquanto, vamos assumir que o backend aceita ou ignora campos extras
+        problemas_saude: data.lesoes?.join(", "),
+        duracao_treino: parseInt(data.duracao_treino || "60"),
+        
       };
 
       // Chama a API criada
@@ -119,7 +116,6 @@ export default function SummaryScreen() {
                 onPress={handleFinish} 
                 bgColor={Colors.primary} 
                 color={Colors.bg}
-                //disabled={loading}
             />
             {!loading && (
               <Button 

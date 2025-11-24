@@ -22,9 +22,12 @@ export default function ProfileHeader({
   waterGoal,
   onLogout,
 }: ProfileHeaderProps) {
-  // Cálculo das porcentagens (limitadas a 100%)
-  const caloriesPercent = caloriesGoal > 0 ? Math.min((caloriesConsumed / caloriesGoal) * 100, 100) : 0;
-  const waterPercent = waterGoal > 0 ? Math.min((waterConsumed / waterGoal) * 100, 100) : 0;
+  const caloriesPercent =
+    caloriesGoal > 0
+      ? Math.min((caloriesConsumed / caloriesGoal) * 100, 100)
+      : 0;
+  const waterPercent =
+    waterGoal > 0 ? Math.min((waterConsumed / waterGoal) * 100, 100) : 0;
 
   return (
     <View style={styles.container}>
@@ -36,9 +39,9 @@ export default function ProfileHeader({
             <View style={styles.nameRow}>
               <Text style={styles.userName}>{userName}</Text>
             </View>
-            
+
             <TouchableOpacity onPress={onLogout} style={styles.logoutButton}>
-                <MaterialIcons name="logout" size={24} color={Colors.incorrect} />
+              <MaterialIcons name="logout" size={24} color={Colors.incorrect} />
             </TouchableOpacity>
           </View>
 
@@ -47,7 +50,6 @@ export default function ProfileHeader({
 
           {/* Barras de Progresso */}
           <View style={styles.barsContainer}>
-            
             {/* Barra de Calorias */}
             <View style={styles.progressRow}>
               <View style={styles.barBackground}>
@@ -56,7 +58,7 @@ export default function ProfileHeader({
                     styles.barFill,
                     {
                       width: `${caloriesPercent}%`,
-                      backgroundColor: Colors.accent, 
+                      backgroundColor: Colors.accent,
                     },
                   ]}
                 />

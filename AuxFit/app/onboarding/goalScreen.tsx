@@ -38,13 +38,13 @@ export default function GoalScreen() {
     setLoading(true);
 
     try {
-      // Atualiza o último dado localmente antes de enviar
+     
       const finalData = {
         ...onboardingData,
         objetivo: selectedGoal
       };
 
-      // Recupera o Token
+      
       const token = await authStorage.getToken();
       if (!token) {
         Alert.alert("Sessão expirada", "Faça login novamente.");
@@ -52,7 +52,7 @@ export default function GoalScreen() {
         return;
       }
 
-      // Envia para o Backend
+
       console.log("Enviando dados:", finalData);
       await api.completeProfile(finalData, token);
 
@@ -102,7 +102,7 @@ export default function GoalScreen() {
     </SafeAreaView>
   );
 }
-// ... Mesmos styles
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.bg },
   container: { flex: 1, position: "relative" },

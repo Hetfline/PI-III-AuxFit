@@ -7,7 +7,7 @@ import {
   StyleSheet,
   LayoutChangeEvent,
 } from "react-native";
-import { Colors, Spacing, Texts } from "@/constants/Styles";
+import { Colors, Texts } from "@/constants/Styles";
 
 type TabSelectorProps = {
   activeTab: "geral" | "dieta" | "treino";
@@ -26,8 +26,7 @@ export default function ProfileTabSelector({
   };
 
   useEffect(() => {
-    const tabIndex =
-      activeTab === "geral" ? 0 : activeTab === "dieta" ? 1 : 2;
+    const tabIndex = activeTab === "geral" ? 0 : activeTab === "dieta" ? 1 : 2;
 
     Animated.timing(underlineAnim, {
       toValue: tabIndex,
@@ -91,7 +90,10 @@ export default function ProfileTabSelector({
 
       <View style={styles.underlineContainer}>
         <Animated.View
-          style={[styles.underline, { width: tabWidth, transform: [{ translateX }] }]}
+          style={[
+            styles.underline,
+            { width: tabWidth, transform: [{ translateX }] },
+          ]}
         />
       </View>
     </View>
