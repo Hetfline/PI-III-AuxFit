@@ -109,7 +109,6 @@ export default function QuestionTypeScreen() {
     if (selectedPath === "workout") {
       router.push("/onboarding/workout/experienceScreen");
     } else if (selectedPath === "diet") {
-      
       router.push("/onboarding/diet/restrictionsScreen");
     }
   };
@@ -173,29 +172,19 @@ export default function QuestionTypeScreen() {
             </View>
 
             <View style={styles.nextButtonWrapper}>
-              {/* LÓGICA DE EXIBIÇÃO DOS BOTÕES DO RODAPÉ */}
-              {!isLoadingProfiles && hasAnyProfile ? (
-                
-                <Button
-                  title="Começar"
-                  onPress={handleSkip}
-                  bgColor={Colors.primary}
-                />
-              ) : (
-                
-                <Button
-                  title="Próxima"
-                  onPress={handleNext}
-                  bgColor={Colors.primary}
-                />
-              )}
+              {/* Agora o botão "Próxima" aparece sempre, permitindo continuar o fluxo */}
+              <Button
+                title="Próxima"
+                onPress={handleNext}
+                bgColor={Colors.primary}
+              />
             </View>
           </View>
 
-          {/* Botão de pular só aparece se NÃO tiver perfil, pois se tiver perfil o botão principal já leva pra home */}
-          {!hasAnyProfile && (
+          {/* Botão de ir para home aparece apenas se JÁ EXISTIR algum perfil */}
+          {!isLoadingProfiles && hasAnyProfile && (
             <Button
-              title="Pular personalização"
+              title="Ir para a Tela Inicial"
               onPress={handleSkip}
               bgColor="transparent"
               color={Colors.subtext}
