@@ -124,7 +124,7 @@ export default function WaterProgress({ currentWater, onAddWater }: WaterProgres
           </Text>
 
           <Text style={[Texts.bodyBold, { color: Colors.secondary }]}>
-            Restantes
+            Restante
           </Text>
         </View>
       </View>

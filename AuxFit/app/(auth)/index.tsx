@@ -60,7 +60,7 @@ export default function LoginScreen() {
           await authStorage.saveToken(response.session.access_token);
         }
 
-        Alert.alert("Sucesso", "Conta criada! Vamos finalizar seu perfil.");
+        // Alert.alert("Sucesso", "Conta criada! Vamos finalizar seu perfil.");
 
         // 2. Redireciona para o Onboarding
         router.replace("/onboarding");

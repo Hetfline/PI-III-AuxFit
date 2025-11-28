@@ -65,7 +65,7 @@ export default function SummaryScreen() {
       await api.saveTrainingProfile(trainingProfile);
 
       Alert.alert("Tudo pronto!", "Seu perfil de treino foi criado com sucesso.", [
-        { text: "Bora treinar!", onPress: () => router.replace("/(tabs)/home") }
+        { text: "Ok!", onPress: () => router.replace("/onboarding/questionTypeScreen") }
       ]);
 
     } catch (error) {

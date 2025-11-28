@@ -8,7 +8,6 @@ import Button from "@/components/universal/Button";
 import SelectionList, {
   OptionItem,
 } from "@/components/onboarding/workout/SelectionList";
-import Toast from "@/components/universal/Toast";
 import { Colors, Spacing, Texts } from "@/constants/Styles";
 import { useOnboarding } from "@/context/OnboardingContext";
 import { api } from "@/services/api"; // Para finalizar o cadastro
@@ -68,10 +67,8 @@ export default function MealsFrequencyScreen() {
       const finalProfileData = {
         ...onboardingData,
         refeicoes_dia: parseInt(selectedId),
-        // Garante campos obrigatórios para o backend
         objetivo: onboardingData.objetivo || "manter",
         sexo: onboardingData.sexo || "M",
-        // ... outros campos
       };
 
       // 3. Envia para o backend (usando o endpoint completeProfile que criamos)
@@ -80,8 +77,8 @@ export default function MealsFrequencyScreen() {
         await require("@/services/auth-storage").authStorage.getToken();
       await api.completeProfile(finalProfileData, token);
 
-      // 4. Redireciona para a Home
-      router.replace("/(tabs)/home"); // Vai para a tela principal
+      // 4. Redireciona para a tela de seleção de caminho
+      router.replace("/onboarding/questionTypeScreen"); // Vai para a tela principal
     } catch (error) {
       console.log("Erro ao finalizar onboarding:", error);
       // Em produção, mostraria um Toast de erro aqui

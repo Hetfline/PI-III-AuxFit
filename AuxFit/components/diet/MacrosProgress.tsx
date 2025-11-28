@@ -84,7 +84,7 @@ export default function MacrosProgress({
           </Text>
 
           <Text style={[Texts.bodyBold, { color: Colors.accent }]}>
-            Restantes
+            Restante
           </Text>
         </View>
       </View>

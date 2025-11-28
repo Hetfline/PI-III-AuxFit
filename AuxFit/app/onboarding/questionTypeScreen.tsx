@@ -182,14 +182,14 @@ export default function QuestionTypeScreen() {
           </View>
 
           {/* Botão de ir para home aparece apenas se JÁ EXISTIR algum perfil */}
-          {!isLoadingProfiles && hasAnyProfile && (
+          
             <Button
-              title="Ir para a Tela Inicial"
+              title="Pular perguntas"
               onPress={handleSkip}
               bgColor="transparent"
               color={Colors.subtext}
             />
-          )}
+          
         </View>
       </View>
     </SafeAreaView>
