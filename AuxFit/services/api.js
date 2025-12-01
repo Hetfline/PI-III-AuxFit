@@ -2,7 +2,7 @@ import { authStorage } from "./auth-storage";
 
 // *  Endereço IP Mateus!
 // TODO tem que trocar essa bagaça aqui depois
-const MEU_IP = "172.16.9.37"; 
+const MEU_IP = "10.50.1.46"; 
 
 const API_URL = `http://${MEU_IP}:3000/api`; 
 
