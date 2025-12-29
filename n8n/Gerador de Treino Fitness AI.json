@@ -1,0 +1,344 @@
+{
+  "name": "Gerador de Treino Fitness AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gerar-treino",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -2464,
+        176
+      ],
+      "id": "bb7677a6-6fe4-4bb6-a656-3cc1c2c96b04",
+      "name": "Webhook (Recebe User ID)",
+      "webhookId": "ec275c5a-12f5-451c-8f44-28a59e8613b9"
+    },
+    {
+      "parameters": {
+        "jsCode": "// return $('ai-generator').first().json.content;\n\n// O Basic LLM Chain costuma retornar o texto na chave 'text'\nconst rawOutput = $('Basic LLM Chain').first().json.text;\n\n// Limpeza de segurança caso o modelo mande markdown\nconst cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '');\n\nreturn JSON.parse(cleanJson);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1040,
+        176
+      ],
+      "id": "91773df1-4817-42ca-bef3-139595e6aeea",
+      "name": "Parse JSON Output"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        176
+      ],
+      "id": "06b1e0b5-fe5d-4cac-9472-1a705a2b4faa",
+      "name": "Loop Treinos (Dias)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const treinoId = $('Insert Treino Header').item.json.id;\nconst exercicios = $('Loop Treinos (Dias)').item.json.lista_exercicios;\n\nreturn exercicios.map(ex => {\n  return {\n    treino_fk: treinoId,\n    exercicio_fk: ex.exercicio_id,\n    series: ex.series,\n    repeticoes: ex.repeticoes,\n    carga: ex.carga,\n    // CORREÇÃO AQUI:\n    // Tenta ler 'descanso', se não achar tenta 'descanso_segundos', \n    // se não achar nenhum, usa 60 (segundos) como padrão para não quebrar o banco.\n    descanso_segundos: ex.descanso || ex.descanso_segundos || 60 \n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -336,
+        176
+      ],
+      "id": "f1d058f9-e570-480f-821a-98b212fe4d98",
+      "name": "Mapear Exercicios com ID"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM usuarios WHERE id = $1",
+        "options": {
+          "queryReplacement": "={{$node[\"Webhook (Recebe User ID)\"].json.body.user_id}}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2192,
+        432
+      ],
+      "id": "ee3adb88-3d12-4a5d-a874-befe8e54d31f",
+      "name": "Supabase: Get Usuario",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM perfil_treino WHERE usuario_fk = $1",
+        "options": {
+          "queryReplacement": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1920,
+        512
+      ],
+      "id": "7304b9bd-3574-4b0b-ab52-e7a8443a5f51",
+      "name": "Supabase: Get Perfil",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  id, \n  nome_exercicio, \n  grupo_muscular_geral, \n  equipamento_necessario, \n  nivel_dificuldade, \n  tipo_exercicio\nFROM exercicios\nLIMIT 10;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1648,
+        416
+      ],
+      "id": "704307e6-5a63-476b-a2bf-b252634018c1",
+      "name": "Supabase: Get Todos Exercicios",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO treinos (usuario_fk, nome, areas_foco, duracao) VALUES ($1, $2, $3, $4) RETURNING id;",
+        "options": {
+          "queryReplacement": "={{ $('Supabase: Get Usuario').first().json.id }},{{ $json.nome_treino }},{{ Array.isArray($json.areas_foco) ? $json.areas_foco.join(' - ') : $json.areas_foco.toString().replace(/,/g, ' - ') }},{{ $json.duracao_minutos }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -560,
+        464
+      ],
+      "id": "34f510df-f39b-4eeb-af7c-656d9dd857bc",
+      "name": "Insert Treino Header",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO treino_exercicios (treino_fk, exercicio_fk, series, repeticoes, carga, descanso_segundos) VALUES ($1, $2, $3, $4, $5, $6);",
+        "options": {
+          "queryReplacement": "={{ $json.treino_fk }},{{ $json.exercicio_fk }},{{ $json.series }},{{ $json.repeticoes }},{{ $json.carga }},{{ $json.descanso_segundos }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -96,
+        480
+      ],
+      "id": "49e94a88-42a9-4f5c-94a9-7fb551dee377",
+      "name": "Insert Itens do Treino",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{\n`Você é um Personal Trainer de elite com conhecimento em fisiologia e periodização de treino, e também um especialista em manipulação de dados JSON.\n\nSUA TAREFA:\nCriar uma rotina de treino personalizada para o usuário fornecido, utilizando EXCLUSIVAMENTE os exercícios disponíveis no banco de dados fornecido abaixo.\n\nINPUTS (DADOS DE CONTEXTO):\n\n--- DADOS DO USUÁRIO ---\n${JSON.stringify($('Supabase: Get Usuario').first().json)}\n\n--- PERFIL DE TREINO ---\n${JSON.stringify($('Supabase: Get Perfil').first().json)}\n\n--- EXERCÍCIOS DISPONÍVEIS NO BANCO (Use apenas estes IDs) ---\n${JSON.stringify($('Supabase: Get Todos Exercicios').all().map(e => e.json))}\n\nREGRAS OBRIGATÓRIAS:\n1. Correspondência de IDs: Ao selecionar um exercício, você DEVE usar o 'id' exato que veio na lista 'EXERCÍCIOS DISPONÍVEIS'. Não invente IDs e não use o nome do exercício como chave.\n2. Filtro de Equipamentos: Se o usuário diz que só tem 'Halteres', NÃO inclua exercícios que requerem 'Máquina' ou 'Barra'.\n3. Filtro de Lesões: Se o usuário tem lesão, evite exercícios que agravem a área citada.\n4. Volume de Treino: O número de treinos gerados deve ser igual a 'dias_por_semana'.\n5. Carga: Estime uma carga inicial conservadora (campo 'carga' numérico). Use 0 se for peso do corpo.\n\nFORMATO DE RESPOSTA (CRÍTICO):\nRetorne APENAS um JSON puro contendo um Array de Objetos.\nNÃO use markdown.\nNÃO coloque blocos de código (tres crases json) no início.\nNÃO escreva texto introdutório como 'Aqui está seu treino'.\nComece a resposta com '[' e termine com ']'.\n\nExemplo de estrutura desejada:\n[\n  {\n    \"nome_treino\": \"Treino A - Empurrar\",\n    \"areas_foco\": [\"Peito\", \"Ombro\"],\n    \"duracao_minutos\": 60,\n    \"lista_exercicios\": [\n       { \"exercicio_id\": 101, \"series\": 3, \"repeticoes\": 12, \"carga\": 10, \"descanso\": 90 }\n    ]\n  }\n]`\n}}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -1424,
+        736
+      ],
+      "id": "0db5f274-8ce0-4c43-938d-820859919b25",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        944
+      ],
+      "id": "f20ba453-859c-49bb-a974-1fb81822c8fb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XjZ5xRCKwX57SouH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (Recebe User ID)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Output": {
+      "main": [
+        [
+          {
+            "node": "Loop Treinos (Dias)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Treinos (Dias)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Insert Treino Header",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Exercicios com ID": {
+      "main": [
+        [
+          {
+            "node": "Insert Itens do Treino",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Usuario": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Perfil": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Todos Exercicios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Todos Exercicios": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Treino Header": {
+      "main": [
+        [
+          {
+            "node": "Mapear Exercicios com ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Itens do Treino": {
+      "main": [
+        [
+          {
+            "node": "Loop Treinos (Dias)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b7ca6385-73b2-4591-8a14-fcfbe045015e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "00fe7c9f37710aa16cfc6b829729754f2c57829556460b4254e31b439e02f833"
+  },
+  "id": "dszEdhNDoFEkgYr4",
+  "tags": []
+}

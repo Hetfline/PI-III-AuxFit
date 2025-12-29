@@ -1,0 +1,343 @@
+{
+  "name": "Gerador de Dieta Fitness AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gerar-dieta",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1952,
+        -432
+      ],
+      "id": "20f41fb3-f242-452f-9388-5ee2b8a8dad6",
+      "name": "Webhook (Recebe User ID)",
+      "webhookId": "ec275c5a-12f5-451c-8f44-28a59e8613b9"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Limpeza de segurança caso o modelo mande markdown\nconst rawOutput = $('Basic LLM Chain').first().json.text;\nconst cleanJson = rawOutput.replace(/```json/g, '').replace(/```/g, '');\n\ntry {\n  let refeicoes = JSON.parse(cleanJson);\n  \n  // Normalização de chaves para garantir integridade do banco\n  // Isso mapeia erros comuns do LLM para o formato correto do Postgres\n  const mapaCorrecao = {\n    'cafe_manha': 'cafe_da_manha',\n    'café_da_manhã': 'cafe_da_manha',\n    'janta': 'jantar',\n    'lache': 'lanche', \n    'almoco': 'almoco',\n    'almoço': 'almoco'\n  };\n\n  const tiposValidos = ['cafe_da_manha', 'almoco', 'jantar', 'lanche', 'ceia', 'pre_treino', 'pos_treino'];\n\n  // Percorre o array e corrige os tipos\n  refeicoes = refeicoes.map(r => {\n    // Tenta corrigir se estiver no mapa de erros comuns\n    if (mapaCorrecao[r.tipo_refeicao]) {\n      r.tipo_refeicao = mapaCorrecao[r.tipo_refeicao];\n    }\n    \n    // Fallback de segurança: Se o tipo gerado não existir na constraint, força 'lanche' ou lança erro\n    if (!tiposValidos.includes(r.tipo_refeicao)) {\n        // Opção A: Forçar um tipo genérico (evita quebra do fluxo)\n        r.tipo_refeicao = 'lanche'; \n        \n        // Opção B (comente a linha acima e descomente abaixo se preferir que o fluxo pare):\n        // throw new Error(`Tipo de refeição inválido gerado: ${r.tipo_refeicao}`);\n    }\n    return r;\n  });\n\n  return refeicoes;\n\n} catch (e) {\n  throw new Error('Erro ao processar JSON: ' + e.message + ' | Output original: ' + rawOutput);\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        -432
+      ],
+      "id": "814bee2a-b2fd-4c38-824c-d2a2730f220e",
+      "name": "Parse JSON Output"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM usuarios WHERE id = $1",
+        "options": {
+          "queryReplacement": "={{$node[\"Webhook (Recebe User ID)\"].json.body.user_id}}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1680,
+        -176
+      ],
+      "id": "05aa8a10-c287-412c-9e36-c8ec328abab7",
+      "name": "Supabase: Get Usuario",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM perfil_alimentar WHERE usuario_fk = $1",
+        "options": {
+          "queryReplacement": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1408,
+        -96
+      ],
+      "id": "cce3a9e8-740c-47e3-8e20-8825fc7d9b71",
+      "name": "Supabase: Get Perfil",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um Nutricionista de elite. Sua tarefa é criar um plano alimentar diário personalizado.\n\nINPUTS:\n--- DADOS DO USUÁRIO ---\n${JSON.stringify($('Supabase: Get Usuario').first().json)}\n\n--- PREFERÊNCIAS ---\n${JSON.stringify($('Supabase: Get Perfil').first().json)}\n\n--- ALIMENTOS DISPONÍVEIS (Use apenas estes IDs e Nomes) ---\n${JSON.stringify($('Supabase: Get Todos Alimentos').all().map(e => e.json))}\n\nREGRAS OBRIGATÓRIAS:\n1. Quantidade de Refeições: Gere EXATAMENTE o número de refeições solicitado em 'refeicoes_dia' (Ex: se for 3, gere Café, Almoço, Janta).\n2. Restrições: Respeite estritamente as restrições alimentares (Ex: intolerância a lactose).\n3. Use IDs Reais: Em 'alimento_fk', use apenas os IDs da lista de ALIMENTOS DISPONÍVEIS.\n4. Quantidade: Defina a quantidade em gramas (g) para cada alimento.\n5. Calorias: Calcule a soma das calorias dos alimentos e preencha 'meta_calorias' para a refeição.\n\n*** REGRA CRÍTICA DE FORMATAÇÃO ***\nO campo 'tipo_refeicao' deve ser ESTRITAMENTE um dos seguintes valores (exatamente como escrito abaixo):\n- 'cafe_da_manha'\n- 'almoco'\n- 'jantar'\n- 'lanche'\n- 'ceia'\n- 'pre_treino'\n- 'pos_treino'\n\nFORMATO DE SAÍDA (JSON PURO, SEM MARKDOWN):\nRetorne um Array de Objetos. Exemplo:\n[\n  {\n    \"nome\": \"Café da Manhã\",\n    \"horario\": \"08:00:00\",\n    \"tipo_refeicao\": \"cafe_da_manha\",  <-- NO SEU ANTERIOR ESTAVA \"cafe_manha\" (ERRADO)\n    \"meta_calorias\": 450,\n    \"lista_alimentos\": [\n       { \"alimento_fk\": 12, \"quantidade\": 150 },\n       { \"alimento_fk\": 5, \"quantidade\": 30 }\n    ]\n  }\n]",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -912,
+        128
+      ],
+      "id": "263dca25-18b4-45c4-8284-16991f334a8d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        336
+      ],
+      "id": "8f17fcd7-16ba-4467-8dec-d42ac92403b4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "XjZ5xRCKwX57SouH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  id, \n  nome, \n  calorias,\n  proteinas,\n  carboidratos,\n  gorduras\nFROM alimentos\nLIMIT 10;\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1136,
+        -192
+      ],
+      "id": "bd8fcb7f-0f29-4d54-b04f-44ee26bd17e7",
+      "name": "Supabase: Get Todos Alimentos",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -288,
+        -432
+      ],
+      "id": "16b5286f-8f75-43a8-8c8c-cd25846a7fef",
+      "name": "Loop Refeicoes"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO refeicoes (usuario_fk, nome, horario, tipo_refeicao, meta_calorias) \nVALUES ($1, $2, $3, $4, $5) \nRETURNING id;",
+        "options": {
+          "queryReplacement": "={{ $('Supabase: Get Usuario').first().json.id }},{{ $json.nome }},{{ $json.horario }},{{ $json.tipo_refeicao }},{{ $json.meta_calorias }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        32,
+        -80
+      ],
+      "id": "484417e3-2aac-45e5-8d80-df5003f02e3f",
+      "name": "Insert Refeição Header",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const refeicaoId = $('Insert Refeição Header').item.json.id;\nconst alimentos = $('Loop Refeicoes').item.json.lista_alimentos;\n\n// Mapeia para o formato da tabela refeicao_itens\nreturn alimentos.map(item => {\n  return {\n    refeicao_fk: refeicaoId,\n    alimento_fk: item.alimento_fk,\n    quantidade: item.quantidade // em gramas\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -416
+      ],
+      "id": "10d2c4f6-8ee8-479a-93e0-28e1908346ee",
+      "name": "Mapear Alimentos com ID"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO refeicao_itens (refeicao_fk, alimento_fk, quantidade) \nVALUES ($1, $2, $3);",
+        "options": {
+          "queryReplacement": "={{ $json.refeicao_fk }},{{ $json.alimento_fk }},{{ $json.quantidade }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        768,
+        -32
+      ],
+      "id": "4c7109df-2f70-472c-ae52-808c8359a9ee",
+      "name": "Insert Alimentos da Dieta",
+      "credentials": {
+        "postgres": {
+          "id": "i8V2Rqsb8ACbo7bb",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (Recebe User ID)": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Output": {
+      "main": [
+        [
+          {
+            "node": "Loop Refeicoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Usuario": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Perfil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Perfil": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Get Todos Alimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase: Get Todos Alimentos": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Refeicoes": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Insert Refeição Header",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Refeição Header": {
+      "main": [
+        [
+          {
+            "node": "Mapear Alimentos com ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapear Alimentos com ID": {
+      "main": [
+        [
+          {
+            "node": "Insert Alimentos da Dieta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Alimentos da Dieta": {
+      "main": [
+        [
+          {
+            "node": "Loop Refeicoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d8d20824-9075-48fa-8183-a368788f7d29",
+  "meta": {
+    "instanceId": "00fe7c9f37710aa16cfc6b829729754f2c57829556460b4254e31b439e02f833"
+  },
+  "id": "tPYrPJBk6gbsHffc",
+  "tags": []
+}
